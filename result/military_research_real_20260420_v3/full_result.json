@@ -1,0 +1,873 @@
+{
+  "scenario": {
+    "name": "沿海联合突击示范",
+    "mission_type": "assault",
+    "objective": "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+    "terrain": "coastal-urban",
+    "weather": "rain",
+    "threat_level": 0.74,
+    "ew_threat": 0.68,
+    "civilian_presence": 0.36,
+    "time_pressure": 0.77,
+    "doctrine_profile": "offensive_breakthrough",
+    "desired_end_state": "蓝方控制沿海关键地域并保持持续投送与再打击能力",
+    "constraints": [
+      "控制附带损伤并保持港岸基础设施可用",
+      "敌方存在较强电磁压制能力",
+      "首波突击后12小时内必须完成稳定控制"
+    ],
+    "friendly_forces": [
+      {
+        "name": "两栖突击群",
+        "role": "两栖突击",
+        "domain": "ground",
+        "quantity": 12,
+        "readiness": 0.88,
+        "fires": 0.64,
+        "mobility": 0.86,
+        "protection": 0.72,
+        "awareness": 0.58,
+        "ew": 0.32,
+        "sustainment": 0.62,
+        "c2": 0.68
+      },
+      {
+        "name": "远程火力群",
+        "role": "炮兵火力",
+        "domain": "ground",
+        "quantity": 8,
+        "readiness": 0.84,
+        "fires": 0.92,
+        "mobility": 0.46,
+        "protection": 0.5,
+        "awareness": 0.52,
+        "ew": 0.2,
+        "sustainment": 0.58,
+        "c2": 0.64
+      },
+      {
+        "name": "无人侦察分队",
+        "role": "无人机侦察",
+        "domain": "air",
+        "quantity": 16,
+        "readiness": 0.9,
+        "fires": 0.18,
+        "mobility": 0.82,
+        "protection": 0.24,
+        "awareness": 0.94,
+        "ew": 0.36,
+        "sustainment": 0.52,
+        "c2": 0.7
+      },
+      {
+        "name": "电子对抗分队",
+        "role": "电子战",
+        "domain": "information",
+        "quantity": 6,
+        "readiness": 0.86,
+        "fires": 0.12,
+        "mobility": 0.54,
+        "protection": 0.4,
+        "awareness": 0.72,
+        "ew": 0.96,
+        "sustainment": 0.56,
+        "c2": 0.78
+      },
+      {
+        "name": "联合指挥通信单元",
+        "role": "指挥通信",
+        "domain": "information",
+        "quantity": 4,
+        "readiness": 0.92,
+        "fires": 0.1,
+        "mobility": 0.48,
+        "protection": 0.46,
+        "awareness": 0.76,
+        "ew": 0.4,
+        "sustainment": 0.66,
+        "c2": 0.94
+      }
+    ],
+    "enemy_forces": [
+      {
+        "name": "岸防导弹阵地",
+        "role": "岸防火力",
+        "domain": "ground",
+        "quantity": 6,
+        "readiness": 0.82,
+        "fires": 0.9,
+        "mobility": 0.28,
+        "protection": 0.56,
+        "awareness": 0.58,
+        "ew": 0.18,
+        "sustainment": 0.44,
+        "c2": 0.62
+      },
+      {
+        "name": "中程防空连",
+        "role": "防空单元",
+        "domain": "ground",
+        "quantity": 5,
+        "readiness": 0.8,
+        "fires": 0.72,
+        "mobility": 0.36,
+        "protection": 0.58,
+        "awareness": 0.64,
+        "ew": 0.22,
+        "sustainment": 0.42,
+        "c2": 0.6
+      },
+      {
+        "name": "机步守备群",
+        "role": "机步分队",
+        "domain": "ground",
+        "quantity": 10,
+        "readiness": 0.78,
+        "fires": 0.58,
+        "mobility": 0.62,
+        "protection": 0.66,
+        "awareness": 0.54,
+        "ew": 0.12,
+        "sustainment": 0.5,
+        "c2": 0.56
+      }
+    ]
+  },
+  "memory_hits": [
+    {
+      "score": 0.8805,
+      "confidence": 0.8805,
+      "record": {
+        "case_id": "CASE-001",
+        "mission_type": "assault",
+        "terrain": "coastal-urban",
+        "objective": "压制沿海防空节点并夺控登陆窗口",
+        "friendly_roles": [
+          "两栖突击群",
+          "舰载火力分队",
+          "无人侦察分队",
+          "电子对抗分队"
+        ],
+        "enemy_roles": [
+          "岸防导弹阵地",
+          "防空连",
+          "机步分队"
+        ],
+        "key_actions": [
+          "多域侦察确认敌岸防雷达",
+          "舰炮与远火同步压制",
+          "电子干扰覆盖主突击轴",
+          "抢占港岸结合部要点"
+        ],
+        "lessons": [
+          "先压制敌防空与岸防感知节点，再投入主突击群",
+          "在登陆前完成电磁塑形可显著降低首波损失"
+        ],
+        "outcome": "positive",
+        "tags": [
+          "joint",
+          "littoral",
+          "ew"
+        ],
+        "metrics": {
+          "mission_success": 0.78,
+          "ler": 1.61,
+          "overall_effectiveness": 0.74
+        }
+      }
+    },
+    {
+      "score": 0.8771,
+      "confidence": 0.8771,
+      "record": {
+        "case_id": "AUTO-ab5702b3",
+        "mission_type": "assault",
+        "terrain": "coastal-urban",
+        "objective": "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+        "friendly_roles": [
+          "两栖突击",
+          "炮兵火力",
+          "无人机侦察",
+          "电子战",
+          "指挥通信"
+        ],
+        "enemy_roles": [
+          "岸防火力",
+          "防空单元",
+          "机步分队"
+        ],
+        "key_actions": [
+          "待补充动作",
+          "...…..…………………………………………………??………..………………………………………………………………………………………",
+          "待补充动作",
+          "待补充动作",
+          "待补充动作",
+          "待补充动作"
+        ],
+        "lessons": [
+          "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：阶段1、阶段2、....、P1、P1、沿海联合突击示范。",
+          "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+          "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+        ],
+        "outcome": "positive",
+        "tags": [
+          "rain",
+          "offensive_breakthrough"
+        ],
+        "metrics": {
+          "mission_success": 0.4752,
+          "ler": 1.6667,
+          "overall_effectiveness": 0.6902
+        }
+      }
+    },
+    {
+      "score": 0.8129,
+      "confidence": 0.8129,
+      "record": {
+        "case_id": "CASE-004",
+        "mission_type": "assault",
+        "terrain": "coastal-urban",
+        "objective": "快速突击港口核心区域",
+        "friendly_roles": [
+          "装甲突击群",
+          "炮兵分队"
+        ],
+        "enemy_roles": [
+          "岸防火力群",
+          "防空单元"
+        ],
+        "key_actions": [
+          "直接突击港口核心",
+          "省略电磁塑形和侦察确认"
+        ],
+        "lessons": [
+          "未先塑形导致主攻轴暴露严重",
+          "缺乏多域协同会扩大突击阶段损失"
+        ],
+        "outcome": "negative",
+        "tags": [
+          "risk",
+          "insufficient-isr"
+        ],
+        "metrics": {
+          "mission_success": 0.41,
+          "ler": 0.73,
+          "overall_effectiveness": 0.46
+        }
+      }
+    }
+  ],
+  "best_plan": {
+    "title": "沿海联合突击示范",
+    "commander_intent": "...",
+    "theory_of_victory": "...}<|start|>analysis<|message|>Need produce JSON with phases P1-P4. Ensure fields.<|start|>final<|message|>{",
+    "doctrine_weights": {
+      "fires": 0.82,
+      "mobility": 0.8,
+      "protection": 0.64,
+      "awareness": 0.76,
+      "ew": 0.66,
+      "sustainment": 0.62,
+      "c2": 0.76
+    },
+    "fast_weights": {
+      "fires": 0.074,
+      "mobility": 0.0678,
+      "protection": 0.2384,
+      "awareness": 0.2688,
+      "ew": 0.1224,
+      "sustainment": 0.0,
+      "c2": 0.195
+    },
+    "fused_weights": {
+      "fires": 0.894,
+      "mobility": 0.8678,
+      "protection": 0.8784,
+      "awareness": 1.0,
+      "ew": 0.7824,
+      "sustainment": 0.62,
+      "c2": 0.955
+    },
+    "memory_insights": [
+      "案例CASE-001（相似度 0.88）提示：先压制敌防空与岸防感知节点，再投入主突击群；在登陆前完成电磁塑形可显著降低首波损失",
+      "案例AUTO-ab5702b3（相似度 0.88）提示：以下阶段成功率偏低，需要重排任务链路或增强兵力配置：阶段1、阶段2、....、P1、P1、沿海联合突击示范。；整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+      "案例CASE-004（相似度 0.81）提示：未先塑形导致主攻轴暴露严重；缺乏多域协同会扩大突击阶段损失"
+    ],
+    "risk_controls": [
+      "采用受限任务分解与模板化输出，降低自然语言歧义",
+      "使用红蓝损失阈值和任务时限双门限触发重规划",
+      "将阶段结果写入案例库并标记正负样本用于检索修正"
+    ],
+    "assessment_metrics": [
+      "战损交换比(LER)",
+      "任务完成时间",
+      "关键节点压制率",
+      "指挥链路完整度",
+      "后续行动可持续性"
+    ],
+    "phases": [
+      {
+        "phase_id": "P1",
+        "name": "多域侦察与电磁塑形",
+        "intent": "先确认敌岸防雷达及导弹阵地位置，完成电子干扰覆盖主突击轴。",
+        "actions": [
+          "无人侦察分队开展海空双域侦察",
+          "电子对抗分队实施频谱压制与信号干扰"
+        ],
+        "allocated_units": [
+          "无人侦察分队",
+          "电子对抗分队"
+        ],
+        "decision_points": [
+          "若敌雷达未被压制，是否追加电子对抗资源？",
+          "若侦察发现新岸防节点，是否调整突击轴向？"
+        ],
+        "expected_effects": [
+          "敌方雷达失效或误导",
+          "主突击轴电磁环境可控"
+        ]
+      },
+      {
+        "phase_id": "P2",
+        "name": "远程火力压制与港口核心夺取",
+        "intent": "利用远程火力群对岸防导弹阵地、中程防空连实施精准打击，抢占港口关键节点。",
+        "actions": [
+          "远程火力群开展预先点射",
+          "两栖突击群同步登陆并冲锋至港口核心"
+        ],
+        "allocated_units": [
+          "远程火力群",
+          "两栖突击群"
+        ],
+        "decision_points": [
+          "若岸防导弹阵地仍存活，是否追加火力打击？",
+          "若港口核心被占领后出现反扑，如何快速支援？"
+        ],
+        "expected_effects": [
+          "敌岸防与中程防空大幅削弱",
+          "蓝方控制港口关键区域"
+        ]
+      },
+      {
+        "phase_id": "P3",
+        "name": "联合指挥与持续投送",
+        "intent": "在已夺取的港口建立前沿指挥所，保障后勤与再打击能力。",
+        "actions": [
+          "联合指挥通信单元搭建临时指挥中心",
+          "两栖突击群保持机动防御并支援火力"
+        ],
+        "allocated_units": [
+          "联合指挥通信单元",
+          "两栖突击群"
+        ],
+        "decision_points": [
+          "若后勤补给受阻，是否开启海上快速补给通道？",
+          "若敌方出现新型电子压制，如何调整指挥链路？"
+        ],
+        "expected_effects": [
+          "蓝方保持持续投送与再打击能力",
+          "港岸基础设施可用"
+        ]
+      },
+      {
+        "phase_id": "P4",
+        "name": "稳控与后续扩展",
+        "intent": "巩固已夺取区域，防止敌方反扑，并为进一步两栖展开铺路。",
+        "actions": [
+          "两栖突击群部署防御阵地",
+          "远程火力群维持压制态势"
+        ],
+        "allocated_units": [
+          "两栖突击群",
+          "远程火力群"
+        ],
+        "decision_points": [
+          "若敌方出现快速机步反扑，是否立即展开空中支援？",
+          "若平民密度升高，如何调整作战节奏以降低附带损伤？"
+        ],
+        "expected_effects": [
+          "蓝方控制沿海关键地域稳定",
+          "后续两栖行动可顺利进行"
+        ]
+      }
+    ]
+  },
+  "best_simulation": {
+    "mission_success": 0.4658,
+    "ler": 1.6667,
+    "completion_time_hours": 12.89,
+    "survivability": 0.985,
+    "command_resilience": 0.7978,
+    "overall_effectiveness": 0.6829,
+    "notes": [
+      "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：多域侦察与电磁塑形、远程火力压制与港口核心夺取、联合指挥与持续投送、稳控与后续扩展。",
+      "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+      "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+    ],
+    "phases": [
+      {
+        "phase_id": "P1",
+        "phase_name": "多域侦察与电磁塑形",
+        "success_score": 0.4729,
+        "duration_hours": 3.22,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 47%",
+          "蓝方能力指数 6.43",
+          "红方压力指数 3.37"
+        ]
+      },
+      {
+        "phase_id": "P2",
+        "phase_name": "远程火力压制与港口核心夺取",
+        "success_score": 0.4642,
+        "duration_hours": 3.22,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 46%",
+          "蓝方能力指数 6.24",
+          "红方压力指数 3.53"
+        ]
+      },
+      {
+        "phase_id": "P3",
+        "phase_name": "联合指挥与持续投送",
+        "success_score": 0.4607,
+        "duration_hours": 3.22,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 46%",
+          "蓝方能力指数 6.14",
+          "红方压力指数 3.58"
+        ]
+      },
+      {
+        "phase_id": "P4",
+        "phase_name": "稳控与后续扩展",
+        "success_score": 0.4656,
+        "duration_hours": 3.22,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 47%",
+          "蓝方能力指数 6.33",
+          "红方压力指数 3.56"
+        ]
+      }
+    ],
+    "recommendations": [
+      "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+      "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+    ]
+  },
+  "last_reflection": {
+    "diagnosis": [
+      "多域侦察与电磁塑形阶段未能充分利用其前置作用，导致后续阶段缺乓 ",
+      "出现 …"
+    ],
+    "variant_instructions": [
+      "..."
+    ],
+    "meta_prompt_patch": "..."
+  },
+  "dodaf": {
+    "ov5b": {
+      "view": "OV-5b",
+      "operation_name": "沿海联合突击示范",
+      "mission_type": "assault",
+      "activities": [
+        {
+          "activity_id": "OV5B-ACT-01",
+          "name": "多域侦察与电磁塑形",
+          "intent": "先确认敌岸防雷达及导弹阵地位置，完成电子干扰覆盖主突击轴。",
+          "performers": [
+            "无人侦察分队",
+            "电子对抗分队"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "敌方雷达失效或误导",
+            "主突击轴电磁环境可控"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        },
+        {
+          "activity_id": "OV5B-ACT-02",
+          "name": "远程火力压制与港口核心夺取",
+          "intent": "利用远程火力群对岸防导弹阵地、中程防空连实施精准打击，抢占港口关键节点。",
+          "performers": [
+            "远程火力群",
+            "两栖突击群"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "敌岸防与中程防空大幅削弱",
+            "蓝方控制港口关键区域"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        },
+        {
+          "activity_id": "OV5B-ACT-03",
+          "name": "联合指挥与持续投送",
+          "intent": "在已夺取的港口建立前沿指挥所，保障后勤与再打击能力。",
+          "performers": [
+            "联合指挥通信单元",
+            "两栖突击群"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "蓝方保持持续投送与再打击能力",
+            "港岸基础设施可用"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        },
+        {
+          "activity_id": "OV5B-ACT-04",
+          "name": "稳控与后续扩展",
+          "intent": "巩固已夺取区域，防止敌方反扑，并为进一步两栖展开铺路。",
+          "performers": [
+            "两栖突击群",
+            "远程火力群"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "蓝方控制沿海关键地域稳定",
+            "后续两栖行动可顺利进行"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        }
+      ]
+    },
+    "ov6c": {
+      "view": "OV-6c",
+      "operation_name": "沿海联合突击示范",
+      "event_traces": [
+        {
+          "event_id": "OV6C-EVT-01",
+          "from": "CommandAuthority",
+          "to": "多域侦察与电磁塑形",
+          "trigger": "先确认敌岸防雷达及导弹阵地位置，完成电子干扰覆盖主突击轴。",
+          "effects": [
+            "敌方雷达失效或误导",
+            "主突击轴电磁环境可控"
+          ],
+          "decision_points": [
+            "若敌雷达未被压制，是否追加电子对抗资源？",
+            "若侦察发现新岸防节点，是否调整突击轴向？"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-02",
+          "from": "多域侦察与电磁塑形",
+          "to": "远程火力压制与港口核心夺取",
+          "trigger": "利用远程火力群对岸防导弹阵地、中程防空连实施精准打击，抢占港口关键节点。",
+          "effects": [
+            "敌岸防与中程防空大幅削弱",
+            "蓝方控制港口关键区域"
+          ],
+          "decision_points": [
+            "若岸防导弹阵地仍存活，是否追加火力打击？",
+            "若港口核心被占领后出现反扑，如何快速支援？"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-03",
+          "from": "远程火力压制与港口核心夺取",
+          "to": "联合指挥与持续投送",
+          "trigger": "在已夺取的港口建立前沿指挥所，保障后勤与再打击能力。",
+          "effects": [
+            "蓝方保持持续投送与再打击能力",
+            "港岸基础设施可用"
+          ],
+          "decision_points": [
+            "若后勤补给受阻，是否开启海上快速补给通道？",
+            "若敌方出现新型电子压制，如何调整指挥链路？"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-04",
+          "from": "联合指挥与持续投送",
+          "to": "稳控与后续扩展",
+          "trigger": "巩固已夺取区域，防止敌方反扑，并为进一步两栖展开铺路。",
+          "effects": [
+            "蓝方控制沿海关键地域稳定",
+            "后续两栖行动可顺利进行"
+          ],
+          "decision_points": [
+            "若敌方出现快速机步反扑，是否立即展开空中支援？",
+            "若平民密度升高，如何调整作战节奏以降低附带损伤？"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-05",
+          "from": "稳控与后续扩展",
+          "to": "BattleDamageAssessment",
+          "trigger": "Collect mission metrics and close the loop",
+          "effects": [
+            "战损交换比(LER)",
+            "任务完成时间",
+            "关键节点压制率",
+            "指挥链路完整度",
+            "后续行动可持续性"
+          ],
+          "decision_points": [
+            "Write simulation feedback into memory"
+          ]
+        }
+      ]
+    }
+  },
+  "c2sim_xml": "<C2SIM_Message xmlns=\"urn:sisostds:c2sim:std:019:2020\"><Header><MessageType>Order</MessageType><OperationName>沿海联合突击示范</OperationName></Header><Body><Order><MissionType>assault</MissionType><Objective>夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件</Objective><CommanderIntent>...</CommanderIntent><DesiredEndState>蓝方控制沿海关键地域并保持持续投送与再打击能力</DesiredEndState><ControlMeasures><Measure>采用受限任务分解与模板化输出，降低自然语言歧义</Measure><Measure>使用红蓝损失阈值和任务时限双门限触发重规划</Measure><Measure>将阶段结果写入案例库并标记正负样本用于检索修正</Measure></ControlMeasures><Task id=\"P1\"><Name>多域侦察与电磁塑形</Name><Intent>先确认敌岸防雷达及导弹阵地位置，完成电子干扰覆盖主突击轴。</Intent><AllocatedUnits>无人侦察分队, 电子对抗分队</AllocatedUnits><ActionList><Action>无人侦察分队开展海空双域侦察</Action><Action>电子对抗分队实施频谱压制与信号干扰</Action></ActionList><ExpectedEffects><Effect>敌方雷达失效或误导</Effect><Effect>主突击轴电磁环境可控</Effect></ExpectedEffects><DecisionPoints><Decision>若敌雷达未被压制，是否追加电子对抗资源？</Decision><Decision>若侦察发现新岸防节点，是否调整突击轴向？</Decision></DecisionPoints></Task><Task id=\"P2\"><Name>远程火力压制与港口核心夺取</Name><Intent>利用远程火力群对岸防导弹阵地、中程防空连实施精准打击，抢占港口关键节点。</Intent><AllocatedUnits>远程火力群, 两栖突击群</AllocatedUnits><ActionList><Action>远程火力群开展预先点射</Action><Action>两栖突击群同步登陆并冲锋至港口核心</Action></ActionList><ExpectedEffects><Effect>敌岸防与中程防空大幅削弱</Effect><Effect>蓝方控制港口关键区域</Effect></ExpectedEffects><DecisionPoints><Decision>若岸防导弹阵地仍存活，是否追加火力打击？</Decision><Decision>若港口核心被占领后出现反扑，如何快速支援？</Decision></DecisionPoints></Task><Task id=\"P3\"><Name>联合指挥与持续投送</Name><Intent>在已夺取的港口建立前沿指挥所，保障后勤与再打击能力。</Intent><AllocatedUnits>联合指挥通信单元, 两栖突击群</AllocatedUnits><ActionList><Action>联合指挥通信单元搭建临时指挥中心</Action><Action>两栖突击群保持机动防御并支援火力</Action></ActionList><ExpectedEffects><Effect>蓝方保持持续投送与再打击能力</Effect><Effect>港岸基础设施可用</Effect></ExpectedEffects><DecisionPoints><Decision>若后勤补给受阻，是否开启海上快速补给通道？</Decision><Decision>若敌方出现新型电子压制，如何调整指挥链路？</Decision></DecisionPoints></Task><Task id=\"P4\"><Name>稳控与后续扩展</Name><Intent>巩固已夺取区域，防止敌方反扑，并为进一步两栖展开铺路。</Intent><AllocatedUnits>两栖突击群, 远程火力群</AllocatedUnits><ActionList><Action>两栖突击群部署防御阵地</Action><Action>远程火力群维持压制态势</Action></ActionList><ExpectedEffects><Effect>蓝方控制沿海关键地域稳定</Effect><Effect>后续两栖行动可顺利进行</Effect></ExpectedEffects><DecisionPoints><Decision>若敌方出现快速机步反扑，是否立即展开空中支援？</Decision><Decision>若平民密度升高，如何调整作战节奏以降低附带损伤？</Decision></DecisionPoints></Task></Order></Body></C2SIM_Message>",
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "reflection": null,
+      "plan": {
+        "title": "沿海联合突击示范",
+        "commander_intent": "...",
+        "theory_of_victory": "...}<|start|>analysis<|message|>Need produce JSON with phases P1-P4. Ensure fields.<|start|>final<|message|>{",
+        "doctrine_weights": {
+          "fires": 0.82,
+          "mobility": 0.8,
+          "protection": 0.64,
+          "awareness": 0.76,
+          "ew": 0.66,
+          "sustainment": 0.62,
+          "c2": 0.76
+        },
+        "fast_weights": {
+          "fires": 0.074,
+          "mobility": 0.0678,
+          "protection": 0.2384,
+          "awareness": 0.2688,
+          "ew": 0.1224,
+          "sustainment": 0.0,
+          "c2": 0.195
+        },
+        "fused_weights": {
+          "fires": 0.894,
+          "mobility": 0.8678,
+          "protection": 0.8784,
+          "awareness": 1.0,
+          "ew": 0.7824,
+          "sustainment": 0.62,
+          "c2": 0.955
+        },
+        "memory_insights": [
+          "案例CASE-001（相似度 0.88）提示：先压制敌防空与岸防感知节点，再投入主突击群；在登陆前完成电磁塑形可显著降低首波损失",
+          "案例AUTO-ab5702b3（相似度 0.88）提示：以下阶段成功率偏低，需要重排任务链路或增强兵力配置：阶段1、阶段2、....、P1、P1、沿海联合突击示范。；整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+          "案例CASE-004（相似度 0.81）提示：未先塑形导致主攻轴暴露严重；缺乏多域协同会扩大突击阶段损失"
+        ],
+        "risk_controls": [
+          "采用受限任务分解与模板化输出，降低自然语言歧义",
+          "使用红蓝损失阈值和任务时限双门限触发重规划",
+          "将阶段结果写入案例库并标记正负样本用于检索修正"
+        ],
+        "assessment_metrics": [
+          "战损交换比(LER)",
+          "任务完成时间",
+          "关键节点压制率",
+          "指挥链路完整度",
+          "后续行动可持续性"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "name": "多域侦察与电磁塑形",
+            "intent": "先确认敌岸防雷达及导弹阵地位置，完成电子干扰覆盖主突击轴。",
+            "actions": [
+              "无人侦察分队开展海空双域侦察",
+              "电子对抗分队实施频谱压制与信号干扰"
+            ],
+            "allocated_units": [
+              "无人侦察分队",
+              "电子对抗分队"
+            ],
+            "decision_points": [
+              "若敌雷达未被压制，是否追加电子对抗资源？",
+              "若侦察发现新岸防节点，是否调整突击轴向？"
+            ],
+            "expected_effects": [
+              "敌方雷达失效或误导",
+              "主突击轴电磁环境可控"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "name": "远程火力压制与港口核心夺取",
+            "intent": "利用远程火力群对岸防导弹阵地、中程防空连实施精准打击，抢占港口关键节点。",
+            "actions": [
+              "远程火力群开展预先点射",
+              "两栖突击群同步登陆并冲锋至港口核心"
+            ],
+            "allocated_units": [
+              "远程火力群",
+              "两栖突击群"
+            ],
+            "decision_points": [
+              "若岸防导弹阵地仍存活，是否追加火力打击？",
+              "若港口核心被占领后出现反扑，如何快速支援？"
+            ],
+            "expected_effects": [
+              "敌岸防与中程防空大幅削弱",
+              "蓝方控制港口关键区域"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "name": "联合指挥与持续投送",
+            "intent": "在已夺取的港口建立前沿指挥所，保障后勤与再打击能力。",
+            "actions": [
+              "联合指挥通信单元搭建临时指挥中心",
+              "两栖突击群保持机动防御并支援火力"
+            ],
+            "allocated_units": [
+              "联合指挥通信单元",
+              "两栖突击群"
+            ],
+            "decision_points": [
+              "若后勤补给受阻，是否开启海上快速补给通道？",
+              "若敌方出现新型电子压制，如何调整指挥链路？"
+            ],
+            "expected_effects": [
+              "蓝方保持持续投送与再打击能力",
+              "港岸基础设施可用"
+            ]
+          },
+          {
+            "phase_id": "P4",
+            "name": "稳控与后续扩展",
+            "intent": "巩固已夺取区域，防止敌方反扑，并为进一步两栖展开铺路。",
+            "actions": [
+              "两栖突击群部署防御阵地",
+              "远程火力群维持压制态势"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群"
+            ],
+            "decision_points": [
+              "若敌方出现快速机步反扑，是否立即展开空中支援？",
+              "若平民密度升高，如何调整作战节奏以降低附带损伤？"
+            ],
+            "expected_effects": [
+              "蓝方控制沿海关键地域稳定",
+              "后续两栖行动可顺利进行"
+            ]
+          }
+        ]
+      },
+      "simulation": {
+        "mission_success": 0.4658,
+        "ler": 1.6667,
+        "completion_time_hours": 12.89,
+        "survivability": 0.985,
+        "command_resilience": 0.7978,
+        "overall_effectiveness": 0.6829,
+        "notes": [
+          "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：多域侦察与电磁塑形、远程火力压制与港口核心夺取、联合指挥与持续投送、稳控与后续扩展。",
+          "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+          "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "phase_name": "多域侦察与电磁塑形",
+            "success_score": 0.4729,
+            "duration_hours": 3.22,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.43",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "phase_name": "远程火力压制与港口核心夺取",
+            "success_score": 0.4642,
+            "duration_hours": 3.22,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 46%",
+              "蓝方能力指数 6.24",
+              "红方压力指数 3.53"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "phase_name": "联合指挥与持续投送",
+            "success_score": 0.4607,
+            "duration_hours": 3.22,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 46%",
+              "蓝方能力指数 6.14",
+              "红方压力指数 3.58"
+            ]
+          },
+          {
+            "phase_id": "P4",
+            "phase_name": "稳控与后续扩展",
+            "success_score": 0.4656,
+            "duration_hours": 3.22,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.33",
+              "红方压力指数 3.56"
+            ]
+          }
+        ],
+        "recommendations": [
+          "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+          "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+        ]
+      }
+    }
+  ]
+}

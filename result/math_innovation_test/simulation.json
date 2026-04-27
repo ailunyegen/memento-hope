@@ -1,0 +1,71 @@
+{
+  "mission_success": 0.4539,
+  "ler": 1.6667,
+  "completion_time_hours": 7.83,
+  "survivability": 0.985,
+  "command_resilience": 0.621,
+  "overall_effectiveness": 0.6707,
+  "notes": [
+    "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：多域协同侦察与电磁塑形、快速火力突击与登陆展开、稳控巩固与后勤保障准备、持续再打击与最终控制巩固。",
+    "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+    "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+  ],
+  "phases": [
+    {
+      "phase_id": "P1",
+      "phase_name": "多域协同侦察与电磁塑形",
+      "success_score": 0.4597,
+      "duration_hours": 1.96,
+      "friendly_loss": 0.03,
+      "enemy_loss": 0.05,
+      "notes": [
+        "阶段成功评分 46%",
+        "蓝方能力指数 5.73",
+        "红方压力指数 3.20"
+      ]
+    },
+    {
+      "phase_id": "P2",
+      "phase_name": "快速火力突击与登陆展开",
+      "success_score": 0.4531,
+      "duration_hours": 1.96,
+      "friendly_loss": 0.03,
+      "enemy_loss": 0.05,
+      "notes": [
+        "阶段成功评分 45%",
+        "蓝方能力指数 5.79",
+        "红方压力指数 3.53"
+      ]
+    },
+    {
+      "phase_id": "P3",
+      "phase_name": "稳控巩固与后勤保障准备",
+      "success_score": 0.4556,
+      "duration_hours": 1.96,
+      "friendly_loss": 0.03,
+      "enemy_loss": 0.05,
+      "notes": [
+        "阶段成功评分 46%",
+        "蓝方能力指数 5.74",
+        "红方压力指数 3.37"
+      ]
+    },
+    {
+      "phase_id": "P4",
+      "phase_name": "持续再打击与最终控制巩固",
+      "success_score": 0.4472,
+      "duration_hours": 1.96,
+      "friendly_loss": 0.03,
+      "enemy_loss": 0.05,
+      "notes": [
+        "阶段成功评分 45%",
+        "蓝方能力指数 5.61",
+        "红方压力指数 3.59"
+      ]
+    }
+  ],
+  "recommendations": [
+    "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+    "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+  ]
+}

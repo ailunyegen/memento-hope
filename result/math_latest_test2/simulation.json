@@ -1,0 +1,83 @@
+{
+  "mission_success": 0.5854,
+  "ler": 1.9311,
+  "completion_time_hours": 16.22,
+  "survivability": 0.9959,
+  "command_resilience": 0.5712,
+  "overall_effectiveness": 0.7224,
+  "stage_scores": {
+    "detect": 0.5785,
+    "disrupt": 0.5718,
+    "breach": 0.5631,
+    "control": 0.6177,
+    "sustain": 0.6153
+  },
+  "notes": [
+    "当前方案的主要短板集中在：突破突击链、压制打断链、侦察发现链。",
+    "整体任务成功度偏低，根因更接近突破突击链失效，而不是单一兵力数量不足。",
+    "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+  ],
+  "phases": [
+    {
+      "phase_id": "P1",
+      "phase_name": "多域协同侦察与电磁塑形",
+      "success_score": 0.5905,
+      "duration_hours": 4.06,
+      "friendly_loss": 0.008,
+      "enemy_loss": 0.025,
+      "notes": [
+        "阶段成功评分 59%",
+        "蓝方能力指数 5.21",
+        "红方压力指数 3.37",
+        "杀伤链评分 detect=0.60, disrupt=0.57, breach=0.56, control=0.62, sustain=0.59"
+      ]
+    },
+    {
+      "phase_id": "P2",
+      "phase_name": "快速登陆与滩头巩固",
+      "success_score": 0.5905,
+      "duration_hours": 4.06,
+      "friendly_loss": 0.008,
+      "enemy_loss": 0.025,
+      "notes": [
+        "阶段成功评分 59%",
+        "蓝方能力指数 5.21",
+        "红方压力指数 3.37",
+        "杀伤链评分 detect=0.60, disrupt=0.57, breach=0.56, control=0.62, sustain=0.59"
+      ]
+    },
+    {
+      "phase_id": "P3",
+      "phase_name": "稳控与纵深巩固",
+      "success_score": 0.5822,
+      "duration_hours": 4.06,
+      "friendly_loss": 0.008,
+      "enemy_loss": 0.024,
+      "notes": [
+        "阶段成功评分 58%",
+        "蓝方能力指数 5.08",
+        "红方压力指数 3.29",
+        "杀伤链评分 detect=0.55, disrupt=0.57, breach=0.56, control=0.62, sustain=0.64"
+      ]
+    },
+    {
+      "phase_id": "P4",
+      "phase_name": "持续投送与再打击准备",
+      "success_score": 0.5822,
+      "duration_hours": 4.06,
+      "friendly_loss": 0.008,
+      "enemy_loss": 0.024,
+      "notes": [
+        "阶段成功评分 58%",
+        "蓝方能力指数 5.08",
+        "红方压力指数 3.29",
+        "杀伤链评分 detect=0.55, disrupt=0.57, breach=0.56, control=0.62, sustain=0.64"
+      ]
+    }
+  ],
+  "recommendations": [
+    "强化主攻轴机动、防护与突击火力协同，优先集中优势兵力打穿局部突破口。",
+    "增加压制火力、电子对抗和关键节点瘫痪动作，在主攻发起前先削弱敌方反制能力。",
+    "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+  ]
+}

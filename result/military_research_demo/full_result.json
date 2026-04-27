@@ -1,0 +1,2170 @@
+{
+  "scenario": {
+    "name": "沿海联合突击示范",
+    "mission_type": "assault",
+    "objective": "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+    "terrain": "coastal-urban",
+    "weather": "rain",
+    "threat_level": 0.74,
+    "ew_threat": 0.68,
+    "civilian_presence": 0.36,
+    "time_pressure": 0.77,
+    "doctrine_profile": "offensive_breakthrough",
+    "desired_end_state": "蓝方控制沿海关键地域并保持持续投送与再打击能力",
+    "constraints": [
+      "控制附带损伤并保持港岸基础设施可用",
+      "敌方存在较强电磁压制能力",
+      "首波突击后12小时内必须完成稳定控制"
+    ],
+    "friendly_forces": [
+      {
+        "name": "两栖突击群",
+        "role": "两栖突击",
+        "domain": "ground",
+        "quantity": 12,
+        "readiness": 0.88,
+        "fires": 0.64,
+        "mobility": 0.86,
+        "protection": 0.72,
+        "awareness": 0.58,
+        "ew": 0.32,
+        "sustainment": 0.62,
+        "c2": 0.68
+      },
+      {
+        "name": "远程火力群",
+        "role": "炮兵火力",
+        "domain": "ground",
+        "quantity": 8,
+        "readiness": 0.84,
+        "fires": 0.92,
+        "mobility": 0.46,
+        "protection": 0.5,
+        "awareness": 0.52,
+        "ew": 0.2,
+        "sustainment": 0.58,
+        "c2": 0.64
+      },
+      {
+        "name": "无人侦察分队",
+        "role": "无人机侦察",
+        "domain": "air",
+        "quantity": 16,
+        "readiness": 0.9,
+        "fires": 0.18,
+        "mobility": 0.82,
+        "protection": 0.24,
+        "awareness": 0.94,
+        "ew": 0.36,
+        "sustainment": 0.52,
+        "c2": 0.7
+      },
+      {
+        "name": "电子对抗分队",
+        "role": "电子战",
+        "domain": "information",
+        "quantity": 6,
+        "readiness": 0.86,
+        "fires": 0.12,
+        "mobility": 0.54,
+        "protection": 0.4,
+        "awareness": 0.72,
+        "ew": 0.96,
+        "sustainment": 0.56,
+        "c2": 0.78
+      },
+      {
+        "name": "联合指挥通信单元",
+        "role": "指挥通信",
+        "domain": "information",
+        "quantity": 4,
+        "readiness": 0.92,
+        "fires": 0.1,
+        "mobility": 0.48,
+        "protection": 0.46,
+        "awareness": 0.76,
+        "ew": 0.4,
+        "sustainment": 0.66,
+        "c2": 0.94
+      }
+    ],
+    "enemy_forces": [
+      {
+        "name": "岸防导弹阵地",
+        "role": "岸防火力",
+        "domain": "ground",
+        "quantity": 6,
+        "readiness": 0.82,
+        "fires": 0.9,
+        "mobility": 0.28,
+        "protection": 0.56,
+        "awareness": 0.58,
+        "ew": 0.18,
+        "sustainment": 0.44,
+        "c2": 0.62
+      },
+      {
+        "name": "中程防空连",
+        "role": "防空单元",
+        "domain": "ground",
+        "quantity": 5,
+        "readiness": 0.8,
+        "fires": 0.72,
+        "mobility": 0.36,
+        "protection": 0.58,
+        "awareness": 0.64,
+        "ew": 0.22,
+        "sustainment": 0.42,
+        "c2": 0.6
+      },
+      {
+        "name": "机步守备群",
+        "role": "机步分队",
+        "domain": "ground",
+        "quantity": 10,
+        "readiness": 0.78,
+        "fires": 0.58,
+        "mobility": 0.62,
+        "protection": 0.66,
+        "awareness": 0.54,
+        "ew": 0.12,
+        "sustainment": 0.5,
+        "c2": 0.56
+      }
+    ]
+  },
+  "memory_hits": [
+    {
+      "score": 0.8536,
+      "confidence": 0.8536,
+      "record": {
+        "case_id": "CASE-001",
+        "mission_type": "assault",
+        "terrain": "coastal-urban",
+        "objective": "压制沿海防空节点并夺控登陆窗口",
+        "friendly_roles": [
+          "两栖突击群",
+          "舰载火力分队",
+          "无人侦察分队",
+          "电子对抗分队"
+        ],
+        "enemy_roles": [
+          "岸防导弹阵地",
+          "防空连",
+          "机步分队"
+        ],
+        "key_actions": [
+          "多域侦察确认敌岸防雷达",
+          "舰炮与远火同步压制",
+          "电子干扰覆盖主突击轴",
+          "抢占港岸结合部要点"
+        ],
+        "lessons": [
+          "先压制敌防空与岸防感知节点，再投入主突击群",
+          "在登陆前完成电磁塑形可显著降低首波损失"
+        ],
+        "outcome": "positive",
+        "tags": [
+          "joint",
+          "littoral",
+          "ew"
+        ],
+        "metrics": {
+          "mission_success": 0.78,
+          "ler": 1.61,
+          "overall_effectiveness": 0.74
+        }
+      }
+    },
+    {
+      "score": 0.8424,
+      "confidence": 0.8424,
+      "record": {
+        "case_id": "CASE-004",
+        "mission_type": "assault",
+        "terrain": "coastal-urban",
+        "objective": "快速突击港口核心区域",
+        "friendly_roles": [
+          "装甲突击群",
+          "炮兵分队"
+        ],
+        "enemy_roles": [
+          "岸防火力群",
+          "防空单元"
+        ],
+        "key_actions": [
+          "直接突击港口核心",
+          "省略电磁塑形和侦察确认"
+        ],
+        "lessons": [
+          "未先塑形导致主攻轴暴露严重",
+          "缺乏多域协同会扩大突击阶段损失"
+        ],
+        "outcome": "negative",
+        "tags": [
+          "risk",
+          "insufficient-isr"
+        ],
+        "metrics": {
+          "mission_success": 0.41,
+          "ler": 0.73,
+          "overall_effectiveness": 0.46
+        }
+      }
+    },
+    {
+      "score": 0.8334,
+      "confidence": 0.8334,
+      "record": {
+        "case_id": "AUTO-c0597299",
+        "mission_type": "assault",
+        "terrain": "coastal-urban",
+        "objective": "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+        "friendly_roles": [
+          "两栖突击",
+          "炮兵火力",
+          "无人机侦察",
+          "电子战",
+          "指挥通信"
+        ],
+        "enemy_roles": [
+          "岸防火力",
+          "防空单元",
+          "机步分队"
+        ],
+        "key_actions": [
+          "多域侦察",
+          "电子压制",
+          "远程精确火力",
+          "压制关键节点",
+          "主攻群突破",
+          "两栖/地面协同机动"
+        ],
+        "lessons": [
+          "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+          "以更高机动权重重排阶段顺序，优先打穿关键瓶颈节点。",
+          "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+        ],
+        "outcome": "negative",
+        "tags": [
+          "rain",
+          "offensive_breakthrough"
+        ],
+        "metrics": {
+          "mission_success": 0.4691,
+          "ler": 1.6667,
+          "overall_effectiveness": 0.6233
+        }
+      }
+    }
+  ],
+  "best_plan": {
+    "title": "沿海联合突击示范",
+    "commander_intent": "...",
+    "theory_of_victory": "以侦察塑形、联合火力、机动夺控和持续投送形成闭环优势，实现夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件。",
+    "doctrine_weights": {
+      "fires": 0.82,
+      "mobility": 0.8,
+      "protection": 0.64,
+      "awareness": 0.76,
+      "ew": 0.66,
+      "sustainment": 0.62,
+      "c2": 0.76
+    },
+    "fast_weights": {
+      "fires": 0.074,
+      "mobility": 0.0678,
+      "protection": 0.2384,
+      "awareness": 0.2688,
+      "ew": 0.1224,
+      "sustainment": 0.0,
+      "c2": 0.195
+    },
+    "fused_weights": {
+      "fires": 0.9029,
+      "mobility": 0.8831,
+      "protection": 0.907,
+      "awareness": 1.0,
+      "ew": 0.7971,
+      "sustainment": 0.6248,
+      "c2": 0.9838
+    },
+    "memory_insights": [
+      "案例CASE-001（相似度 0.85）提示：先压制敌防空与岸防感知节点，再投入主突击群；在登陆前完成电磁塑形可显著降低首波损失",
+      "案例CASE-004（相似度 0.84）提示：未先塑形导致主攻轴暴露严重；缺乏多域协同会扩大突击阶段损失",
+      "案例AUTO-c0597299（相似度 0.83）提示：提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。；以更高机动权重重排阶段顺序，优先打穿关键瓶颈节点。"
+    ],
+    "risk_controls": [
+      "采用受限任务分解与模板化输出，降低自然语言歧义",
+      "使用红蓝损失阈值和任务时限双门限触发重规划",
+      "将阶段结果写入案例库并标记正负样本用于检索修正"
+    ],
+    "assessment_metrics": [
+      "战损交换比(LER)",
+      "任务完成时间",
+      "关键节点压制率",
+      "指挥链路完整度",
+      "后续行动可持续性"
+    ],
+    "phases": [
+      {
+        "phase_id": "P1",
+        "name": "多域侦察与电磁塑形",
+        "intent": "",
+        "actions": [
+          "无人侦察分队完成海岸线雷达扫描并标记敌岸防雷达位置；电子对抗分队实施低频干扰覆盖主突击轴；远程火力群预先点燃关键导弹阵地；联合指挥通信单元同步情报链路，确保实时数据共享。"
+        ],
+        "allocated_units": [
+          "无人侦察分队",
+          "电子对抗分队",
+          "远程火力群",
+          "联合指挥通信单元"
+        ],
+        "decision_points": [
+          "是否确认敌岸防雷达已被抑制；是否需要追加电磁压制频段；是否允许主突击群进入登陆窗口。"
+        ],
+        "expected_effects": [
+          "敌岸防空与导弹感知能力显著下降；关键节点被预先消耗或失效；情报链路保持完整，降低误判风险。"
+        ]
+      },
+      {
+        "phase_id": "P2",
+        "name": "主突击群登陆与压制",
+        "intent": "",
+        "actions": [
+          "两栖突击群以快速登陆方式占领港口核心区并建立前沿阵地；远程火力群对岸防导弹阵地实施精准打击；电子对抗分队持续干扰敌中程防空连的雷达与通信；联合指挥通信单元实时协调各域行动，确保登陆部队与火力支援同步。"
+        ],
+        "allocated_units": [
+          "两栖突击群",
+          "远程火力群",
+          "电子对抗分队",
+          "联合指挥通信单元"
+        ],
+        "decision_points": [
+          "是否需要增派火力以消灭残余岸防导弹；是否调整登陆节奏以避免高空雷达曝光；是否开启后勤投送通道。"
+        ],
+        "expected_effects": [
+          "港口核心区被占领，敌岸防空与导弹系统被压制或摧毁；登陆部队获得前沿阵地，为后续作战提供掩护；电磁压制持续降低敌方指挥控制能力。"
+        ]
+      },
+      {
+        "phase_id": "P3",
+        "name": "稳控与后勤投送",
+        "intent": "",
+        "actions": [
+          "两栖突击群巩固港口关键节点，建立临时基地；远程火力群对岸防导弹阵地进行持续压制；电子对抗分队保持低频干扰，封锁敌方雷达；联合指挥通信单元监控后勤投送链路，确保补给与增援及时到位。"
+        ],
+        "allocated_units": [
+          "两栖突击群",
+          "远程火力群",
+          "电子对抗分队",
+          "联合指挥通信单元"
+        ],
+        "decision_points": [
+          "是否需要开启港口码头进行物资投送；是否调整后勤路线以规避敌方巡逻；是否启动增援部队。"
+        ],
+        "expected_effects": [
+          "蓝方在沿海关键地域保持持续控制，后勤链路畅通；敌方岸防与导弹系统被彻底压制；港口基础设施可用性得到恢复或维持。"
+        ]
+      },
+      {
+        "phase_id": "P4",
+        "name": "压制与再打击准备",
+        "intent": "",
+        "actions": [
+          "远程火力群对残余敌岸防导弹阵地实施精确打击；电子对抗分队持续干扰，封锁敌方雷达；联合指挥通信单元协调后续增援和空中支援；两栖突击群准备第二波登陆或机步守备群进行巩固。"
+        ],
+        "allocated_units": [
+          "远程火力群",
+          "电子对抗分队",
+          "联合指挥通信单元",
+          "两栖突击群"
+        ],
+        "decision_points": [
+          "是否需要追加精确打击以消灭残余导弹；是否开启空中支援通道；是否启动第二波登陆。"
+        ],
+        "expected_effects": [
+          "敌方岸防与导弹系统被彻底清除，蓝方在沿海关键地域实现长期控制；电磁压制持续降低敌方指挥能力；后勤投送与再打击能力得到保障。"
+        ]
+      }
+    ]
+  },
+  "best_simulation": {
+    "mission_success": 0.4699,
+    "ler": 1.6667,
+    "completion_time_hours": 7.94,
+    "survivability": 0.985,
+    "command_resilience": 0.814,
+    "overall_effectiveness": 0.7003,
+    "notes": [
+      "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：多域侦察与电磁塑形、主突击群登陆与压制、稳控与后勤投送、压制与再打击准备。",
+      "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+      "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+    ],
+    "phases": [
+      {
+        "phase_id": "P1",
+        "phase_name": "多域侦察与电磁塑形",
+        "success_score": 0.4754,
+        "duration_hours": 1.98,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 48%",
+          "蓝方能力指数 6.53",
+          "红方压力指数 3.37"
+        ]
+      },
+      {
+        "phase_id": "P2",
+        "phase_name": "主突击群登陆与压制",
+        "success_score": 0.4689,
+        "duration_hours": 1.98,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 47%",
+          "蓝方能力指数 6.21",
+          "红方压力指数 3.31"
+        ]
+      },
+      {
+        "phase_id": "P3",
+        "phase_name": "稳控与后勤投送",
+        "success_score": 0.4663,
+        "duration_hours": 1.98,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 47%",
+          "蓝方能力指数 6.08",
+          "红方压力指数 3.29"
+        ]
+      },
+      {
+        "phase_id": "P4",
+        "phase_name": "压制与再打击准备",
+        "success_score": 0.4689,
+        "duration_hours": 1.98,
+        "friendly_loss": 0.03,
+        "enemy_loss": 0.05,
+        "notes": [
+          "阶段成功评分 47%",
+          "蓝方能力指数 6.21",
+          "红方压力指数 3.31"
+        ]
+      }
+    ],
+    "recommendations": [
+      "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+      "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+    ]
+  },
+  "last_reflection": {
+    "diagnosis": [
+      "多域侦各阶段成功率不佳，导致整体任务成功度低",
+      "电磁对抗压强度高，缺少相应抗干扰方案"
+    ],
+    "variant_instructions": [
+      "先前方案未能体现出更好地协同与协作流程”， “…”。}{",
+      "diagnosis",
+      "variant_instructions",
+      "meta_prompt_patch"
+    ],
+    "meta_prompt_patch": "请在下一轮 Prompt 中强调多域协同、抗干扰通信与关键节点压制的细化方案。"
+  },
+  "dodaf": {
+    "ov5b": {
+      "view": "OV-5b",
+      "operation_name": "沿海联合突击示范",
+      "mission_type": "assault",
+      "activities": [
+        {
+          "activity_id": "OV5B-ACT-01",
+          "name": "多域侦察与电磁塑形",
+          "intent": "",
+          "performers": [
+            "无人侦察分队",
+            "电子对抗分队",
+            "远程火力群",
+            "联合指挥通信单元"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "敌岸防空与导弹感知能力显著下降；关键节点被预先消耗或失效；情报链路保持完整，降低误判风险。"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        },
+        {
+          "activity_id": "OV5B-ACT-02",
+          "name": "主突击群登陆与压制",
+          "intent": "",
+          "performers": [
+            "两栖突击群",
+            "远程火力群",
+            "电子对抗分队",
+            "联合指挥通信单元"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "港口核心区被占领，敌岸防空与导弹系统被压制或摧毁；登陆部队获得前沿阵地，为后续作战提供掩护；电磁压制持续降低敌方指挥控制能力。"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        },
+        {
+          "activity_id": "OV5B-ACT-03",
+          "name": "稳控与后勤投送",
+          "intent": "",
+          "performers": [
+            "两栖突击群",
+            "远程火力群",
+            "电子对抗分队",
+            "联合指挥通信单元"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "蓝方在沿海关键地域保持持续控制，后勤链路畅通；敌方岸防与导弹系统被彻底压制；港口基础设施可用性得到恢复或维持。"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        },
+        {
+          "activity_id": "OV5B-ACT-04",
+          "name": "压制与再打击准备",
+          "intent": "",
+          "performers": [
+            "远程火力群",
+            "电子对抗分队",
+            "联合指挥通信单元",
+            "两栖突击群"
+          ],
+          "inputs": [
+            "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+            "控制附带损伤并保持港岸基础设施可用",
+            "敌方存在较强电磁压制能力",
+            "首波突击后12小时内必须完成稳定控制"
+          ],
+          "outputs": [
+            "敌方岸防与导弹系统被彻底清除，蓝方在沿海关键地域实现长期控制；电磁压制持续降低敌方指挥能力；后勤投送与再打击能力得到保障。"
+          ],
+          "governing_rules": [
+            "采用受限任务分解与模板化输出，降低自然语言歧义",
+            "使用红蓝损失阈值和任务时限双门限触发重规划",
+            "将阶段结果写入案例库并标记正负样本用于检索修正"
+          ]
+        }
+      ]
+    },
+    "ov6c": {
+      "view": "OV-6c",
+      "operation_name": "沿海联合突击示范",
+      "event_traces": [
+        {
+          "event_id": "OV6C-EVT-01",
+          "from": "CommandAuthority",
+          "to": "多域侦察与电磁塑形",
+          "trigger": "",
+          "effects": [
+            "敌岸防空与导弹感知能力显著下降；关键节点被预先消耗或失效；情报链路保持完整，降低误判风险。"
+          ],
+          "decision_points": [
+            "是否确认敌岸防雷达已被抑制；是否需要追加电磁压制频段；是否允许主突击群进入登陆窗口。"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-02",
+          "from": "多域侦察与电磁塑形",
+          "to": "主突击群登陆与压制",
+          "trigger": "",
+          "effects": [
+            "港口核心区被占领，敌岸防空与导弹系统被压制或摧毁；登陆部队获得前沿阵地，为后续作战提供掩护；电磁压制持续降低敌方指挥控制能力。"
+          ],
+          "decision_points": [
+            "是否需要增派火力以消灭残余岸防导弹；是否调整登陆节奏以避免高空雷达曝光；是否开启后勤投送通道。"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-03",
+          "from": "主突击群登陆与压制",
+          "to": "稳控与后勤投送",
+          "trigger": "",
+          "effects": [
+            "蓝方在沿海关键地域保持持续控制，后勤链路畅通；敌方岸防与导弹系统被彻底压制；港口基础设施可用性得到恢复或维持。"
+          ],
+          "decision_points": [
+            "是否需要开启港口码头进行物资投送；是否调整后勤路线以规避敌方巡逻；是否启动增援部队。"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-04",
+          "from": "稳控与后勤投送",
+          "to": "压制与再打击准备",
+          "trigger": "",
+          "effects": [
+            "敌方岸防与导弹系统被彻底清除，蓝方在沿海关键地域实现长期控制；电磁压制持续降低敌方指挥能力；后勤投送与再打击能力得到保障。"
+          ],
+          "decision_points": [
+            "是否需要追加精确打击以消灭残余导弹；是否开启空中支援通道；是否启动第二波登陆。"
+          ]
+        },
+        {
+          "event_id": "OV6C-EVT-05",
+          "from": "压制与再打击准备",
+          "to": "BattleDamageAssessment",
+          "trigger": "Collect mission metrics and close the loop",
+          "effects": [
+            "战损交换比(LER)",
+            "任务完成时间",
+            "关键节点压制率",
+            "指挥链路完整度",
+            "后续行动可持续性"
+          ],
+          "decision_points": [
+            "Write simulation feedback into memory"
+          ]
+        }
+      ]
+    }
+  },
+  "c2sim_xml": "<C2SIM_Message xmlns=\"urn:sisostds:c2sim:std:019:2020\"><Header><MessageType>Order</MessageType><OperationName>沿海联合突击示范</OperationName></Header><Body><Order><MissionType>assault</MissionType><Objective>夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件</Objective><CommanderIntent>...</CommanderIntent><DesiredEndState>蓝方控制沿海关键地域并保持持续投送与再打击能力</DesiredEndState><ControlMeasures><Measure>采用受限任务分解与模板化输出，降低自然语言歧义</Measure><Measure>使用红蓝损失阈值和任务时限双门限触发重规划</Measure><Measure>将阶段结果写入案例库并标记正负样本用于检索修正</Measure></ControlMeasures><Task id=\"P1\"><Name>多域侦察与电磁塑形</Name><Intent /><AllocatedUnits>无人侦察分队, 电子对抗分队, 远程火力群, 联合指挥通信单元</AllocatedUnits><ActionList><Action>无人侦察分队完成海岸线雷达扫描并标记敌岸防雷达位置；电子对抗分队实施低频干扰覆盖主突击轴；远程火力群预先点燃关键导弹阵地；联合指挥通信单元同步情报链路，确保实时数据共享。</Action></ActionList><ExpectedEffects><Effect>敌岸防空与导弹感知能力显著下降；关键节点被预先消耗或失效；情报链路保持完整，降低误判风险。</Effect></ExpectedEffects><DecisionPoints><Decision>是否确认敌岸防雷达已被抑制；是否需要追加电磁压制频段；是否允许主突击群进入登陆窗口。</Decision></DecisionPoints></Task><Task id=\"P2\"><Name>主突击群登陆与压制</Name><Intent /><AllocatedUnits>两栖突击群, 远程火力群, 电子对抗分队, 联合指挥通信单元</AllocatedUnits><ActionList><Action>两栖突击群以快速登陆方式占领港口核心区并建立前沿阵地；远程火力群对岸防导弹阵地实施精准打击；电子对抗分队持续干扰敌中程防空连的雷达与通信；联合指挥通信单元实时协调各域行动，确保登陆部队与火力支援同步。</Action></ActionList><ExpectedEffects><Effect>港口核心区被占领，敌岸防空与导弹系统被压制或摧毁；登陆部队获得前沿阵地，为后续作战提供掩护；电磁压制持续降低敌方指挥控制能力。</Effect></ExpectedEffects><DecisionPoints><Decision>是否需要增派火力以消灭残余岸防导弹；是否调整登陆节奏以避免高空雷达曝光；是否开启后勤投送通道。</Decision></DecisionPoints></Task><Task id=\"P3\"><Name>稳控与后勤投送</Name><Intent /><AllocatedUnits>两栖突击群, 远程火力群, 电子对抗分队, 联合指挥通信单元</AllocatedUnits><ActionList><Action>两栖突击群巩固港口关键节点，建立临时基地；远程火力群对岸防导弹阵地进行持续压制；电子对抗分队保持低频干扰，封锁敌方雷达；联合指挥通信单元监控后勤投送链路，确保补给与增援及时到位。</Action></ActionList><ExpectedEffects><Effect>蓝方在沿海关键地域保持持续控制，后勤链路畅通；敌方岸防与导弹系统被彻底压制；港口基础设施可用性得到恢复或维持。</Effect></ExpectedEffects><DecisionPoints><Decision>是否需要开启港口码头进行物资投送；是否调整后勤路线以规避敌方巡逻；是否启动增援部队。</Decision></DecisionPoints></Task><Task id=\"P4\"><Name>压制与再打击准备</Name><Intent /><AllocatedUnits>远程火力群, 电子对抗分队, 联合指挥通信单元, 两栖突击群</AllocatedUnits><ActionList><Action>远程火力群对残余敌岸防导弹阵地实施精确打击；电子对抗分队持续干扰，封锁敌方雷达；联合指挥通信单元协调后续增援和空中支援；两栖突击群准备第二波登陆或机步守备群进行巩固。</Action></ActionList><ExpectedEffects><Effect>敌方岸防与导弹系统被彻底清除，蓝方在沿海关键地域实现长期控制；电磁压制持续降低敌方指挥能力；后勤投送与再打击能力得到保障。</Effect></ExpectedEffects><DecisionPoints><Decision>是否需要追加精确打击以消灭残余导弹；是否开启空中支援通道；是否启动第二波登陆。</Decision></DecisionPoints></Task></Order></Body></C2SIM_Message>",
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "reflection": null,
+      "plan": {
+        "title": "沿海联合突击示范",
+        "commander_intent": "...",
+        "theory_of_victory": "以侦察塑形、联合火力、机动夺控和持续投送形成闭环优势，实现夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件。",
+        "doctrine_weights": {
+          "fires": 0.82,
+          "mobility": 0.8,
+          "protection": 0.64,
+          "awareness": 0.76,
+          "ew": 0.66,
+          "sustainment": 0.62,
+          "c2": 0.76
+        },
+        "fast_weights": {
+          "fires": 0.074,
+          "mobility": 0.0678,
+          "protection": 0.2384,
+          "awareness": 0.2688,
+          "ew": 0.1224,
+          "sustainment": 0.0,
+          "c2": 0.195
+        },
+        "fused_weights": {
+          "fires": 0.894,
+          "mobility": 0.8678,
+          "protection": 0.8784,
+          "awareness": 1.0,
+          "ew": 0.7824,
+          "sustainment": 0.62,
+          "c2": 0.955
+        },
+        "memory_insights": [
+          "案例CASE-001（相似度 0.85）提示：先压制敌防空与岸防感知节点，再投入主突击群；在登陆前完成电磁塑形可显著降低首波损失",
+          "案例CASE-004（相似度 0.84）提示：未先塑形导致主攻轴暴露严重；缺乏多域协同会扩大突击阶段损失",
+          "案例AUTO-c0597299（相似度 0.83）提示：提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。；以更高机动权重重排阶段顺序，优先打穿关键瓶颈节点。"
+        ],
+        "risk_controls": [
+          "采用受限任务分解与模板化输出，降低自然语言歧义",
+          "使用红蓝损失阈值和任务时限双门限触发重规划",
+          "将阶段结果写入案例库并标记正负样本用于检索修正"
+        ],
+        "assessment_metrics": [
+          "战损交换比(LER)",
+          "任务完成时间",
+          "关键节点压制率",
+          "指挥链路完整度",
+          "后续行动可持续性"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "name": "多域侦察与电磁塑形",
+            "intent": "先行获取敌岸防雷达、导弹阵地及中程防空连位置，完成电子压制覆盖主突击轴。",
+            "actions": [
+              "无人侦察分队在海上低空巡航，采集雷达与红外图像；",
+              "电子对抗分队启动频谱干扰，锁定岸防导弹阵地及中程防空连；",
+              "远程火力群预先点射敌岸防雷达，削弱其感知能力。"
+            ],
+            "allocated_units": [
+              "无人侦察分队",
+              "电子对抗分队",
+              "远程火力群"
+            ],
+            "decision_points": [
+              "若雷达覆盖范围不足，则增派电子干扰；",
+              "若敌岸防导弹阵地未被压制，立即启动预警射击。"
+            ],
+            "expected_effects": [
+              "敌方雷达失效或受限；",
+              "岸防导弹与中程防空连的火力输出大幅削弱；",
+              "主突击轴获得电磁掩护，首波登陆损失降低。"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "name": "主突击群登陆与压制",
+            "intent": "在已塑形的海岸线上进行两栖登陆，快速夺取港口核心并压制残余防空与岸防节点。",
+            "actions": [
+              "两栖突击群以高速登陆艇突破港口入口；",
+              "远程火力群同步发射精确弹道导弹，对岸防导弹阵地及中程防空连实施点射压制；",
+              "电子对抗分队持续干扰敌雷达，保持电磁掩护。"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群",
+              "电子对抗分队"
+            ],
+            "decision_points": [
+              "若登陆艇被拦截，则立即调动空中支援；",
+              "若岸防导弹阵地仍能发射，启动快速反制。"
+            ],
+            "expected_effects": [
+              "港口核心被夺取；",
+              "敌方防空与岸防火力被压制至可忽略水平；",
+              "登陆部队获得初步控制区。"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "name": "稳控与后勤投送",
+            "intent": "巩固已夺取的港口核心，确保持续投送与再打击能力，同时保持港岸基础设施可用。",
+            "actions": [
+              "联合指挥通信单元建立快速链路，协调各域作战；",
+              "两栖突击群在港口内部部署防御工事；",
+              "远程火力群轮换弹药补给，保持持续打击。"
+            ],
+            "allocated_units": [
+              "联合指挥通信单元",
+              "两栖突击群",
+              "远程火力群"
+            ],
+            "decision_points": [
+              "若港口设施受损严重，则启动修复任务；",
+              "若敌方出现反扑迹象，立即增派防御力量。"
+            ],
+            "expected_effects": [
+              "港口核心保持稳定控制；",
+              "持续投送通道畅通；",
+              "后勤补给链条完整。"
+            ]
+          },
+          {
+            "phase_id": "P4",
+            "name": "压制与再打击准备",
+            "intent": "在稳控区内进行持续压制，预备对敌方残余防空及岸防节点实施再打击。",
+            "actions": [
+              "远程火力群开展连续弹道导弹扫射；",
+              "电子对抗分队维持频谱干扰；",
+              "联合指挥通信单元监控态势，调整打击窗口。"
+            ],
+            "allocated_units": [
+              "远程火力群",
+              "电子对抗分队",
+              "联合指挥通信单元"
+            ],
+            "decision_points": [
+              "若敌方防空连恢复作战能力，则启动高精度导弹；",
+              "若雷达重新出现，立即切换干扰频段。"
+            ],
+            "expected_effects": [
+              "残余防空与岸防节点被彻底压制；",
+              "蓝方保持持续打击优势；",
+              "后续行动可无缝衔接。"
+            ]
+          }
+        ]
+      },
+      "simulation": {
+        "mission_success": 0.4664,
+        "ler": 1.6667,
+        "completion_time_hours": 17.69,
+        "survivability": 0.985,
+        "command_resilience": 0.7978,
+        "overall_effectiveness": 0.6698,
+        "notes": [
+          "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：多域侦察与电磁塑形、主突击群登陆与压制、稳控与后勤投送、压制与再打击准备。",
+          "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+          "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "phase_name": "多域侦察与电磁塑形",
+            "success_score": 0.4729,
+            "duration_hours": 4.42,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.43",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "phase_name": "主突击群登陆与压制",
+            "success_score": 0.4663,
+            "duration_hours": 4.42,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.11",
+              "红方压力指数 3.31"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "phase_name": "稳控与后勤投送",
+            "success_score": 0.4587,
+            "duration_hours": 4.42,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 46%",
+              "蓝方能力指数 6.02",
+              "红方压力指数 3.53"
+            ]
+          },
+          {
+            "phase_id": "P4",
+            "phase_name": "压制与再打击准备",
+            "success_score": 0.4678,
+            "duration_hours": 4.42,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.22",
+              "红方压力指数 3.36"
+            ]
+          }
+        ],
+        "recommendations": [
+          "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+          "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+        ]
+      }
+    },
+    {
+      "iteration": 2,
+      "reflection": {
+        "diagnosis": [
+          "多域侦相与电磁塑形阶段未能有效识别/回收站点，导致后续阶段缺乏精准定位。”",
+          "先前方案在其“变更”等…"
+        ],
+        "variant_instructions": [
+          "..."
+        ],
+        "meta_prompt_patch": "..."
+      },
+      "plan": {
+        "title": "沿海联合突击示范",
+        "commander_intent": "...",
+        "theory_of_victory": "以侦察塑形、联合火力、机动夺控和持续投送形成闭环优势，实现夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件。",
+        "doctrine_weights": {
+          "fires": 0.82,
+          "mobility": 0.8,
+          "protection": 0.64,
+          "awareness": 0.76,
+          "ew": 0.66,
+          "sustainment": 0.62,
+          "c2": 0.76
+        },
+        "fast_weights": {
+          "fires": 0.074,
+          "mobility": 0.0678,
+          "protection": 0.2384,
+          "awareness": 0.2688,
+          "ew": 0.1224,
+          "sustainment": 0.0,
+          "c2": 0.195
+        },
+        "fused_weights": {
+          "fires": 0.9029,
+          "mobility": 0.8831,
+          "protection": 0.907,
+          "awareness": 1.0,
+          "ew": 0.7971,
+          "sustainment": 0.6248,
+          "c2": 0.9838
+        },
+        "memory_insights": [
+          "案例CASE-001（相似度 0.85）提示：先压制敌防空与岸防感知节点，再投入主突击群；在登陆前完成电磁塑形可显著降低首波损失",
+          "案例CASE-004（相似度 0.84）提示：未先塑形导致主攻轴暴露严重；缺乏多域协同会扩大突击阶段损失",
+          "案例AUTO-c0597299（相似度 0.83）提示：提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。；以更高机动权重重排阶段顺序，优先打穿关键瓶颈节点。"
+        ],
+        "risk_controls": [
+          "采用受限任务分解与模板化输出，降低自然语言歧义",
+          "使用红蓝损失阈值和任务时限双门限触发重规划",
+          "将阶段结果写入案例库并标记正负样本用于检索修正"
+        ],
+        "assessment_metrics": [
+          "战损交换比(LER)",
+          "任务完成时间",
+          "关键节点压制率",
+          "指挥链路完整度",
+          "后续行动可持续性"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "name": "多域侦察与电磁塑形",
+            "intent": "",
+            "actions": [
+              "无人侦察分队完成海岸线雷达扫描并标记敌岸防雷达位置；电子对抗分队实施低频干扰覆盖主突击轴；远程火力群预先点燃关键导弹阵地；联合指挥通信单元同步情报链路，确保实时数据共享。"
+            ],
+            "allocated_units": [
+              "无人侦察分队",
+              "电子对抗分队",
+              "远程火力群",
+              "联合指挥通信单元"
+            ],
+            "decision_points": [
+              "是否确认敌岸防雷达已被抑制；是否需要追加电磁压制频段；是否允许主突击群进入登陆窗口。"
+            ],
+            "expected_effects": [
+              "敌岸防空与导弹感知能力显著下降；关键节点被预先消耗或失效；情报链路保持完整，降低误判风险。"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "name": "主突击群登陆与压制",
+            "intent": "",
+            "actions": [
+              "两栖突击群以快速登陆方式占领港口核心区并建立前沿阵地；远程火力群对岸防导弹阵地实施精准打击；电子对抗分队持续干扰敌中程防空连的雷达与通信；联合指挥通信单元实时协调各域行动，确保登陆部队与火力支援同步。"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群",
+              "电子对抗分队",
+              "联合指挥通信单元"
+            ],
+            "decision_points": [
+              "是否需要增派火力以消灭残余岸防导弹；是否调整登陆节奏以避免高空雷达曝光；是否开启后勤投送通道。"
+            ],
+            "expected_effects": [
+              "港口核心区被占领，敌岸防空与导弹系统被压制或摧毁；登陆部队获得前沿阵地，为后续作战提供掩护；电磁压制持续降低敌方指挥控制能力。"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "name": "稳控与后勤投送",
+            "intent": "",
+            "actions": [
+              "两栖突击群巩固港口关键节点，建立临时基地；远程火力群对岸防导弹阵地进行持续压制；电子对抗分队保持低频干扰，封锁敌方雷达；联合指挥通信单元监控后勤投送链路，确保补给与增援及时到位。"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群",
+              "电子对抗分队",
+              "联合指挥通信单元"
+            ],
+            "decision_points": [
+              "是否需要开启港口码头进行物资投送；是否调整后勤路线以规避敌方巡逻；是否启动增援部队。"
+            ],
+            "expected_effects": [
+              "蓝方在沿海关键地域保持持续控制，后勤链路畅通；敌方岸防与导弹系统被彻底压制；港口基础设施可用性得到恢复或维持。"
+            ]
+          },
+          {
+            "phase_id": "P4",
+            "name": "压制与再打击准备",
+            "intent": "",
+            "actions": [
+              "远程火力群对残余敌岸防导弹阵地实施精确打击；电子对抗分队持续干扰，封锁敌方雷达；联合指挥通信单元协调后续增援和空中支援；两栖突击群准备第二波登陆或机步守备群进行巩固。"
+            ],
+            "allocated_units": [
+              "远程火力群",
+              "电子对抗分队",
+              "联合指挥通信单元",
+              "两栖突击群"
+            ],
+            "decision_points": [
+              "是否需要追加精确打击以消灭残余导弹；是否开启空中支援通道；是否启动第二波登陆。"
+            ],
+            "expected_effects": [
+              "敌方岸防与导弹系统被彻底清除，蓝方在沿海关键地域实现长期控制；电磁压制持续降低敌方指挥能力；后勤投送与再打击能力得到保障。"
+            ]
+          }
+        ]
+      },
+      "simulation": {
+        "mission_success": 0.4699,
+        "ler": 1.6667,
+        "completion_time_hours": 7.94,
+        "survivability": 0.985,
+        "command_resilience": 0.814,
+        "overall_effectiveness": 0.7003,
+        "notes": [
+          "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：多域侦察与电磁塑形、主突击群登陆与压制、稳控与后勤投送、压制与再打击准备。",
+          "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+          "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "phase_name": "多域侦察与电磁塑形",
+            "success_score": 0.4754,
+            "duration_hours": 1.98,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.53",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "phase_name": "主突击群登陆与压制",
+            "success_score": 0.4689,
+            "duration_hours": 1.98,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.21",
+              "红方压力指数 3.31"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "phase_name": "稳控与后勤投送",
+            "success_score": 0.4663,
+            "duration_hours": 1.98,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.08",
+              "红方压力指数 3.29"
+            ]
+          },
+          {
+            "phase_id": "P4",
+            "phase_name": "压制与再打击准备",
+            "success_score": 0.4689,
+            "duration_hours": 1.98,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.21",
+              "红方压力指数 3.31"
+            ]
+          }
+        ],
+        "recommendations": [
+          "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+          "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+        ]
+      }
+    },
+    {
+      "iteration": 3,
+      "reflection": {
+        "diagnosis": [
+          "多域侦相与电磁塑形阶段未能充分利用其前置作用，导致后续阶段成功率不够。”], ",
+          "?} The user wants JSON output. Let's produce proper JSON with fields: diagnosis, variant_instructions, meta_prompt_patch.{",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "diagnosis",
+          "variant_instructions",
+          "meta_prompt_patch",
+          "json"
+        ],
+        "variant_instructions": [
+          "..."
+        ],
+        "meta_prompt_patch": "\"...\""
+      },
+      "plan": {
+        "title": "沿海联合突击示范",
+        "commander_intent": "先行电磁塑形与多域侦察，确保主突击群登陆时能在敌防空与岸防节点被压制的环境下进行；通过精确火力与电子干扰覆盖，降低首波损失并实现快速稳定控制。",
+        "theory_of_victory": "以侦察塑形、联合火力、机动夺控和持续投送形成闭环优势，实现夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件。",
+        "doctrine_weights": {
+          "fires": 0.82,
+          "mobility": 0.8,
+          "protection": 0.64,
+          "awareness": 0.76,
+          "ew": 0.66,
+          "sustainment": 0.62,
+          "c2": 0.76
+        },
+        "fast_weights": {
+          "fires": 0.074,
+          "mobility": 0.0678,
+          "protection": 0.2384,
+          "awareness": 0.2688,
+          "ew": 0.1224,
+          "sustainment": 0.0,
+          "c2": 0.195
+        },
+        "fused_weights": {
+          "fires": 0.9118,
+          "mobility": 0.8912,
+          "protection": 0.9356,
+          "awareness": 1.0,
+          "ew": 0.8118,
+          "sustainment": 0.6248,
+          "c2": 1.0
+        },
+        "memory_insights": [
+          "案例CASE-001（相似度 0.85）提示：先压制敌防空与岸防感知节点，再投入主突击群；在登陆前完成电磁塑形可显著降低首波损失",
+          "案例CASE-004（相似度 0.84）提示：未先塑形导致主攻轴暴露严重；缺乏多域协同会扩大突击阶段损失",
+          "案例AUTO-c0597299（相似度 0.83）提示：提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。；以更高机动权重重排阶段顺序，优先打穿关键瓶颈节点。"
+        ],
+        "risk_controls": [
+          "..."
+        ],
+        "assessment_metrics": [
+          "战损交换比(LER)",
+          "任务完成时间",
+          "关键节点压制率",
+          "指挥链路完整度",
+          "后续行动可持续性"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "name": "多域侬……………………………………………………………………………………………………………………………??………?……………………………………………………………………………..………………………………………………………………...………??……………………………………………….………………………………………………………………………………………………………………………………………………………………………………………………………….………………………………………………………………………………………………………………………...…………………………………………………………………We…………………………??…………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………{",
+            "intent": "在恶劣雨天与强电磁压制环境下，快速夺取沿海登陆窗口并压制敌防空与岸防节点，为两栖作战提供持续投送与再打击能力。",
+            "actions": [
+              "无人侦察分队完成多域情报采集与雷达识别",
+              "电子对抗分队实施电磁压制覆盖主突击轴",
+              "远程火力群进行精确点射压制岸防导弹阵地及中程防空连",
+              "两栖突击群登陆并快速抢占港岸结合部要点"
+            ],
+            "allocated_units": [
+              "无人侦察分队",
+              "电子对抗分队",
+              "远程火力群",
+              "两栖突击群"
+            ],
+            "decision_points": [
+              "确认敌雷达与防空覆盖范围后决定登陆时机",
+              "评估电磁压制效果是否足以保障主突击轴安全",
+              "根据首波损失率调整再打击火力配置",
+              "确保港岸基础设施可用性并维持投送链路"
+            ],
+            "expected_effects": [
+              "实现对沿海关键地域的快速控制与持续投送能力",
+              "压制敌方防空与岸防节点，降低附带损伤",
+              "保障港岸基础设施在登陆后保持可用状态",
+              "为后续两栖展开创造安全、稳定的作战环境"
+            ]
+          },
+          {
+            "phase_id": "P1",
+            "name": "情报采集与电磁塑形",
+            "intent": "先行消除敌岸防雷达与感知节点，形成电磁压制屏障，为登陆提供安全窗口。",
+            "actions": [
+              "无人侦察分队进行海陆空域侦查并标定岸防雷达位置",
+              "电子对抗分队实施持续干扰以削弱敌雷达与感知系统"
+            ],
+            "allocated_units": [
+              "无人侦察分队",
+              "电子对抗分队"
+            ],
+            "decision_points": [
+              "评估电磁压制覆盖范围是否足够",
+              "决定远程火力群点射时机"
+            ],
+            "expected_effects": [
+              "消除敌岸防雷达与导弹预警，降低登陆损失率",
+              "形成电磁屏障，为主突击轴提供安全通道"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "name": "主突击群登陆压制",
+            "intent": "两栖突击群快速登陆并与远程火力同步压制岸防节点，确保沿海窗口稳定控制。",
+            "actions": [
+              "两栖突击群完成登陆作战",
+              "远程火力群对岸防导弹阵地实施点射压制"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群"
+            ],
+            "decision_points": [
+              "登陆窗口控制",
+              "防空节点压制"
+            ],
+            "expected_effects": [
+              "登陆成功，稳定控制",
+              "保持港岸基础设施可用"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "name": "稳固后勤投送",
+            "intent": "...??",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "…"
+            ],
+            "decision_points": [
+              "待补充决策点"
+            ],
+            "expected_effects": [
+              "待补充预期效果"
+            ]
+          },
+          {
+            "phase_id": "P5",
+            "name": ".????….???……..…????…???We need to produce JSON with those fields.{",
+            "intent": "沿海联合突击示范",
+            "actions": [
+              "P1：无人侦察分队进行电磁塑形并覆盖登陆轴",
+              "P2：主突击群登陆与压制",
+              "P3：远程火力群登陆支援",
+              "P4：稳控后勤"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群",
+              "无人侦察分队",
+              "电子对抗分队",
+              "联合指挥通信单元"
+            ],
+            "decision_points": [
+              "P1：决定是否展开电磁塑形覆盖",
+              "P2：决定精确压制后方节点",
+              "P3：决定登陆轴前置稳定"
+            ],
+            "expected_effects": [
+              "P1：完成电磁干扰并锁定关键点",
+              "P2：..."
+            ]
+          },
+          {
+            "phase_id": "P1到P4",
+            "name": "沿海联合突击示范",
+            "intent": "专业作战语言",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群"
+            ],
+            "decision_points": [
+              "待补充决策点"
+            ],
+            "expected_effects": [
+              "待补充预期效果"
+            ]
+          },
+          {
+            "phase_id": "P1到P4",
+            "name": "int",
+            "intent": "专业作战语言",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群"
+            ],
+            "decision_points": [
+              "待补充决策点"
+            ],
+            "expected_effects": [
+              "待补充预期效果"
+            ]
+          },
+          {
+            "phase_id": "P1",
+            "name": "P2",
+            "intent": "专业作战语言",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "decision_points": [
+              "待补充决策点"
+            ],
+            "expected_effects": [
+              "待补充预期效果"
+            ]
+          },
+          {
+            "phase_id": "P1",
+            "name": "P1",
+            "intent": "专业作战语言",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "两栖突击群",
+              "远程火力群"
+            ],
+            "decision_points": [
+              "登陆窗口"
+            ],
+            "expected_effects": [
+              "成功"
+            ]
+          },
+          {
+            "phase_id": "P1到P4",
+            "name": "专业作战语言",
+            "intent": "...<|start|>commentary<|channel|>final<|channel|>final<|channel|>commentary{",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "allocated_units"
+            ],
+            "decision_points": [
+              "P1",
+              "P2",
+              "P3"
+            ],
+            "expected_effects": [
+              "待补充预期效果"
+            ]
+          },
+          {
+            "phase_id": "风险控制",
+            "name": "P4",
+            "intent": "理论",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "待分配兵力"
+            ],
+            "decision_points": [
+              "actions"
+            ],
+            "expected_effects": [
+              "待补充预期效果"
+            ]
+          },
+          {
+            "phase_id": "action",
+            "name": "P1",
+            "intent": "commune",
+            "actions": [
+              "待补充动作"
+            ],
+            "allocated_units": [
+              "待分配兵力"
+            ],
+            "decision_points": [
+              "待补充决策点"
+            ],
+            "expected_effects": [
+              "待补充预期效果"
+            ]
+          }
+        ]
+      },
+      "simulation": {
+        "mission_success": 0.4767,
+        "ler": 1.6667,
+        "completion_time_hours": 33.15,
+        "survivability": 0.955,
+        "command_resilience": 0.8249,
+        "overall_effectiveness": 0.629,
+        "notes": [
+          "以下阶段成功率偏低，需要重排任务链路或增强兵力配置：多域侬……………………………………………………………………………………………………………………………??………?……………………………………………………………………………..………………………………………………………………...………??……………………………………………….………………………………………………………………………………………………………………………………………………………………………………………………………….………………………………………………………………………………………………………………………...…………………………………………………………………We…………………………??…………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………{、情报采集与电磁塑形、主突击群登陆压制、稳固后勤投送、.????….???……..…????…???We need to produce JSON with those fields.{、沿海联合突击示范、int、P2、P1、专业作战语言、P4、P1。",
+          "整体任务成功度偏低，说明当前方案在侦察塑形、关键节点压制或阶段衔接上存在缺口。",
+          "任务完成时间过长，后续变种方案应缩短阶段串行深度并提高机动与指挥效率。",
+          "电磁对抗压力较高，应提升抗干扰通信、备用链路和战场态势更新能力。"
+        ],
+        "phases": [
+          {
+            "phase_id": "P1",
+            "phase_name": "多域侬……………………………………………………………………………………………………………………………??………?……………………………………………………………………………..………………………………………………………………...………??……………………………………………….………………………………………………………………………………………………………………………………………………………………………………………………………….………………………………………………………………………………………………………………………...…………………………………………………………………We…………………………??…………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………{",
+            "success_score": 0.4771,
+            "duration_hours": 5.56,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.60",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P1",
+            "phase_name": "情报采集与电磁塑形",
+            "success_score": 0.4854,
+            "duration_hours": 3.16,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 49%",
+              "蓝方能力指数 6.76",
+              "红方压力指数 3.20"
+            ]
+          },
+          {
+            "phase_id": "P2",
+            "phase_name": "主突击群登陆压制",
+            "success_score": 0.4686,
+            "duration_hours": 3.16,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.42",
+              "红方压力指数 3.53"
+            ]
+          },
+          {
+            "phase_id": "P3",
+            "phase_name": "稳固后勤投送",
+            "success_score": 0.4765,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.57",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P5",
+            "phase_name": ".????….???……..…????…???We need to produce JSON with those fields.{",
+            "success_score": 0.4741,
+            "duration_hours": 5.56,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 47%",
+              "蓝方能力指数 6.45",
+              "红方压力指数 3.34"
+            ]
+          },
+          {
+            "phase_id": "P1到P4",
+            "phase_name": "沿海联合突击示范",
+            "success_score": 0.4798,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.67",
+              "红方压力指数 3.34"
+            ]
+          },
+          {
+            "phase_id": "P1到P4",
+            "phase_name": "int",
+            "success_score": 0.4765,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.57",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P1",
+            "phase_name": "P2",
+            "success_score": 0.4765,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.57",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P1",
+            "phase_name": "P1",
+            "success_score": 0.4765,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.57",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "P1到P4",
+            "phase_name": "专业作战语言",
+            "success_score": 0.4765,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.57",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "风险控制",
+            "phase_name": "P4",
+            "success_score": 0.4765,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.57",
+              "红方压力指数 3.37"
+            ]
+          },
+          {
+            "phase_id": "action",
+            "phase_name": "P1",
+            "success_score": 0.4765,
+            "duration_hours": 1.96,
+            "friendly_loss": 0.03,
+            "enemy_loss": 0.05,
+            "notes": [
+              "阶段成功评分 48%",
+              "蓝方能力指数 6.57",
+              "红方压力指数 3.37"
+            ]
+          }
+        ],
+        "recommendations": [
+          "提高侦察塑形和联合作战指挥权重，缩短发现到打击链路。",
+          "以更高机动权重重排阶段顺序，优先打穿关键瓶颈节点。",
+          "补强抗干扰链路和备用指挥节点，避免电磁压制造成闭环失效。"
+        ]
+      }
+    }
+  ]
+}
