@@ -1,0 +1,11 @@
+{
+  "suite_name": "generalization_scenarios_v1",
+  "description": "用于验证 Memento + Hope + Reflection 在不同作战类型、不同地形和不同压力条件下的跨场景泛化能力。",
+  "scenarios": [
+    {"file": "coastal_joint_assault.json", "family": "assault", "terrain_family": "coastal", "recommended_case_count": 8},
+    {"file": "urban_hub_defense.json", "family": "defense", "terrain_family": "urban", "recommended_case_count": 8},
+    {"file": "mountain_corridor_recon.json", "family": "recon", "terrain_family": "mountain", "recommended_case_count": 6},
+    {"file": "river_crossing_breakthrough.json", "family": "assault", "terrain_family": "river", "recommended_case_count": 8},
+    {"file": "island_resupply_corridor.json", "family": "sustain", "terrain_family": "maritime", "recommended_case_count": 6}
+  ]
+}

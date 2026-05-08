@@ -1,6 +1,8 @@
 {
+    "python.defaultInterpreterPath": "D:/Users/Alcoholic/anaconda3/python.exe",
     "python.analysis.extraPaths": [
-        "./memory"
+        "./memory",
+        "D:/Users/Alcoholic/anaconda3/Lib/site-packages"
     ],
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda"

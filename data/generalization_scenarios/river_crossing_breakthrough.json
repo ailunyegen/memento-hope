@@ -1,0 +1,28 @@
+{
+  "name": "江河强渡突破泛化场景",
+  "mission_type": "assault",
+  "objective": "压制敌岸火力并建立渡河突破口，为主力装甲群后续展开创造通路",
+  "terrain": "river-plain",
+  "weather": "overcast",
+  "threat_level": 0.71,
+  "ew_threat": 0.57,
+  "civilian_presence": 0.14,
+  "time_pressure": 0.73,
+  "doctrine_profile": "offensive_breakthrough",
+  "desired_end_state": "蓝方在指定河段完成突破并保持桥头控制至少6小时",
+  "constraints": [
+    "敌岸火力覆盖强，渡河窗口短",
+    "浮桥与工兵保障必须与火力压制同步",
+    "主攻轴暴露时间需尽量压缩"
+  ],
+  "friendly_forces": [
+    {"name": "装甲突击群", "role": "装甲突击", "domain": "ground", "quantity": 10, "readiness": 0.87, "fires": 0.76, "mobility": 0.88, "protection": 0.80, "awareness": 0.56, "ew": 0.16, "sustainment": 0.58, "c2": 0.70},
+    {"name": "工兵架桥群", "role": "工兵保障", "domain": "ground", "quantity": 6, "readiness": 0.83, "fires": 0.10, "mobility": 0.68, "protection": 0.46, "awareness": 0.48, "ew": 0.08, "sustainment": 0.82, "c2": 0.64},
+    {"name": "压制火力群", "role": "炮兵火力", "domain": "ground", "quantity": 7, "readiness": 0.85, "fires": 0.94, "mobility": 0.42, "protection": 0.48, "awareness": 0.50, "ew": 0.18, "sustainment": 0.54, "c2": 0.62},
+    {"name": "前沿侦察单元", "role": "侦察", "domain": "air", "quantity": 12, "readiness": 0.89, "fires": 0.14, "mobility": 0.84, "protection": 0.20, "awareness": 0.92, "ew": 0.30, "sustainment": 0.46, "c2": 0.68}
+  ],
+  "enemy_forces": [
+    {"name": "对岸岸防群", "role": "岸防火力", "domain": "ground", "quantity": 8, "readiness": 0.79, "fires": 0.88, "mobility": 0.34, "protection": 0.62, "awareness": 0.52, "ew": 0.12, "sustainment": 0.46, "c2": 0.58},
+    {"name": "机动反击群", "role": "装甲反击", "domain": "ground", "quantity": 6, "readiness": 0.77, "fires": 0.70, "mobility": 0.72, "protection": 0.68, "awareness": 0.46, "ew": 0.08, "sustainment": 0.52, "c2": 0.54}
+  ]
+}

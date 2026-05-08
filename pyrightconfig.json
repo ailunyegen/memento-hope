@@ -1,0 +1,12 @@
+{
+  "include": [
+    "military_research",
+    "tests"
+  ],
+  "extraPaths": [
+    "./memory",
+    "D:/Users/Alcoholic/anaconda3/Lib/site-packages"
+  ],
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": "warning"
+}

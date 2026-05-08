@@ -1,0 +1,49 @@
+{
+  "mode": "leave-one-family-out",
+  "exclude_terrain_family": false,
+  "source_case_count": 250,
+  "output_dir": "data\\generalization_case_banks_v2",
+  "all_cases": "data\\generalization_case_banks_v2\\all_cases.jsonl",
+  "per_scene": [
+    {
+      "scene": "coastal_joint_assault",
+      "family": "assault",
+      "terrain_family": "coastal",
+      "output": "data\\generalization_case_banks_v2\\coastal_joint_assault.jsonl",
+      "case_count": 150,
+      "warning": null
+    },
+    {
+      "scene": "urban_hub_defense",
+      "family": "defense",
+      "terrain_family": "urban",
+      "output": "data\\generalization_case_banks_v2\\urban_hub_defense.jsonl",
+      "case_count": 200,
+      "warning": null
+    },
+    {
+      "scene": "mountain_corridor_recon",
+      "family": "recon",
+      "terrain_family": "mountain",
+      "output": "data\\generalization_case_banks_v2\\mountain_corridor_recon.jsonl",
+      "case_count": 200,
+      "warning": null
+    },
+    {
+      "scene": "river_crossing_breakthrough",
+      "family": "assault",
+      "terrain_family": "river",
+      "output": "data\\generalization_case_banks_v2\\river_crossing_breakthrough.jsonl",
+      "case_count": 150,
+      "warning": null
+    },
+    {
+      "scene": "island_resupply_corridor",
+      "family": "sustain",
+      "terrain_family": "maritime",
+      "output": "data\\generalization_case_banks_v2\\island_resupply_corridor.jsonl",
+      "case_count": 200,
+      "warning": null
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "沿海联合突击泛化场景",
+  "mission_type": "assault",
+  "objective": "夺控沿海登陆窗口并压制敌防空与岸防节点，为后续两栖展开创造条件",
+  "terrain": "coastal-urban",
+  "weather": "rain",
+  "threat_level": 0.74,
+  "ew_threat": 0.68,
+  "civilian_presence": 0.36,
+  "time_pressure": 0.77,
+  "doctrine_profile": "offensive_breakthrough",
+  "desired_end_state": "蓝方控制沿海关键地域并保持持续投送与再次打击能力",
+  "constraints": [
+    "控制附带损伤并保持港口基础设施可用",
+    "敌方存在较强电磁压制能力",
+    "首波突击后2小时内必须完成稳定控制"
+  ],
+  "friendly_forces": [
+    {"name": "两栖突击群", "role": "两栖突击", "domain": "ground", "quantity": 12, "readiness": 0.88, "fires": 0.64, "mobility": 0.86, "protection": 0.72, "awareness": 0.58, "ew": 0.32, "sustainment": 0.62, "c2": 0.68},
+    {"name": "远程火力群", "role": "炮兵火力", "domain": "ground", "quantity": 8, "readiness": 0.84, "fires": 0.92, "mobility": 0.46, "protection": 0.50, "awareness": 0.52, "ew": 0.20, "sustainment": 0.58, "c2": 0.64},
+    {"name": "无人侦察分队", "role": "无人机侦察", "domain": "air", "quantity": 16, "readiness": 0.90, "fires": 0.18, "mobility": 0.82, "protection": 0.24, "awareness": 0.94, "ew": 0.36, "sustainment": 0.52, "c2": 0.70},
+    {"name": "电子对抗分队", "role": "电子战", "domain": "information", "quantity": 6, "readiness": 0.86, "fires": 0.12, "mobility": 0.54, "protection": 0.40, "awareness": 0.72, "ew": 0.96, "sustainment": 0.56, "c2": 0.78},
+    {"name": "联合指挥通信单元", "role": "指挥通信", "domain": "information", "quantity": 4, "readiness": 0.92, "fires": 0.10, "mobility": 0.48, "protection": 0.46, "awareness": 0.76, "ew": 0.40, "sustainment": 0.66, "c2": 0.94}
+  ],
+  "enemy_forces": [
+    {"name": "岸防导弹阵地", "role": "岸防火力", "domain": "ground", "quantity": 6, "readiness": 0.82, "fires": 0.90, "mobility": 0.28, "protection": 0.56, "awareness": 0.58, "ew": 0.18, "sustainment": 0.44, "c2": 0.62},
+    {"name": "中程防空营", "role": "防空单元", "domain": "ground", "quantity": 5, "readiness": 0.80, "fires": 0.72, "mobility": 0.36, "protection": 0.58, "awareness": 0.64, "ew": 0.22, "sustainment": 0.42, "c2": 0.60},
+    {"name": "机步守备群", "role": "机步分队", "domain": "ground", "quantity": 10, "readiness": 0.78, "fires": 0.58, "mobility": 0.62, "protection": 0.66, "awareness": 0.54, "ew": 0.12, "sustainment": 0.50, "c2": 0.56}
+  ]
+}

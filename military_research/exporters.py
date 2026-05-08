@@ -3,7 +3,11 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List
 
-from .domain import CombatPlan, Scenario
+from .domain import ActionItem, CombatPlan, Scenario
+
+
+def _action_texts(actions: List[ActionItem]) -> List[str]:
+    return [f"{action.action_type}: {action.description}" for action in actions]
 
 
 def build_ov5b(plan: CombatPlan, scenario: Scenario) -> Dict[str, Any]:
@@ -86,7 +90,9 @@ def build_c2sim_xml(plan: CombatPlan, scenario: Scenario) -> str:
 
         action_list = ET.SubElement(task, "ActionList")
         for action in phase.actions:
-            ET.SubElement(action_list, "Action").text = action
+            action_node = ET.SubElement(action_list, "Action")
+            action_node.text = action.description
+            action_node.set("type", action.action_type)
 
         effect_list = ET.SubElement(task, "ExpectedEffects")
         for effect in phase.expected_effects:

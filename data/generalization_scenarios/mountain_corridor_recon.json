@@ -1,0 +1,27 @@
+{
+  "name": "山地走廊侦察泛化场景",
+  "mission_type": "recon",
+  "objective": "隐蔽获取高地火力节点与补给线情报，为后续联合火力打击提供可靠输入",
+  "terrain": "mountain",
+  "weather": "cloudy",
+  "threat_level": 0.58,
+  "ew_threat": 0.46,
+  "civilian_presence": 0.10,
+  "time_pressure": 0.55,
+  "doctrine_profile": "balanced_joint",
+  "desired_end_state": "蓝方形成稳定、可复核的高价值目标图谱并安全回传",
+  "constraints": [
+    "山地地形遮蔽强，侦察路径受限",
+    "敌方机动补给线间歇出现",
+    "需要降低暴露与持续留空时间"
+  ],
+  "friendly_forces": [
+    {"name": "山地侦察分队", "role": "地面侦察", "domain": "ground", "quantity": 8, "readiness": 0.86, "fires": 0.18, "mobility": 0.78, "protection": 0.42, "awareness": 0.88, "ew": 0.20, "sustainment": 0.56, "c2": 0.66},
+    {"name": "无人机蜂群", "role": "无人机侦察", "domain": "air", "quantity": 18, "readiness": 0.90, "fires": 0.10, "mobility": 0.86, "protection": 0.18, "awareness": 0.95, "ew": 0.38, "sustainment": 0.44, "c2": 0.72},
+    {"name": "电子侦收分队", "role": "电子侦察", "domain": "information", "quantity": 5, "readiness": 0.84, "fires": 0.06, "mobility": 0.40, "protection": 0.32, "awareness": 0.78, "ew": 0.82, "sustainment": 0.50, "c2": 0.70}
+  ],
+  "enemy_forces": [
+    {"name": "山地步兵群", "role": "山地守备", "domain": "ground", "quantity": 7, "readiness": 0.76, "fires": 0.54, "mobility": 0.66, "protection": 0.58, "awareness": 0.50, "ew": 0.10, "sustainment": 0.48, "c2": 0.52},
+    {"name": "机动补给分队", "role": "补给运输", "domain": "ground", "quantity": 4, "readiness": 0.71, "fires": 0.12, "mobility": 0.74, "protection": 0.30, "awareness": 0.36, "ew": 0.04, "sustainment": 0.70, "c2": 0.40}
+  ]
+}

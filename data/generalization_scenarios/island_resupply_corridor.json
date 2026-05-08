@@ -1,0 +1,28 @@
+{
+  "name": "岛链补给走廊保障泛化场景",
+  "mission_type": "sustain",
+  "objective": "在敌持续侦察与间歇打击下维持岛链补给走廊畅通，确保前沿据点获得稳定补给",
+  "terrain": "maritime-island",
+  "weather": "windy",
+  "threat_level": 0.63,
+  "ew_threat": 0.59,
+  "civilian_presence": 0.08,
+  "time_pressure": 0.61,
+  "doctrine_profile": "balanced_joint",
+  "desired_end_state": "蓝方补给线保持连续，前沿据点持续具备防御和再打击能力",
+  "constraints": [
+    "敌方对补给节点实施持续侦察与点杀",
+    "海空航线必须在高压下保持轮换",
+    "补给中断时间不得超过30分钟"
+  ],
+  "friendly_forces": [
+    {"name": "海上补给群", "role": "海上补给", "domain": "sea", "quantity": 5, "readiness": 0.86, "fires": 0.20, "mobility": 0.70, "protection": 0.56, "awareness": 0.50, "ew": 0.12, "sustainment": 0.94, "c2": 0.72},
+    {"name": "岛链护航单元", "role": "护航防御", "domain": "sea", "quantity": 6, "readiness": 0.84, "fires": 0.66, "mobility": 0.74, "protection": 0.72, "awareness": 0.54, "ew": 0.18, "sustainment": 0.60, "c2": 0.68},
+    {"name": "中继通信单元", "role": "指挥通信", "domain": "information", "quantity": 4, "readiness": 0.90, "fires": 0.06, "mobility": 0.36, "protection": 0.40, "awareness": 0.78, "ew": 0.34, "sustainment": 0.72, "c2": 0.95},
+    {"name": "海空侦察分队", "role": "侦察", "domain": "air", "quantity": 9, "readiness": 0.88, "fires": 0.08, "mobility": 0.82, "protection": 0.22, "awareness": 0.90, "ew": 0.28, "sustainment": 0.42, "c2": 0.70}
+  ],
+  "enemy_forces": [
+    {"name": "远程侦打一体群", "role": "远程侦打", "domain": "air", "quantity": 7, "readiness": 0.80, "fires": 0.74, "mobility": 0.76, "protection": 0.30, "awareness": 0.84, "ew": 0.26, "sustainment": 0.44, "c2": 0.62},
+    {"name": "机动快艇袭扰群", "role": "海上袭扰", "domain": "sea", "quantity": 8, "readiness": 0.78, "fires": 0.58, "mobility": 0.88, "protection": 0.28, "awareness": 0.46, "ew": 0.10, "sustainment": 0.36, "c2": 0.48}
+  ]
+}

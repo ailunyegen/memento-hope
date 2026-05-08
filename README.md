@@ -1,367 +1,275 @@
-# Memento: Fine-tuning LLM Agents **without** Fine-tuning LLMs
+# 基于 Memento 与 Hope 架构的大模型作战体系方案生成与仿真研究
 
-> A memory-based, continual-learning framework that helps LLM agents improve from experience **without** updating model weights.
+## 研究边界
+- 本系统仅用于虚拟场景下的方案生成与仿真评估研究。
+- 不面向真实作战指挥、现实目标攻击、武器部署或现实行动建议。
+- 所有实验结果仅用于算法验证、架构分析和论文展示。
 
-<p align="center">
-  <b>Planner–Executor Architecture</b> • <b>Case-Based Reasoning</b> • <b>MCP Tooling</b> • <b>Memory-Augmented Learning</b>
-</p>
+## 项目简介
+本项目在本地大模型底座之上，结合：
+- `Memento`：案例记忆检索、经验写回、正负样本提示
+- `Hope`：快慢权重融合与场景自适应能力调节
+- `Reflection`：基于失败教训的 EvoPrompt 反思优化
 
----
+当前主链路包括：
+- 作战方案生成
+- 基于五阶段杀伤链的仿真评估
+- `action_type` 驱动的结构化动作评分
+- Monte Carlo 多次仿真统计
+- DoDAF / C2SIM 导出
+- 对照实验与消融实验汇总
 
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <img src="Figure/f1_val_test.jpg" width="90%"/>
-      <br/>
-      <sub><b>Memento vs. Baselines on GAIA validation and test sets.</b></sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="Figure/f1_tasks.jpg" width="90%"/>
-      <br/>
-      <sub><b>Ablation study of Memento across benchmarks.</b></sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <img src="Figure/f1_iteration.jpg" width="90%"/>
-      <br/>
-      <sub><b>Continual learning curves across memory designs.</b></sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="Figure/f1_ood.jpg" width="90%"/>
-      <br/>
-      <sub><b>Memento’s accuracy improvement on OOD datasets.</b></sub>
-    </td>
-  </tr>
-</table>
+## 环境依赖
+- Python 3.11+
+- 本地 OpenAI-compatible LLM 服务，例如 LM Studio
+- `requirements.txt` 中列出的依赖
 
-## 📰 News
-- [2025.08.27] Thanks for your interest in our work! We’ll release our CBR code next week and our Parametric Memory code next month. We’ll keep updating on our further development.
-- [2025.08.27] We add a new Crawler MCP in ```server/ai_crawler.py``` for web crawling and query-aware content compression to reduce token cost.
-- [2025.08.26] We add the SerpAPI (https://serpapi.com/search-api) MCP tool to help you avoid using the search Docker and speed up development. 
-
-## 🔥 Key Features
-
-- **No LLM weight updates.** Memento reframes continual learning as **memory-based online reinforcement learning** over a **memory-augmented MDP**. A neural **case-selection policy** guides actions; experiences are stored and reused via efficient Read/Write operations.
-- **Two-stage planner–executor loop.** A CBR-driven **Planner** decomposes tasks and retrieves relevant cases; an **Executor** runs each subtask as an MCP client, orchestrating tools and writing back outcomes.
-- **Comprehensive tool ecosystem.** Built-in support for web search, document processing, code execution, image/video analysis, and more through a unified MCP interface.
-- **Strong benchmark performance.** Achieves competitive results across GAIA, DeepResearcher, SimpleQA, and HLE benchmarks.
-
----
-
-## 🧠 Core Concept
-
-**Learn from experiences, not gradients.** Memento logs successful & failed trajectories into a **Case Bank** and **retrieves by value** to steer planning and execution—enabling low-cost, transferable, and online continual learning.
-
----
-
-## 🏗️ Architecture
-
-### Core Components
-
-- **Meta-Planner**: Breaks down high-level queries into executable subtasks using GPT-4.1
-- **Executor**: Executes individual subtasks using o3 or other models via MCP tools
-- **Case Memory**: Stores final-step tuples **(s_T, a_T, r_T)** for experience replay
-- **MCP Tool Layer**: Unified interface for external tools and services
-
-### Tool Ecosystem
-
-- **Web Research**: Live search and controlled crawling via SearxNG
-- **Document Processing**: Multi-format support (PDF, Office, images, audio, video)
-- **Code Execution**: Sandboxed Python workspace with security controls
-- **Data Analysis**: Excel processing, mathematical computations
-- **Media Analysis**: Image captioning, video narration, audio transcription
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.10+
-- OpenAI API key (or compatible API endpoint)
-- SearxNG instance for web search
-
-### Environment Setup
-
-### Installation
-
+推荐安装：
 
 ```bash
-# Create and activate conda environment
-
-git clone https://github.com/Agent-on-the-Fly/Memento
-cd Memento
-
-conda create -n Memento python=3.11 -y
-conda activate Memento
-
-# Navigate to client directory
-cd Memento/client
-
-# Create environment file
-touch .env
+python -m pip install -r requirements.txt
 ```
 
-
-### Environment Variables Configuration
-
-After creating the `.env` file, you need to configure the following API keys and service endpoints:
-
-```bash
-# OPENAI API
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_BASE_URL=https://api.openai.com/v1  # or your custom endpoint
-
-#===========================================
-# Tools & Services API
-#===========================================
-# Chunkr API (https://chunkr.ai/)
-CHUNKR_API_KEY=your_chunkr_api_key_here
-
-# Jina API
-JINA_API_KEY=your_jina_api_key_here
-
-# ASSEMBLYAI API 
-ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
-```
-
-**Note**: Replace `your_*_api_key_here` with your actual API keys. Some services are optional depending on which tools you plan to use.
-
-### Dependencies Installation
-
-#### Web Scraping & Search
-
-```bash
-# Web crawling and search capabilities
-pip install -U crawl4ai
-crawl4ai-setup
-crawl4ai-doctor
-playwright install
-```
-
-#### Utility Libraries
-
-```bash
-pip install -r requirements.txt
-```
-
-### SearxNG Setup
-
-For web search capabilities, set up SearxNG: 
-You can follow https://github.com/searxng/searxng-docker/ to set the docker and use our setting.
-
-```bash
-# In a new terminal
-cd ./Memento/searxng-docker
-docker compose up -d
-```
-
-
-### Basic Usage
-
-#### Interactive Mode
-
-```bash
-python client/agent.py
-```
-
----
-
-## 🔧 Configuration
-
-### Model Selection
-
-- **Planner Model**: Defaults to `gpt-4.1` for task decomposition
-- **Executor Model**: Defaults to `o3` for task execution
-- **Custom Models**: Support for any OpenAI-compatible API
-
-### Tool Configuration
-
-- **Search**: Configure SearxNG instance URL
-- **Code Execution**: Customize import whitelist and security settings
-- **Document Processing**: Set cache directories and processing limits
-
----
-
-## 📊 Performance
-
-### Benchmark Results
-
-- **GAIA**: 87.88% (Val, Pass@3 Top-1) and **79.40%** (Test)
-- **DeepResearcher**: **66.6% F1 / 80.4% PM**, with **+4.7–9.6** absolute gains on OOD datasets
-- **SimpleQA**: **95.0%**
-- **HLE**: **24.4% PM** (close to GPT-5 at 25.32%)
-
-### Key Insights
-
-- **Small, high-quality memory works best**: Retrieval **K=4** yields peak F1/PM
-- **Planning + CBR consistently improves performance**
-- **Concise, structured planning outperforms verbose deliberation**
-
----
-
-## 🛠️ Development
-
-### Project Structure
-
-```
-Memento/
-├── client/                 # Main agent implementation
-│   └── agent.py          # Hierarchical client with planner-executor
-├── server/                # MCP tool servers
-│   ├── code_agent.py     # Code execution and workspace management
-│   ├── search_tool.py    # Web search via SearxNG
-│   ├── documents_tool.py # Multi-format document processing
-│   ├── image_tool.py     # Image analysis and captioning
-│   ├── video_tool.py     # Video processing and narration
-│   ├── excel_tool.py     # Spreadsheet processing
-│   ├── math_tool.py      # Mathematical computations
-│   └── craw_page.py      # Web page crawling
-└── interpreters/          # Code execution backends
-    ├── docker_interpreter.py
-    ├── e2b_interpreter.py
-    ├── internal_python_interpreter.py
-    └── subprocess_interpreter.py
-```
-
-### Adding New Tools
-
-1. Create a new FastMCP server in the `server/` directory
-2. Implement your tool functions with proper error handling
-3. Register the tool with the MCP protocol
-4. Update the client's server list in `agent.py`
-
-### Custom Interpreters
-
-Extend the `interpreters/` module to add new execution backends:
-
-```python
-from interpreters.base import BaseInterpreter
-
-class CustomInterpreter(BaseInterpreter):
-    async def execute(self, code: str) -> str:
-        # Your custom execution logic
-        pass
-```
-
----
-
-## 📋 TODO
-
-### Upcoming Features & Improvements
-
-- [ ] **Add Case Bank Reasoning**: Implement memory-based case retrieval and reasoning system
-- [ ] **Add User Personal Memory Mechanism**: Implement user-preference search 
-- [ ] **Refine Tools & Add More Tools**: Enhance existing tools and expand the tool ecosystem
-- [ ] **Test More New Benchmarks**: Evaluate performance on additional benchmark datasets
-
----
-
-### Limitations
-
-- **Long-horizon tasks**: GAIA Level-3 remains challenging due to compounding errors
-- **Frontier knowledge**: HLE performance limited by tooling alone
-- **Open-source coverage**: Limited executor validation in fully open pipelines
-
----
-
-## 🙏 Acknowledgement
-
-* Some parts of the code in the toolkits and interpreters are adapted from [Camel-AI](https://github.com/camel-ai/camel).
-
----
-
-## 📚 Citation
-
-If Memento helps your work, please cite:
-
-```bibtex
-@techreport{Memento2025,
-  title        = {Memento: Fine-tuning LLM Agents without Fine-tuning LLMs},
-  author       = {Huichi Zhou and Yihang Chen and Siyuan Guo and Xue Yan and
-                  Kin Hei Lee and Zihan Wang and Ka Yiu Lee and Guchun Zhang and
-                  Kun Shao and Linyi Yang and Jun Wang},
-  year         = {2025},
-  github       = {https://github.com/Agent-on-the-Fly/Memento}
-}
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our contributing guidelines for:
-
-- Bug reports and feature requests
-- Code contributions and pull requests
-- Documentation improvements
-- Tool and interpreter extensions
-
----
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Agent-on-the-Fly/Memento&type=Date)](https://www.star-history.com/#Agent-on-the-Fly/Memento&Date)
-
----
-
-## Military Research Prototype
-
-This repo now includes a thesis-oriented prototype in `military_research/` for the topic `基于 Memento 与 Hope 架构的大模型作战体系方案生成与仿真研究`.
-
-It covers three core loops from the proposal:
-
-- Dual-memory cognitive agent: Memento-style case retrieval plus Hope-style slow/fast weight fusion
-- Standards-oriented plan export: DoDAF `OV-5b`, `OV-6c`, and `C2SIM XML`
-- Closed-loop optimization: generate -> simulate -> evaluate -> optimize -> memory write-back
-
-### Run the demo
-
-```bash
-py -X utf8 -m military_research.cli --iterations 4
-```
-
-Before running the upgraded thesis pipeline, make sure a local OpenAI-compatible model server is available, for example LM Studio:
+## 本地模型启动
+以 LM Studio 为例：
+
+1. 启动 LM Studio 本地服务
+2. 加载 OpenAI-compatible 模型
+3. 设置环境变量
 
 ```bash
 set LOCAL_LLM_BASE_URL=http://localhost:1234/v1
 set LOCAL_LLM_API_KEY=lm-studio
-set LOCAL_LLM_MODEL=your-loaded-model-id
-set CASE_EMBEDDING_MODEL=path-or-hf-model
+set LOCAL_LLM_MODEL=openai/gpt-oss-20b
+```
+
+如果使用本地 embedding 模型：
+
+```bash
+set CASE_EMBEDDING_MODEL=your-local-embedding-model
 set CASE_EMBEDDING_LOCAL_ONLY=1
 ```
 
-The upgraded pipeline now uses:
+## Memory 检索模式
+案例记忆支持双模式：
 
-- local LLM prompt planning instead of a hand-written template planner
-- FAISS + sentence-transformers semantic memory retrieval
-- EvoPrompt-style reflection loop based on simulation failure notes
+- `faiss`：优先使用 `sentence-transformers + FAISS` 做语义检索
+- `keyword`：当 FAISS 或 embedding 模型不可用时，自动降级为关键词检索
 
-Default inputs:
+关键词回退模式仍会保留：
+- `positive -> imitate`
+- `negative -> avoid`
 
-- Scenario: `data/sample_joint_operation.json`
-- Case bank: `data/military_case_bank.jsonl`
-- Output directory: `result/military_research_demo`
+因此在无 FAISS 环境下，主 pipeline 仍可运行并完成基础实验。
 
-Generated artifacts:
+## 运行命令
+单次原型运行：
 
+```bash
+python -X utf8 -m military_research.cli ^
+  --scenario data/sample_joint_operation.json ^
+  --case-bank data/military_case_bank_frozen_seed.jsonl ^
+  --iterations 4 ^
+  --sim-runs 20 ^
+  --seed 7 ^
+  --output-dir result/demo_run
+```
+
+常用消融开关：
+- `--disable-memory`
+- `--disable-hope`
+- `--disable-reflection`
+- `--disable-writeback`
+
+## 消融实验命令
+标准四组消融：
+
+```powershell
+.\run_ablation_suite.ps1 `
+  -BaseOutputDir result/ablation_suite_seed7 `
+  -Iterations 3 `
+  -SimRuns 50 `
+  -Seed 7 `
+  -SummaryStyle chapter
+```
+
+手动汇总四组消融：
+
+```bash
+python -X utf8 -m military_research.summarize_ablations ^
+  --pure-llm result/ablation_pure_llm/full_result.json ^
+  --memento result/ablation_memento/full_result.json ^
+  --hope result/ablation_hope/full_result.json ^
+  --full result/ablation_full/full_result.json ^
+  --style chapter ^
+  --output result/ablation_summary_chapter.md
+```
+
+两组结果对照：
+
+```bash
+python -X utf8 -m military_research.compare_results ^
+  --baseline result/math_innovation_test/full_result.json ^
+  --candidate result/math_latest_test1/full_result.json ^
+  --output result/math_comparison.md
+```
+
+## 跨场景泛化实验
+仓库内已提供一组基础泛化场景，位于：
+
+```text
+data/generalization_scenarios/
+```
+
+包含：
+- `coastal_joint_assault.json`
+- `urban_hub_defense.json`
+- `mountain_corridor_recon.json`
+- `river_crossing_breakthrough.json`
+- `island_resupply_corridor.json`
+
+批量运行跨场景四组消融：
+
+```powershell
+.\run_generalization_suite.ps1 `
+  -ScenarioDir data/generalization_scenarios `
+  -CaseBank data/military_case_bank_frozen_seed.jsonl `
+  -BaseOutputDir result/generalization_suite_seed7 `
+  -Iterations 6 `
+  -SimRuns 30 `
+  -Seed 7 `
+  -SummaryStyle chapter
+```
+
+该脚本会为每个场景分别生成：
+- `ablation_pure_llm`
+- `ablation_memento`
+- `ablation_hope`
+- `ablation_full`
+
+并在总目录下输出：
+
+```text
+generalization_summary.md
+```
+
+也可以单独汇总已有泛化实验目录：
+
+```bash
+python -X utf8 -m military_research.summarize_generalization ^
+  --suite-dir result/generalization_suite_seed7 ^
+  --manifest data/generalization_scenarios/manifest.json ^
+  --style chapter ^
+  --output result/generalization_suite_seed7/generalization_summary.md
+```
+
+## 输出文件说明
+一次运行通常会生成：
 - `best_plan.json`
 - `simulation.json`
+- `full_result.json`
+- `research_report.md`
 - `dodaf_ov5b.json`
 - `dodaf_ov6c.json`
 - `c2sim.xml`
-- `full_result.json`
-- `research_report.md`
 
-### Run with your own scenario
+`full_result.json` 中的关键字段包括：
+- `best_plan`
+- `best_simulation`
+- `best_memory_hits`
+- `optimization_history`
+- `experiment_config`
 
-Create a new scenario JSON by following `data/sample_joint_operation.json`, then run:
+`best_simulation.monte_carlo_stats` 当前输出：
+- `mean`
+- `std`
+- `min`
+- `max`
+- `ci95_low`
+- `ci95_high`
+- `n`
 
-```bash
-py -X utf8 -m military_research.cli --scenario data/your_scenario.json --iterations 6 --output-dir result/your_experiment
+## 评分逻辑说明
+当前仿真评分以 `PlanPhase.actions[*].action_type` 为主：
+- `detect`：主要依赖 `recon / c2 / ew`
+- `disrupt`：主要依赖 `strike / ew / c2`
+- `breach`：主要依赖 `mobility / strike / protection`
+- `control`：主要依赖 `control / c2 / protection`
+- `sustain`：主要依赖 `sustain / c2`
+
+中文关键词只作为旧数据兼容时的 fallback，不再作为主评分来源。
+
+## 案例库冻结流程
+为保证论文实验公平，建议使用冻结案例库而不是持续增长的主案例库。
+
+默认冻结案例库：
+
+```text
+data/military_case_bank_frozen_seed.jsonl
 ```
 
-## 🙏 Acknowledgments
+如需重新导出：
 
-Thanks to the open-source community and contributors who made this project possible.
+```bash
+python -X utf8 -m military_research.export_seed_case_bank ^
+  --input data/military_case_bank.jsonl ^
+  --output data/military_case_bank_frozen_seed.jsonl
+```
+
+## 案例库扩充建议
+当前冻结案例库只适合做单场景或小规模消融验证。若要支持“算法具有跨场景普适性”的论文结论，建议继续扩充多场景案例库。
+
+详细蓝图见：
+
+```text
+docs/case_bank_expansion_blueprint.md
+```
+
+## 测试
+运行测试：
+
+```bash
+set PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+set PYTHONPATH=%CD%
+pytest tests -q
+```
+
+当前测试覆盖：
+- `tests/test_domain.py`
+- `tests/test_plan_repair.py`
+- `tests/test_case_memory.py`
+- `tests/test_simulator.py`
+- `tests/test_exporters.py`
+
+## 泛化案例库导出
+如果希望做“留一类场景不入库”的跨场景泛化实验，可以先按场景导出冻结案例库：
+
+```bash
+python -X utf8 -m military_research.export_generalization_case_banks ^
+  --input data/military_case_bank_frozen_seed.jsonl ^
+  --manifest data/generalization_scenarios/manifest.json ^
+  --output-dir data/generalization_case_banks ^
+  --mode leave-one-family-out
+```
+
+导出后会生成：
+- `data/generalization_case_banks/all_cases.jsonl`
+- `data/generalization_case_banks/coastal_joint_assault.jsonl`
+- `data/generalization_case_banks/urban_hub_defense.jsonl`
+- `data/generalization_case_banks/mountain_corridor_recon.jsonl`
+- `data/generalization_case_banks/river_crossing_breakthrough.jsonl`
+- `data/generalization_case_banks/island_resupply_corridor.jsonl`
+- `data/generalization_case_banks/summary.json`
+
+随后可以让泛化实验脚本按场景自动选取对应案例库：
+
+```powershell
+.\run_generalization_suite.ps1 `
+  -ScenarioDir data/generalization_scenarios `
+  -CaseBankDir data/generalization_case_banks `
+  -BaseOutputDir result/generalization_suite_seed7_lf1 `
+  -Iterations 6 `
+  -SimRuns 30 `
+  -Seed 7 `
+  -SummaryStyle chapter
+```

@@ -1,0 +1,28 @@
+{
+  "name": "城市枢纽防御泛化场景",
+  "mission_type": "defense",
+  "objective": "迟滞敌装甲突入并保持交通枢纽与通信中心控制权",
+  "terrain": "urban",
+  "weather": "fog",
+  "threat_level": 0.69,
+  "ew_threat": 0.54,
+  "civilian_presence": 0.52,
+  "time_pressure": 0.66,
+  "doctrine_profile": "defense_in_depth",
+  "desired_end_state": "蓝方保持核心城区与枢纽节点控制，并保留局部反击能力",
+  "constraints": [
+    "高平民密度限制大范围火力覆盖",
+    "敌方装甲突击与无人机侦察并行展开",
+    "必须保持主备指挥链连续"
+  ],
+  "friendly_forces": [
+    {"name": "机械化步兵营", "role": "城市防御", "domain": "ground", "quantity": 14, "readiness": 0.87, "fires": 0.66, "mobility": 0.63, "protection": 0.78, "awareness": 0.64, "ew": 0.22, "sustainment": 0.68, "c2": 0.74},
+    {"name": "反装甲分队", "role": "反坦克", "domain": "ground", "quantity": 6, "readiness": 0.85, "fires": 0.88, "mobility": 0.52, "protection": 0.50, "awareness": 0.55, "ew": 0.12, "sustainment": 0.52, "c2": 0.62},
+    {"name": "城市侦察无人群", "role": "侦察", "domain": "air", "quantity": 10, "readiness": 0.89, "fires": 0.12, "mobility": 0.80, "protection": 0.20, "awareness": 0.91, "ew": 0.34, "sustainment": 0.48, "c2": 0.68},
+    {"name": "通信保障分队", "role": "指挥通信", "domain": "information", "quantity": 4, "readiness": 0.91, "fires": 0.08, "mobility": 0.40, "protection": 0.44, "awareness": 0.74, "ew": 0.30, "sustainment": 0.70, "c2": 0.93}
+  ],
+  "enemy_forces": [
+    {"name": "装甲突击群", "role": "装甲突击", "domain": "ground", "quantity": 9, "readiness": 0.81, "fires": 0.86, "mobility": 0.78, "protection": 0.72, "awareness": 0.56, "ew": 0.16, "sustainment": 0.54, "c2": 0.58},
+    {"name": "无人机侦察群", "role": "无人机侦察", "domain": "air", "quantity": 12, "readiness": 0.83, "fires": 0.16, "mobility": 0.84, "protection": 0.18, "awareness": 0.88, "ew": 0.28, "sustainment": 0.46, "c2": 0.60}
+  ]
+}
