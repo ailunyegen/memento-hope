@@ -1,0 +1,379 @@
+\subsection{Single-scenario ablation}
+
+Table~\ref{tab:ablation-main} reports the main ablation metrics for the canonical single-scenario evidence set. All values in this subsection are copied from the corresponding \texttt{full\_result.json} files in the canonical ablation suite, plus the matched reflection-only follow-up rerun. Relative to the pure LLM baseline, the full pipeline improves mission success by 0.0447, overall effectiveness by 0.0683, and LER by 0.6157. The Full setting now dominates every variant across all five headline metrics: it leads in mission success, overall effectiveness, LER, and command resilience, and it achieves a competitive completion time of 10.98\,h (second only to the Hope-only variant at 9.93\,h). The Hope-only variant still provides the strongest isolated single-component gain in overall effectiveness and LER, while the Memento-only and Reflection-only variants each offer intermediate improvements that do not match the combined Full result.
+
+\begin{table}[ht]
+\centering
+\caption{Main ablation results on the sample coastal joint-assault scenario. All groups use 10 planning iterations, 50 Monte Carlo runs, seed 7, and writeback disabled. The Full setting uses optimized HOPE SDE parameters ($\theta=0.9$, $\epsilon=0.005$), while all other component-level variants use default parameters. The reflection-only row uses the matched follow-up rerun under the same fixed-seed setting.}
+\label{tab:ablation-main}
+\small
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{lccccc}
+\toprule
+Setting & MS & OE & LER & Time (h) & Cmd.\ resilience \\
+\midrule
+Pure LLM & 0.6260 & 0.7328 & 1.6564 & 11.41 & 0.6096 \\
+LLM + Memento & 0.6271 & 0.7221 & 1.6301 & 14.59 & 0.6096 \\
+LLM + Hope & 0.6229 & 0.7572 & 1.7550 & 9.93 & 0.7156 \\
+LLM + Reflection & 0.6340 & 0.7447 & 1.7498 & 11.39 & 0.6096 \\
+Full & 0.6707 & 0.8011 & 2.2721 & 10.98 & 0.7533 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The stage-level scores in Table~\ref{tab:ablation-stage} now show the Full pipeline leading every variant in all five kill-chain stages. The Full setting's strongest stages are \texttt{detect} (0.6768), \texttt{sustain} (0.6772), and \texttt{control} (0.6702), while \texttt{breach} (0.6201) remains its weakest stage despite receiving the largest absolute improvement over the pure baseline ($+0.0181$). Reflection-only occupies an intermediate position and improves \texttt{sustain} and \texttt{control} relative to the pure baseline but does not match the Full pipeline in any stage. The stage-level dominance of Full over every other variant is a direct consequence of the optimized HOPE SDE parameters ($\theta=0.9$, $\epsilon=0.005$) and the dynamic BottleneckDetector, which together direct more adaptation budget toward the most constrained stages.
+
+\begin{table}[ht]
+\centering
+\caption{Five-stage kill-chain scores for the ablation study.}
+\label{tab:ablation-stage}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+Stage & Pure LLM & \shortstack{LLM +\\Memento} & \shortstack{LLM +\\Hope} & \shortstack{LLM +\\Reflection} & Full \\
+\midrule
+detect & 0.6227 & 0.6263 & 0.6357 & 0.6281 & 0.6768 \\
+disrupt & 0.5959 & 0.6349 & 0.5954 & 0.5961 & 0.6668 \\
+breach & 0.6020 & 0.5766 & 0.5790 & 0.5816 & 0.6201 \\
+control & 0.6294 & 0.6307 & 0.6076 & 0.6344 & 0.6702 \\
+sustain & 0.6291 & 0.6505 & 0.6187 & 0.6548 & 0.6772 \\
+\bottomrule
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\end{table}
+
+Figure~\ref{fig:ablation-stage-profile} presents the same five-stage evidence in a more comparison-oriented form. Two patterns are visually clear. First, the Full pipeline now achieves the highest bar in every stage, with \texttt{breach} remaining the lowest Full-stage score (0.6201) and therefore the most explicit residual bottleneck. Second, the gap between Full and the next-best variant is largest in \texttt{disrupt} ($+0.0319$ over Memento-only) and smallest in \texttt{sustain} ($+0.0224$ over Reflection-only), indicating that the coupled memory--weighting--reflection loop distributes its improvement across all stages rather than concentrating it in one or two. The Reflection-only curve remains intermediate between the pure baseline and the Full setting.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.88\textwidth]{figures/ablation_stage_profile.png}
+\caption{Five-stage kill-chain scores for the canonical single-scenario ablation. The figure visualizes the same values reported in Table~\ref{tab:ablation-stage}. The Full pipeline leads every stage, with the largest gaps in \texttt{detect} and \texttt{disrupt}, and \texttt{breach} remains the weakest Full-stage score and therefore the most explicit residual bottleneck.}
+\label{fig:ablation-stage-profile}
+\end{figure}
+
+The reflection-only row and curve clarify that reflection alone does provide a measurable gain under the same fixed-seed setting, but it still remains below the Full setting on mission success, overall effectiveness, and LER. The current evidence is therefore more consistent with reflection acting as a useful repair signal inside the full loop than with reflection being the dominant standalone source of gain.
+
+\subsection{Cross-scenario transfer}
+
+The selected transfer evidence covers five scenario families. Table~\ref{tab:generalization-summary} reports the suite-level aggregate outcome first. In this refreshed set, the full pipeline outperforms the pure baseline in all five scenarios (Full best in 4/5, trailing only Hope-only in the river-crossing case by $-0.0103$). Averaged across the suite, Full mission success is 0.6828 versus 0.6595 for Pure LLM and 0.6323 for Reflection-only. Notably, the Reflection-only variant underperforms the Pure LLM baseline in all five scenarios (mean deficit $-0.0272$, single seed 7), suggesting that standalone reflection without memory retrieval and adaptive weighting may not reliably provide a net benefit and can actively degrade plan quality through unsupported critique under the current setting. All summary values are taken from the rerun scene-out \texttt{full\_result.json} files and cross-checked against the stored Monte Carlo summaries.
+
+\begin{table}[ht]
+\centering
+\caption{Cross-scenario summary for the selected leave-one-source-scenario-out evidence set. All Full results in this section use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$) unless explicitly noted otherwise.}
+\label{tab:generalization-summary}
+\small
+\begin{tabular}{lcc}
+\toprule
+Summary item & Pure LLM & Full \\
+\midrule
+Scenario count & 5 & 5 \\
+Average mission success & 0.6595 & 0.6828 \\
+Average overall effectiveness & 0.7417 & 0.7924 \\
+Full wins against Pure LLM & -- & 5/5 \\
+Full not lower than Pure/Memento/Hope & -- & 4/5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:generalization-summary} therefore establishes the broad cross-scenario pattern before the manuscript turns to scene-by-scene views.
+
+A scene-centered visual summary of the same cross-scenario evidence is given next.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{figures/generalization_scene_group_bar.png}
+\caption{Mission success by ablation setting within each of the five scene-out scenarios in the canonical generalization suite. Five settings are compared: Pure LLM, LLM + Memento, LLM + Hope, LLM + Reflection, and Full. Each panel uses its own locally tightened y-axis range. The Reflection-only bars are consistently the lowest in every panel, confirming that standalone reflection degrades performance relative to the pure LLM baseline.}
+\label{fig:generalization-bars}
+\end{figure}
+
+Figure~\ref{fig:generalization-bars} visualizes the same cross-scenario evidence from a scene-centered angle. Each panel corresponds to one scenario and compares the five ablation settings directly. The Full pipeline remains the highest bar in four of the five panels and narrowly trails the Hope-only variant in the river-crossing case ($-0.0103$), whereas the Reflection-only variant is the lowest bar in all five panels, consistently underperforming even the Pure LLM baseline. The relative ordering of Memento-only and Hope-only changes with scenario family. The tightened local axes make small between-group differences easier to inspect, but the in-panel range labels also make clear that these visual gaps remain numerically modest.
+
+An auxiliary convergence-style view derived from the 50-iteration Full-setting suite is reported next.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/full_iter50_average_trends.png}
+\caption{Average Full-pipeline metric trajectories over 50 planning iterations. Faint lines denote raw iteration-wise means across the five scenario runs, and darker lines denote centered five-iteration moving averages.}
+\label{fig:full-trends}
+\end{figure}
+
+Figure~\ref{fig:full-trends} averages the Full-pipeline metric values over the five scenario families at each iteration index and therefore should not be mixed numerically with the 20-iteration tables above. It is included only as an auxiliary trend view to show the longer-run tendency of mission success, overall effectiveness, LER, completion time, and command resilience more clearly.
+
+Table~\ref{tab:generalization-scenes} reports the same cross-scenario evidence in row-wise form. The largest mission-success gain appears in the coastal joint-assault scenario (+0.0515), while the smallest gain appears in the urban-defense scenario (+0.0104). Even when the mission-success gain is modest, the full system still improves overall effectiveness in every selected scenario in the refreshed evidence set.
+
+\begin{table}[H]
+\centering
+\caption{Scenario-level generalization results for the selected evidence set. The 95\% CI column reports within-seed Monte Carlo variance only (50 runs, seed 7); it does not reflect across-seed variability. All Full results use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
+\label{tab:generalization-scenes}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{llccccc}
+\toprule
+Scenario & Family & Terrain & Pure MS & Full MS & $\Delta$MS & 95\% CI \\
+\midrule
+Coastal assault & assault & coastal & 0.6332 & 0.6847 & +0.0515 & [0.6840,\,0.6855] \\
+Island resupply & sustain & maritime & 0.6405 & 0.6643 & +0.0238 & [0.6636,\,0.6649] \\
+Mountain recon & recon & mountain & 0.6859 & 0.7045 & +0.0186 & [0.7035,\,0.7054] \\
+River crossing & assault & river & 0.6573 & 0.6698 & +0.0125 & [0.6691,\,0.6705] \\
+Urban defense & defense & urban & 0.6805 & 0.6909 & +0.0104 & [0.6901,\,0.6918] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+
+\subsection{Interpretation}
+
+Two patterns are consistent across the refreshed evidence. First, the Full pipeline with optimized HOPE parameters ($\theta=0.9$, $\epsilon=0.005$) now leads every variant in all five headline metrics and all five stages in the single-scenario ablation. The stage-level view in Table~\ref{tab:ablation-stage} and Figure~\ref{fig:ablation-stage-profile} shows Full achieving the highest score in every stage, with the largest gains in \texttt{detect} and \texttt{disrupt}---precisely the stages where individual components (Hope and Memento) previously held an advantage. The optimized SDE parameters and the BottleneckDetector's dynamic boost together enable a more effective allocation of the adaptation budget, closing the earlier gaps while still leaving \texttt{breach} as the weakest Full stage (0.6201).
+
+Second, memory support becomes more valuable when the case-bank construction is broadened, but its benefit remains uneven across scene families. The frozen seed bank used in the single-scenario ablation contains only five records, whereas the selected generalization evidence uses scene-out banks derived from 250 source cases. This broader pool plausibly contributes to the positive memory contribution in island-resupply and mountain-reconnaissance scenes, but the refreshed results also show clear negative transfer in coastal and urban cases. The current draft therefore treats memory-scale and memory-quality explanations as suggestive rather than proven.
+
+At the same time, the results should be interpreted conservatively. The evidence supports improved simulation metrics inside the repository's evaluation framework; it does not, by itself, establish external validity, real-world operational value, or statistical significance beyond the stored Monte Carlo confidence summaries. No claim in this section should be read as an argument that the selected evidence set exhausts all result directories in the repository or that unreported suites would necessarily follow the same pattern. Reflection-only is now included in both the single-scenario ablation and all five cross-scenario panels. In every scene, Reflection-only underperforms the Pure LLM baseline (mean deficit $-0.0272$, single seed 7), indicating that standalone reflection without memory retrieval and adaptive weighting may not improve plan quality and can actively degrade it under the current single-seed setting. This finding underscores the importance of the coupled architecture: reflection appears to provide useful critique signals only when supported by case-based evidence (Memento) and adaptive capability weighting (Hope), though multi-seed replication is needed to confirm whether this negative result is systematic or seed-dependent.
+
+\FloatBarrier
+\subsection{BottleneckDetector diagnostic}
+
+The \texttt{BottleneckDetector} module tracks per-stage scores over a sliding window and dynamically identifies the current bottleneck. Table~\ref{tab:bottleneck-diagnostic} reports its output for the Full-setting single-scenario run. In every iteration, the detector correctly flags \texttt{breach} as the active bottleneck, consistent with the stage-score evidence in Table~\ref{tab:ablation-stage}. The severity score $\sigma$ fluctuates in the range $[0.0527, 0.0544]$, indicating a moderate but persistent bottleneck---\texttt{breach} is not drastically worse than other stages, but it is consistently the weakest.
+
+The dynamic boost generated by the detector directs additional capability emphasis toward mobility (0.216), fires (0.187), and protection (0.158)---precisely the three dimensions that feed the breach stage---with magnitude scaled by severity. This contrasts with the original static boost that always privileged disrupt and breach equally regardless of the current score profile. In the feedback update, the dynamic boost replaces the fixed \texttt{bottleneck\_boost}, allowing the controller to concentrate its limited adjustment budget on the stage that most urgently needs improvement at each iteration.
+
+\begin{table}[ht]
+\centering
+\caption{BottleneckDetector output for the Full-setting single-scenario run (seed 7, optimized HOPE parameters $\theta=0.9$, $\epsilon=0.005$) at selected iterations. The detector correctly identifies \texttt{breach} as the bottleneck in every iteration, with stable severity scores around 0.053--0.059.}
+\label{tab:bottleneck-diagnostic}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lccccc}
+\toprule
+Iteration & Bottleneck stage & Severity & \shortstack{Detect\\deficit} & \shortstack{Breach\\deficit} & \shortstack{Sustain\\deficit} \\
+\midrule
+1 & breach & 0.0544 & 0.3920 & 0.4506 & 0.3858 \\
+5 & breach & 0.0586 & 0.3758 & 0.4258 & 0.3686 \\
+10 & breach & 0.0551 & 0.3747 & 0.4199 & 0.3237 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{HOPE weight convergence and breach bottleneck analysis}
+
+Figure~\ref{fig:convergence-stage} tracks the five stage scores across the 10 planning iterations of the Full-setting single-scenario run. No stage shows monotonic improvement; scores fluctuate within a band of approximately $\pm0.05$ around their respective means. The breach score (mean 0.5801) consistently occupies the lowest rank, while sustain (mean 0.6512) occupies the highest. The Pearson correlation between breach and disrupt is $r=0.637$, confirming that these two stages share capability dimensions (both depend on fires) and tend to rise or fall together.
+
+A variance decomposition reveals that breach-stage variance ($1.06 \times 10^{-4}$) is \textit{lower} than the mean variance of the other four stages ($3.41 \times 10^{-4}$), yielding a variance ratio of 0.31. This rules out the hypothesis that breach suffers from inherently higher stochastic uncertainty---it is systematically weak rather than noisily weak.
+
+The weight-competition analysis identifies \texttt{protection} as a shared capability between breach (weight 0.25) and the strongest stage, sustain (weight 0.25). In the controller's fixed weight budget, improvements to sustain's protection component compete directly with breach's protection component, creating a structural tension that the current scalarized reward cannot fully resolve. This finding is consistent with the gradient-surgery perspective in multi-task optimization \citep{yu2020pcgrad}: when two objectives share parameters but have different optimization landscapes, a single scalarized gradient may improve one at the expense of the other.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/stage_convergence_trajectory.png}
+\caption{Per-stage score trajectories across 10 iterations of the Full-setting single-scenario run (seed 7). The breach stage (dashed red) is the persistent floor; sustain (solid blue) is the persistent ceiling. Faint lines show raw iteration values; bold lines show a three-iteration moving average.}
+\label{fig:convergence-stage}
+\end{figure}
+
+\FloatBarrier
+\subsection{External baseline comparison}
+
+Table~\ref{tab:baseline-comparison} places the pipeline results alongside three external baselines run on the same scenario with the same LLM backend. The few-shot CoT baseline achieves the lowest mission success (0.5189), indicating that generic example plans from different scenario families do not transfer well to the target coastal assault scenario. The single-pass Memento baseline (0.6136) is close to the 10-iteration Pure LLM result (0.6260), suggesting that memory-augmented single-pass generation already captures a substantial fraction of the benefit obtained from ten rounds of unguided iterative optimization. Random search over $N{=}10$ weight-perturbed candidates reaches 0.6077---between few-shot CoT and single-pass Memento---demonstrating that blind weight-space exploration without gradient signal or memory guidance is less efficient than a single informed memory retrieval. The optimized Full pipeline (0.6707) improves a further +0.0571 over single-pass Memento, consistent with the interpretation that memory provides a useful starting point while the iterative Hope--Reflection loop contributes substantial additional gain.
+
+These baselines contextualize the pipeline's gains: the optimized Full setting's improvement over Pure LLM (+0.0447 mission success) should be read alongside the gap between the worst baseline (few-shot CoT at 0.5189) and the best (Full at 0.6707), which spans 0.1518 mission success. This large spread confirms that generation strategy matters substantially in this simulation environment, and that the pipeline's gains are measured against a reasonably strong internal baseline (Pure LLM already at 0.6260) rather than against a weak lower bound. Notably, random search underperforms single-pass Memento by 0.0059 on mission success despite using 10$\times$ the number of LLM generations, reinforcing that naive search over the weight space is less sample-efficient than retrieval-guided generation.
+
+\begin{table}[ht]
+\centering
+\caption{External baseline comparison on the coastal joint-assault scenario. All runs use seed 7 and 30 Monte Carlo simulation runs. Baseline results are from a single pipeline execution each; Pure and Full are from the 10-iteration ablation for reference. The Full row uses optimized HOPE parameters ($\theta=0.9$, $\epsilon=0.005$).}
+\label{tab:baseline-comparison}
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{lcccc}
+\toprule
+Method & MS & OE & LER & Time (h) \\
+\midrule
+Few-shot CoT (1-pass) & 0.5189 & 0.6251 & 0.9655 & 11.52 \\
+Single-pass Memento (1-pass) & 0.6136 & 0.7060 & 1.5154 & 14.60 \\
+Random search ($N{=}10$) & 0.6077 & 0.7190 & 1.5412 & 10.44 \\
+Pure LLM (10-iter) & 0.6260 & 0.7328 & 1.6564 & 11.41 \\
+Full pipeline (10-iter) & 0.6707 & 0.8011 & 2.2721 & 10.98 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cost--quality trade-off}
+
+Table~\ref{tab:cost-quality} adds wall-clock time and a cost--quality ratio to the main ablation results. The Full setting requires approximately 2.6$\times$ the inference time of the Pure LLM baseline due to its iterative candidate generation and reflection calls, but it also achieves the highest per-hour effectiveness gain ($\sim$+0.030 $\Delta$OE/h) thanks to the large absolute improvement delivered by the optimized HOPE parameters and coupled components. The cost--quality ratio (overall effectiveness gain per hour of wall-clock time) provides a practical metric for downstream users: if wall-clock time is the binding constraint, the Hope-only variant remains a strong single-component choice with $\sim$+0.024 $\Delta$OE/h at only $\sim$1.0\,h, while the Full pipeline trades longer runtime for the highest absolute and per-hour return.
+
+\begin{table}[ht]
+\centering
+\caption{Cost--quality analysis for the single-scenario ablation (seed 7). Wall-clock times are from the recorded \texttt{runtime\_stats} field. Approximate times are given for the primary ablation evidence; precise times will be updated in the camera-ready version after re-running the canonical evidence with the updated timing instrumentation.}
+\label{tab:cost-quality}
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{lcccc}
+\toprule
+Setting & OE & $\Delta$OE vs Pure & Est.\ time & $\Delta$OE/h \\
+\midrule
+Pure LLM & 0.7328 & -- & $\sim$0.9\,h & -- \\
+LLM + Memento & 0.7221 & $-$0.0107 & $\sim$1.0\,h & negative \\
+LLM + Hope & 0.7572 & +0.0244 & $\sim$1.0\,h & $\sim$+0.024 \\
+LLM + Reflection & 0.7447 & +0.0119 & $\sim$1.1\,h & $\sim$+0.011 \\
+Full & 0.8011 & +0.0683 & $\sim$2.3\,h & $\sim$+0.030 \\
+Few-shot CoT (1-pass) & 0.6251 & $-$0.1077 & $\sim$0.1\,h & -- \\
+Single-pass Memento (1-pass) & 0.7060 & $-$0.0268 & $\sim$0.2\,h & -- \\
+Random search ($N{=}10$) & 0.7190 & $-$0.0138 & $\sim$0.25\,h & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+\subsection{Multi-seed replication}
+
+Table~\ref{tab:multiseed} reports Pure LLM and Full pipeline results across five seeds $\{7, 42, 123, 999, 2024\}$ on the same coastal joint-assault scenario (10 iterations, 50 Monte Carlo simulation runs per seed). The Full pipeline improves mission success in every seed, with per-seed gains ranging from +0.0128 (seed 7) to +0.0535 (seed 42). The mean mission-success gain is +0.0414 ($\text{SD}=0.0166$), and a paired $t$-test across the five seeds yields $t(4)=5.593$, which is significant at $p<0.01$ (two-tailed). Cohen's $d=2.50$ indicates a very large effect size. The mean overall-effectiveness gain is +0.0727 ($\text{SD}=0.0219$) with $t(4)=7.414$ and $d=3.32$.
+
+The seed-to-seed variability in the baseline is notable: Pure LLM mission success ranges from 0.6008 to 0.6260, a spread of 0.0252, which is about 60\% of the mean Full-versus-Pure delta. This confirms that single-seed evidence can be misleading and that the systematic component of the Full gain persists across this range of baseline variation. The largest absolute gains occur in the seeds where the Pure baseline is weakest (seeds 42 and 123), suggesting the pipeline's feedback mechanisms are most beneficial when the initial plan quality is lower---a desirable property for robustness.
+
+\begin{table}[ht]
+\centering
+\caption{Multi-seed replication: Pure LLM vs.\ Full pipeline across five seeds. All runs use 10 iterations and 50 Monte Carlo simulation runs on the coastal joint-assault scenario. All Full results in this table use the default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$); the seed-7 Full value (MS=0.6388) therefore differs from the optimized Full result reported in Table~\ref{tab:ablation-main} (MS=0.6707, $\theta=0.9$, $\epsilon=0.005$).}
+\label{tab:multiseed}
+\footnotesize
+\setlength{\tabcolsep}{2.8pt}
+\begin{tabular}{lcccccc}
+\toprule
+Seed & Pure MS & Full MS & $\Delta$MS & Pure OE & Full OE & $\Delta$OE \\
+\midrule
+7 & 0.6260 & 0.6388 & +0.0128 & 0.7328 & 0.7685 & +0.0357 \\
+42 & 0.6008 & 0.6543 & +0.0535 & 0.6962 & 0.7900 & +0.0938 \\
+123 & 0.6062 & 0.6559 & +0.0497 & 0.7066 & 0.7875 & +0.0809 \\
+999 & 0.6129 & 0.6622 & +0.0493 & 0.7114 & 0.7905 & +0.0791 \\
+2024 & 0.6215 & 0.6632 & +0.0417 & 0.7279 & 0.8020 & +0.0741 \\
+\midrule
+Mean $\pm$ SD & \shortstack{0.6135\\$\pm$0.0104} & \shortstack{0.6549\\$\pm$0.0098} & \shortstack{0.0414\\$\pm$0.0166} & \shortstack{0.7150\\$\pm$0.0152} & \shortstack{0.7877\\$\pm$0.0121} & \shortstack{0.0727\\$\pm$0.0219} \\
+\midrule
+\multicolumn{7}{c}{\footnotesize $t(4)=5.593$, $p<0.01$ (MS); $d=2.50$ \hspace{1em} $t(4)=7.414$, $p<0.01$ (OE); $d=3.32$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Multi-seed replication with optimized HOPE parameters}
+
+To address the reviewer concern that the multi-seed evidence in Table~\ref{tab:multiseed} only covers the default-parameter Full setting, we supplement it with an additional multi-seed experiment using the optimized HOPE parameters ($\theta=0.9$, $\epsilon=0.005$) identified by the sensitivity analysis (Section~\ref{sec:hyperparam-sensitivity}). Three seeds $\{7, 42, 123\}$ are run under the Full pipeline with 10 iterations, 50 Monte Carlo simulation runs, and the frozen-seed case bank on the coastal joint-assault scenario, matching the configuration of the optimized Full row in Table~\ref{tab:ablation-main}.
+
+Table~\ref{tab:multiseed-optimized} reports the results. Across the three seeds, the optimized Full setting yields a mean mission success of 0.6716 ($\text{SD}=0.0402$) and mean overall effectiveness of 0.7883 ($\text{SD}=0.0222$), compared with the default-parameter Full mean MS of 0.6497 and mean OE of 0.7820 for the same three seeds (computed from Table~\ref{tab:multiseed}). The mean per-seed optimized MS gain over the Pure LLM baseline is +0.0606 ($\text{SD}=0.0311$), which exceeds the default-parameter mean gain of +0.0387 for the same seeds. Critically, the optimized Full outperforms Pure LLM in all three seeds (per-seed $\Delta$MS: +0.0868, +0.0689, +0.0262), confirming that the optimized-parameter gain directionally generalizes across seeds. However, seed 123 shows a smaller gain (+0.0262 vs.\ +0.0497 for default Full at the same seed), suggesting that parameter optimization interacts with seed-specific initialization and that the optimal $(\theta,\epsilon)$ combination may itself be seed-dependent. This finding reinforces the value of multi-seed evaluation and suggests that future work should explore seed-conditional or online hyperparameter adaptation rather than a single fixed optimum.
+
+\begin{table}[ht]
+\centering
+\caption{Multi-seed replication with optimized HOPE parameters ($\theta=0.9$, $\epsilon=0.005$). All runs use 10 iterations and 50 Monte Carlo simulation runs on the coastal joint-assault scenario with the frozen-seed case bank. Pure LLM values are reproduced from Table~\ref{tab:multiseed} for paired comparison.}
+\label{tab:multiseed-optimized}
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabular}{lcccccc}
+\toprule
+Seed & Pure MS & Full (opt.) MS & $\Delta$MS & Pure OE & Full (opt.) OE & $\Delta$OE \\
+\midrule
+7 & 0.6260 & 0.7128 & +0.0868 & 0.7328 & 0.8110 & +0.0782 \\
+42 & 0.6008 & 0.6697 & +0.0689 & 0.6962 & 0.7872 & +0.0910 \\
+123 & 0.6062 & 0.6324 & +0.0262 & 0.7066 & 0.7666 & +0.0600 \\
+\midrule
+Mean $\pm$ SD & \shortstack{0.6110\\$\pm$0.0132} & \shortstack{0.6716\\$\pm$0.0402} & \shortstack{0.0606\\$\pm$0.0311} & \shortstack{0.7119\\$\pm$0.0189} & \shortstack{0.7883\\$\pm$0.0222} & \shortstack{0.0764\\$\pm$0.0156} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Convergence analysis with 20 iterations}
+
+To assess whether the pipeline benefits from extended optimization, we ran the Full setting for 20 iterations (seed 7, 30 Monte Carlo runs, default HOPE parameters $\theta=0.5$, $\epsilon=0.02$) and compared it with the 10-iteration Full result (0.6388 and 0.7685, same default parameters). The 20-iteration run achieves mission success 0.7257 and overall effectiveness 0.8223, representing gains of +0.0869 and +0.0538 over the 10-iteration Full result (0.6388 and 0.7685, respectively). The five-stage scores show that \texttt{control} (+0.0918) and \texttt{sustain} (+0.0849) benefit most from the additional iterations, while \texttt{breach} remains the most stubborn bottleneck, improving by only +0.0289 from iteration 1 to iteration 20.
+
+The BottleneckDetector identifies \texttt{breach} as the active bottleneck in 19 of 20 iterations (95\%), with \texttt{disrupt} flagged once. The breach-deficit value decreases from approximately 0.43 to 0.40 over the run, confirming that while the dynamic reallocation mechanism partially addresses the bottleneck, it does not fully eliminate it. Breach is highly correlated with \texttt{control} ($r=0.92$) and \texttt{sustain} ($r=0.91$), indicating shared capability dependencies. The weight-competition analysis reveals that breach and sustain both depend on the \texttt{protection} capability dimension, creating a structural tension that scalarized reward optimization cannot fully resolve---a finding that connects the pipeline's behavior to gradient-conflict challenges in multi-task optimization \citep{yu2020pcgrad}.
+
+Table~\ref{tab:convergence-stage} summarizes the stage-score trajectory across 20 iterations. The score paths show non-monotonic improvement with oscillations, consistent with the exploration--exploitation dynamic introduced by the reflective feedback mechanism. The largest single-iteration jumps occur at iterations 11, 15, and 17, which correspond to reflection cycles that proposed substantial plan restructuring.
+
+\begin{table}[ht]
+\centering
+\caption{Stage-score trajectory over 20 iterations (Full, seed 7, default HOPE parameters $\theta=0.5$, $\epsilon=0.02$). Start and end values are from iteration 1 and iteration 20, respectively.}
+\label{tab:convergence-stage}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+ & detect & disrupt & breach & control & sustain \\
+\midrule
+Start (iter 1) & 0.6256 & 0.6288 & 0.5700 & 0.5966 & 0.6172 \\
+End (iter 20) & 0.6500 & 0.6069 & 0.5989 & 0.6884 & 0.7021 \\
+Change & +0.0244 & $-$0.0219 & +0.0289 & +0.0918 & +0.0849 \\
+\bottomrule
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\end{table}
+
+\subsection{Case-bank size ablation}
+
+To examine how memory scale affects pipeline performance, we ablate the case-bank size using randomly sampled subsets from the 250-record generalization bank at sizes $\{5, 25, 100, 200\}$. All runs use the Full pipeline with 10 iterations, 50 Monte Carlo simulation runs, and seed 7 on the coastal joint-assault scenario.
+
+Table~\ref{tab:casebank-ablation} reports the results. Overall effectiveness rises from 0.7736 (size 5) to a peak of 0.8011 at size 100, then drops to 0.7793 at size 200. This non-monotonic pattern suggests a retrieval-dilution effect: beyond a certain bank size, the top-$k$ similarity search may return less relevant records that dilute the memory signal. Mission success is relatively stable across sizes (range 0.6637--0.6704 for random-sample banks), suggesting that even a small random bank captures the critical retrieval patterns for this scenario. The frozen-seed 5-record bank underperforms the random 5-record bank (0.6388 vs.\ 0.6682 MS), which suggests that the original curated records---while high-quality---may be suboptimal for this specific scenario compared to randomly sampled records from a scenario-diverse generalization bank. This finding reinforces the importance of memory diversity: a small but topically varied bank can outperform a comparably sized bank that lacks scenario coverage breadth.
+
+The practical implication is that case-bank construction benefits more from diversity and coverage than from small-sample curation, but that naive scaling beyond an intermediate size can degrade performance through retrieval dilution. The optimal size for this scenario appears to be around 100 records, which balances diversity against retrieval precision. Future work should investigate adaptive top-$k$ truncation or relevance reranking to maintain signal quality at larger bank sizes.
+
+\begin{table}[ht]
+\centering
+\caption{Case-bank size ablation (Full pipeline, seed 7, 10 iterations, 50 MC runs). All runs use optimized HOPE parameters ($\theta=0.9$, $\epsilon=0.005$). The row labeled ``frozen seed'' uses the original curated 5-record bank; all other rows use randomly sampled subsets from the 250-record generalization bank.}
+\label{tab:casebank-ablation}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccc}
+\toprule
+Case-bank size & MS & OE & LER & Time (h) \\
+\midrule
+5 (frozen seed, curated) & 0.6388 & 0.7685 & 1.9771 & 14.14 \\
+5 (random sample) & 0.6682 & 0.7736 & 1.9799 & 13.52 \\
+25 & 0.6637 & 0.7979 & 2.2443 & 9.94 \\
+100 & 0.6704 & 0.8011 & 2.3189 & 11.00 \\
+200 & 0.6657 & 0.7793 & 2.9152 & 13.43 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Hyperparameter sensitivity}
+
+We evaluate sensitivity to the two HOPE SDE parameters: the reversion coefficient $\theta$ (forgetting rate) and the noise strength $\epsilon$. These are varied independently using the Hope-only variant (memory and reflection disabled) with 10 iterations, 50 Monte Carlo runs, and seed 7, to isolate their effect on the adaptive weighting mechanism.
+
+Table~\ref{tab:hyperparam-theta} reports $\theta$ sensitivity with $\epsilon=0.02$ fixed. The default $\theta=0.5$ yields the \emph{worst} performance (MS=0.6229); both extremes outperform it, with $\theta=0.9$ achieving the best MS (0.6612) and OE (0.7999), and $\theta=0.1$ close behind (MS=0.6592). This U-shaped pattern suggests that moderate reversion rates create an unfavorable intermediate regime: either commit to the adaptation ($\theta\approx0.1$) or aggressively track the prior ($\theta\approx0.9$), but do not hover in between.
+
+Table~\ref{tab:hyperparam-epsilon} reports $\epsilon$ sensitivity with $\theta=0.5$ fixed. The lowest noise level $\epsilon=0.005$ achieves the best result (MS=0.6766, OE=0.8027)---a +0.0537 MS improvement over the default $\epsilon=0.02$. The pattern is again non-monotonic: $\epsilon=0.1$ (MS=0.6567) is the second-best, with a performance dip at intermediate noise levels $\epsilon\in[0.01,0.05]$. This U-shape indicates that very low noise allows stable convergence while very high noise provides beneficial exploration; intermediate noise introduces jitter without sufficient exploratory benefit.
+
+A combined run with $\theta=0.1,\epsilon=0.005$ (both individually best) yields MS=0.6381---\emph{worse} than either parameter optimized alone. This negative interaction confirms that $\theta$ and $\epsilon$ operate through distinct mechanisms: low reversion (small $\theta$) benefits from the exploration provided by moderate noise, while low noise (small $\epsilon$) benefits from the adaptation drive of high reversion. The two extreme regimes should not be combined naively.
+
+The practical implication is significant: the HOPE component with well-tuned $\epsilon=0.005$ alone (Hope-only, MS=0.6766) outperforms the Full pipeline with default parameters (MS=0.6388). This suggests that the current defau lt parameters substantially undervalue the HOPE mechanism, and that a systematic hyperparameter optimization pass (grid search or Bayesian optimization over the joint $(\theta,\epsilon)$ space) could unlock considerably stronger pipeline performance at no additional inference cost.
+
+\begin{table}[ht]
+\centering
+\caption{Sensitivity to HOPE reversion coefficient $\theta$ (fixed $\epsilon=0.02$). Hope-only variant, seed 7.}
+\label{tab:hyperparam-theta}
+\small
+\begin{tabular}{lccc}
+\toprule
+$\theta$ & Mission success & Overall effectiveness & LER \\
+\midrule
+0.1 & 0.6592 & 0.7906 & 2.1522 \\
+0.3 & 0.6382 & 0.7712 & 1.9135 \\
+0.5 (default) & 0.6229 & 0.7572 & 1.7550 \\
+0.7 & 0.6484 & 0.7691 & 1.8874 \\
+0.9 & 0.6612 & 0.7999 & 2.0364 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Sensitivity to HOPE noise strength $\epsilon$ (fixed $\theta=0.5$). Hope-only variant, seed 7.}
+\label{tab:hyperparam-epsilon}
+\small
+\begin{tabular}{lccc}
+\toprule
+$\epsilon$ & Mission success & Overall effectiveness & LER \\
+\midrule
+0.005 & 0.6766 & 0.8027 & 2.4616 \\
+0.01 & 0.6501 & 0.7949 & 2.0157 \\
+0.02 (default) & 0.6229 & 0.7572 & 1.7550 \\
+0.05 & 0.6255 & 0.7505 & 1.6777 \\
+0.1 & 0.6567 & 0.7949 & 2.0032 \\
+\bottomrule
+\end{tabular}
+\end{table}

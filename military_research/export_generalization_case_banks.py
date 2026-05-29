@@ -13,7 +13,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default="data/generalization_case_banks", help="输出案例库目录。")
     parser.add_argument(
         "--mode",
-        choices=["leave-one-family-out", "leave-one-scene-out"],
+        choices=["leave-one-family-out", "leave-one-scene-out", "leave-one-source-scenario-out"],
         default="leave-one-family-out",
         help="导出模式。leave-one-family-out 会排除同任务族；leave-one-scene-out 额外可排除同地形族。",
     )
@@ -94,6 +94,17 @@ def should_keep_record(
     record_terrain = infer_terrain_family(record)
     target_family = normalize_text(scenario_spec.get("family"))
     target_terrain = normalize_text(scenario_spec.get("terrain_family"))
+    target_scene = normalize_text(Path(str(scenario_spec.get("file", ""))).stem)
+
+    if mode == "leave-one-source-scenario-out":
+        record_sources = {normalize_text(item) for item in record.get("source_scenarios", []) or []}
+        record_tags = {normalize_text(tag) for tag in record.get("tags", []) or []}
+        tagged_sources = {
+            tag.split(":", 1)[1]
+            for tag in record_tags
+            if tag.startswith("group:") and ":" in tag
+        }
+        return target_scene not in (record_sources | tagged_sources)
 
     if mode == "leave-one-family-out" and record_family == target_family:
         return False

@@ -3,12 +3,15 @@ from __future__ import annotations
 import json
 import math
 import os
+import platform
 import random
 import re
+import subprocess
 import time
 import uuid
 from collections import defaultdict
 from datetime import datetime
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -61,6 +64,100 @@ SLOW_WEIGHT_LIBRARY: Dict[str, Dict[str, float]] = {
         "c2": 0.80,
     },
 }
+
+
+class BottleneckDetector:
+    """Dynamically identifies bottleneck stages from simulation feedback and computes
+    targeted capability boosts.  Replaces the fixed ``bottleneck_boost`` vector with a
+    history-aware diagnosis that answers the reviewer observation that *breach* is the
+    persistent weak point while giving the controller a principled way to re-allocate
+    emphasis toward the current bottleneck."""
+
+    STAGE_KEYS = ["detect", "disrupt", "breach", "control", "sustain"]
+
+    # stage → capability-dimension mapping (same indices as CAPABILITY_KEYS)
+    STAGE_TO_CAP: Dict[str, torch.Tensor] = {
+        "detect":   torch.tensor([0.08, 0.06, 0.04, 0.42, 0.18, 0.02, 0.20]),
+        "disrupt":  torch.tensor([0.42, 0.06, 0.04, 0.08, 0.20, 0.04, 0.16]),
+        "breach":   torch.tensor([0.26, 0.30, 0.22, 0.06, 0.04, 0.02, 0.10]),
+        "control":  torch.tensor([0.08, 0.18, 0.24, 0.10, 0.06, 0.06, 0.28]),
+        "sustain":  torch.tensor([0.06, 0.12, 0.12, 0.06, 0.04, 0.40, 0.20]),
+    }
+
+    def __init__(self, window_size: int = 6) -> None:
+        self.window_size = window_size
+        self.stage_history: List[Dict[str, float]] = []
+        self.bottleneck_history: List[Dict[str, Any]] = []
+        self.bottleneck_counts: Dict[str, int] = {k: 0 for k in self.STAGE_KEYS}
+        self.capability_boost_history: List[Dict[str, float]] = []
+
+    # ------------------------------------------------------------------
+    def update(self, stage_scores: Dict[str, float]) -> None:
+        """Record one iteration's stage scores."""
+        snap = {k: stage_scores.get(k, 0.5) for k in self.STAGE_KEYS}
+        self.stage_history.append(snap)
+        if len(self.stage_history) > self.window_size * 2:
+            self.stage_history = self.stage_history[-self.window_size :]
+
+    # ------------------------------------------------------------------
+    def identify(self) -> Tuple[str, float, Dict[str, float]]:
+        """Return ``(bottleneck_stage, severity, deficits)`` for the current iteration.
+
+        *severity* = how much the weakest stage lags behind the mean of the other
+        four stages.  Larger values signal a sharper, more isolated bottleneck.
+        """
+        if not self.stage_history:
+            return ("breach", 0.30, {k: 0.5 for k in self.STAGE_KEYS})
+
+        latest = self.stage_history[-1]
+        deficits = {k: max(0.0, 1.0 - latest[k]) for k in self.STAGE_KEYS}
+
+        ranked = sorted(deficits.items(), key=lambda x: x[1], reverse=True)
+        bottleneck_stage, bottleneck_deficit = ranked[0]
+        others = [d for _, d in ranked[1:]]
+        mean_other = sum(others) / max(1, len(others))
+
+        severity = max(0.0, bottleneck_deficit - mean_other)  # [0, ~0.5]
+        severity = min(severity, 0.50)
+
+        self.bottleneck_counts[bottleneck_stage] += 1
+
+        info = {
+            "bottleneck_stage": bottleneck_stage,
+            "severity": round(severity, 4),
+            "deficits": {k: round(v, 4) for k, v in deficits.items()},
+        }
+        self.bottleneck_history.append(info)
+        return bottleneck_stage, severity, deficits
+
+    # ------------------------------------------------------------------
+    def compute_targeted_boost(
+        self, bottleneck_stage: str, severity: float
+    ) -> torch.Tensor:
+        """Capability boost vector focused on *bottleneck_stage*, scaled by severity."""
+        base = self.STAGE_TO_CAP.get(bottleneck_stage, torch.zeros(7))
+        scale = 0.40 + 1.6 * severity  # 0.40 → 1.20 depending on severity
+        return base * scale
+
+    # ------------------------------------------------------------------
+    def summary(self) -> Dict[str, Any]:
+        total = max(1, sum(self.bottleneck_counts.values()))
+        return {
+            "bottleneck_distribution": {
+                k: round(v / total, 4) for k, v in self.bottleneck_counts.items()
+            },
+            "most_common": max(
+                self.bottleneck_counts, key=lambda k: self.bottleneck_counts[k]
+            ),
+            "counts": dict(self.bottleneck_counts),
+        }
+
+    # ------------------------------------------------------------------
+    def snapshot(self) -> Dict[str, Any]:
+        return {
+            "bottleneck_history": list(self.bottleneck_history),
+            "summary": self.summary(),
+        }
 
 
 class HOPEAdapter(nn.Module):
@@ -152,7 +249,8 @@ class DualMemoryController(nn.Module):
     current_features: torch.Tensor | None
     torch_generator: torch.Generator
 
-    def __init__(self, doctrine_profile: str, seed: int | None = None):
+    def __init__(self, doctrine_profile: str, seed: int | None = None,
+                  sde_theta: float = 0.5, sde_epsilon: float = 0.02):
         super().__init__()
         self.doctrine_profile = doctrine_profile
         self.current_scenario: Scenario | None = None
@@ -163,6 +261,7 @@ class DualMemoryController(nn.Module):
         self.torch_generator = torch.Generator()
         if seed is not None:
             self.torch_generator.manual_seed(seed)
+        self.bottleneck_detector = BottleneckDetector(window_size=6)
         
         # 初始化slow_weights为可学习参数
         initial_slow = SLOW_WEIGHT_LIBRARY.get(doctrine_profile, SLOW_WEIGHT_LIBRARY["balanced_joint"])
@@ -184,8 +283,8 @@ class DualMemoryController(nn.Module):
         self.adapter = HOPEAdapter(input_dim, hidden_dim, output_dim)
         
         # SDE参数
-        self.sde_theta = 0.5      # 回复系数 (遗忘率)
-        self.sde_epsilon = 0.02   # 噪声强度
+        self.sde_theta = sde_theta      # 回复系数 (遗忘率)
+        self.sde_epsilon = sde_epsilon   # 噪声强度
         self.sde_dt = 1.0         # 离散化时间步长
         self.register_buffer('current_fast', torch.zeros(output_dim))
         self.register_buffer("previous_reward", torch.tensor(0.0))
@@ -224,14 +323,24 @@ class DualMemoryController(nn.Module):
         features = torch.cat([terrain_onehot, weather_onehot, numeric])
         return features.unsqueeze(0)  # [1, input_dim]
     
-    def fast_weights(self, scenario: Scenario) -> Dict[str, float]:
+    def fast_weights(
+        self,
+        scenario: Scenario,
+        memory_metrics: List[Dict[str, float]] | None = None,
+    ) -> Dict[str, float]:
         self.current_scenario = scenario
         self.current_features = self._encode_scenario(scenario)
         self.adapter.eval()
         with torch.no_grad():
             target_fast = self.adapter(self.current_features, update_state=False).squeeze(0)  # [output_dim]
-        
-        # SDE Euler-Maruyama 离散化步进: 
+
+        # Memory-conditioned correction: retrieved case metrics bias fast-weight
+        # initialisation toward capabilities that were weak in similar past cases.
+        if memory_metrics:
+            mem_correction = self._compute_memory_correction(memory_metrics)
+            target_fast = target_fast + 0.30 * mem_correction
+
+        # SDE Euler-Maruyama 离散化步进:
         # dW_fast = theta * (F(W_slow, Phi) - W_fast) * dt + epsilon * sqrt(dt) * noise
         noise = torch.empty_like(self.current_fast).normal_(generator=self.torch_generator)
         with torch.no_grad():
@@ -240,9 +349,30 @@ class DualMemoryController(nn.Module):
             self.current_fast += dW
             lower_bounds, upper_bounds = self._fast_weight_bounds(scenario)
             self.current_fast.copy_(torch.max(torch.min(self.current_fast, upper_bounds), lower_bounds))
-            
+
         weights = {key: float(adj) for key, adj in zip(CAPABILITY_KEYS, self.current_fast)}
         return {key: round(value, 4) for key, value in weights.items()}
+
+    # ------------------------------------------------------------------
+    def _compute_memory_correction(
+        self, memory_metrics: List[Dict[str, float]]
+    ) -> torch.Tensor:
+        """Translate retrieved case metrics into a fast-weight correction vector.
+
+        The intuition: if a retrieved case had a low score in a particular kill-chain
+        stage, the controller nudges fast weights toward the capabilities that feed
+        that stage, so the planner is biased to compensate for known weaknesses.
+        """
+        correction = torch.zeros(len(CAPABILITY_KEYS))
+        for metrics in memory_metrics:
+            for stage in BottleneckDetector.STAGE_KEYS:
+                score = float(metrics.get(stage, 0.5))
+                if score < 0.55:
+                    deficit = 1.0 - score
+                    correction += (
+                        BottleneckDetector.STAGE_TO_CAP[stage] * deficit * 0.18
+                    )
+        return torch.clamp(correction, -0.18, 0.28)
     
     def fuse(self, fast_weights: Dict[str, float]) -> Dict[str, float]:
         # ???????????????????????
@@ -321,21 +451,17 @@ class DualMemoryController(nn.Module):
             "sustain": torch.tensor([0.06, 0.12, 0.12, 0.06, 0.04, 0.40, 0.20]),
         }
 
+        # ── Dynamic bottleneck detection ──
+        self.bottleneck_detector.update(stage_scores)
+        bn_stage, bn_severity, _ = self.bottleneck_detector.identify()
+
         deficit_vector = torch.zeros_like(self.slow_weights)
         for stage_name, deficit in deficits.items():
             deficit_vector += stage_to_capability[stage_name] * float(deficit) * stage_priority[stage_name]
 
-        bottleneck_boost = torch.tensor(
-            [
-                0.28 * deficits["disrupt"] + 0.16 * deficits["breach"],
-                0.34 * deficits["breach"],
-                0.20 * deficits["breach"],
-                0.08 * deficits["detect"],
-                0.18 * deficits["disrupt"],
-                0.08 * deficits["sustain"],
-                0.10 * max(deficits["disrupt"], deficits["breach"]),
-            ],
-            dtype=torch.float32,
+        # Dynamic targeted boost replaces the old fixed bottleneck_boost
+        dynamic_boost = self.bottleneck_detector.compute_targeted_boost(
+            bn_stage, bn_severity
         )
 
         reward = 0.7 * float(result.mission_success) + 0.3 * float(result.overall_effectiveness)
@@ -343,7 +469,7 @@ class DualMemoryController(nn.Module):
             reward += 0.05 * max(0.0, float(best_result.mission_success) - float(result.mission_success))
         reward_delta = reward - float(self.previous_reward.item())
         regularization = 0.05 * (self.slow_weights.detach() - self.doctrine_prior)
-        utility_gradient = deficit_vector + bottleneck_boost - regularization
+        utility_gradient = deficit_vector + dynamic_boost - regularization
 
         if self.current_features is not None:
             ew_pressure = float(self.current_features[0, -3].item())
@@ -361,7 +487,7 @@ class DualMemoryController(nn.Module):
             )
             self.adapter.train()
             target_fast = self.adapter(self.current_features, update_state=False).squeeze(0)
-            desired_fast = 0.42 * utility_gradient + 0.18 * bottleneck_boost + support_vector
+            desired_fast = 0.42 * utility_gradient + 0.18 * dynamic_boost + support_vector
             if self.current_scenario is not None:
                 lower_bounds, upper_bounds = self._fast_weight_bounds(self.current_scenario)
                 desired_fast = torch.max(torch.min(desired_fast, upper_bounds), lower_bounds)
@@ -2046,6 +2172,120 @@ class MilitaryResearchPipeline:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
+    def _safe_package_version(self, package_name: str) -> str | None:
+        try:
+            return importlib_metadata.version(package_name)
+        except importlib_metadata.PackageNotFoundError:
+            return None
+
+    def _run_probe(self, command: List[str]) -> str | None:
+        try:
+            completed = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="ignore",
+                timeout=3,
+                check=False,
+            )
+        except (FileNotFoundError, PermissionError, OSError, subprocess.SubprocessError):
+            return None
+        if completed.returncode != 0:
+            return None
+        output = (completed.stdout or "").strip()
+        return output or None
+
+    def _detect_cpu_name(self) -> str:
+        cpu_override = os.getenv("RUNTIME_CPU_NAME", "").strip()
+        if cpu_override:
+            return cpu_override
+
+        if os.name == "nt":
+            cpu_name = self._run_probe(["wmic", "cpu", "get", "name"])
+            if cpu_name:
+                lines = [line.strip() for line in cpu_name.splitlines() if line.strip() and line.strip().lower() != "name"]
+                if lines:
+                    return lines[0]
+            cpu_name = self._run_probe(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    "(Get-ItemProperty 'HKLM:\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0').ProcessorNameString",
+                ]
+            )
+            if cpu_name:
+                return cpu_name.splitlines()[0].strip()
+            cpu_name = self._run_probe(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    "(Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name)",
+                ]
+            )
+            if cpu_name:
+                return cpu_name.splitlines()[0].strip()
+
+        cpu_name = platform.processor().strip()
+        if cpu_name:
+            return cpu_name
+        machine = platform.machine().strip()
+        return machine or "unknown"
+
+    def _detect_gpu_name(self) -> str | None:
+        gpu_override = os.getenv("RUNTIME_GPU_NAME", "").strip()
+        if gpu_override:
+            return gpu_override
+
+        if torch.cuda.is_available():
+            try:
+                return torch.cuda.get_device_name(0)
+            except RuntimeError:
+                pass
+
+        gpu_name = self._run_probe(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"])
+        if gpu_name:
+            return gpu_name.splitlines()[0].strip()
+        return None
+
+    def _collect_runtime_manifest(self) -> Dict[str, Any]:
+        model_id = os.getenv("LOCAL_LLM_MODEL", "").strip() or "unknown"
+        base_url = os.getenv("LOCAL_LLM_BASE_URL", "").strip() or "http://localhost:1234/v1"
+        cuda_available = bool(torch.cuda.is_available())
+        gpu_name = self._detect_gpu_name()
+        return {
+            "collected_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "llm_backend": {
+                "model_id": model_id,
+                "base_url": base_url,
+                "api_mode": "openai-compatible",
+            },
+            "llm_inference_params": {
+                "temperature_generation": 0.1,
+                "temperature_json_repair": 0.0,
+                "top_p": "default (1.0, not explicitly set)",
+                "max_tokens": "server-side default (unlimited for local endpoint)",
+                "response_format": "json_schema",
+                "prompt_source": "military_research/engine.py (inline, not externalized)",
+            },
+            "software": {
+                "python_version": platform.python_version(),
+                "platform": platform.platform(),
+                "torch_version": getattr(torch, "__version__", None),
+                "openai_version": self._safe_package_version("openai"),
+                "sentence_transformers_version": self._safe_package_version("sentence-transformers"),
+                "faiss_version": self._safe_package_version("faiss-cpu") or self._safe_package_version("faiss-gpu"),
+            },
+            "hardware": {
+                "cpu": self._detect_cpu_name(),
+                "gpu": gpu_name,
+                "cuda_available": cuda_available,
+                "cuda_version": getattr(torch.version, "cuda", None) if cuda_available else None,
+            },
+        }
+
     def _terrain_family(self, terrain: str) -> str:
         terrain_value = (terrain or "").strip().lower()
         if "coastal" in terrain_value or "littoral" in terrain_value:
@@ -2487,8 +2727,11 @@ class MilitaryResearchPipeline:
         disable_reflection: bool = False,
         sim_runs: int = 1,
         allow_writeback: bool = True,
+        sde_theta: float = 0.5,
+        sde_epsilon: float = 0.02,
     ) -> Dict[str, Any]:
-        controller = DualMemoryController(scenario.doctrine_profile, seed=self.seed)
+        controller = DualMemoryController(scenario.doctrine_profile, seed=self.seed,
+                                           sde_theta=sde_theta, sde_epsilon=sde_epsilon)
         generator = PlanGenerator()
         simulator = PlanSimulator(self.rng)
 
@@ -2498,8 +2741,13 @@ class MilitaryResearchPipeline:
         best_memory_hits: List[Dict[str, Any]] = []
         reflection: Dict[str, Any] | None = None
         memory_hits: List[Dict[str, Any]] = []
+        run_started = time.perf_counter()
+        iteration_wall_times: List[float] = []
+        iteration_candidate_counts: List[int] = []
+        total_simulation_rollouts = 0
 
         for iteration in range(iterations):
+            iteration_started = time.perf_counter()
             raw_memory_hits = [] if disable_memory else self.case_bank.retrieve(scenario, top_k=3)
             memory_hits = self._select_memory_hits(
                 scenario,
@@ -2513,6 +2761,12 @@ class MilitaryResearchPipeline:
                     strict=True,
                 )
             memory_support = self._memory_support_level(memory_hits)
+            memory_metrics: List[Dict[str, float]] = []
+            for hit in memory_hits:
+                rec_metrics = hit.get("record")
+                if rec_metrics is not None and hasattr(rec_metrics, "metrics"):
+                    memory_metrics.append(rec_metrics.metrics)
+
             if disable_hope:
                 fast_weights = {key: 0.0 for key in CAPABILITY_KEYS}
                 fused_weights = {
@@ -2523,7 +2777,9 @@ class MilitaryResearchPipeline:
                     ).items()
                 }
             else:
-                fast_weights = controller.fast_weights(scenario)
+                fast_weights = controller.fast_weights(
+                    scenario, memory_metrics=memory_metrics if memory_metrics else None
+                )
                 fused_weights = controller.fuse(fast_weights)
             suppress_reflection = self._suppress_reflection_for_scene(scenario, memory_support)
             prior_only_memory = self._only_prior_memory_hits(memory_hits)
@@ -2625,6 +2881,7 @@ class MilitaryResearchPipeline:
                     elif self._prefer_reflection_only(scenario, memory_hits) and active_reflection is not None:
                         candidate_specs.append(reflection_only)
 
+            iteration_candidate_counts.append(len(candidate_specs))
             candidate_results: List[Tuple[str, CombatPlan, SimulationResult, List[Dict[str, Any]]]] = []
             for spec in candidate_specs:
                 candidate_plan = generator.generate(
@@ -2637,6 +2894,7 @@ class MilitaryResearchPipeline:
                     previous_best_plan=best_plan,
                 )
                 candidate_result = self._evaluate_plan(simulator, scenario, candidate_plan, sim_runs=sim_runs)
+                total_simulation_rollouts += max(1, int(sim_runs))
                 candidate_results.append((spec["label"], candidate_plan, candidate_result, list(spec["memory_hits"])))
 
             selected_label, plan, result, selected_memory_hits = candidate_results[0]
@@ -2672,11 +2930,28 @@ class MilitaryResearchPipeline:
                 )
             else:
                 reflection = None
+            iteration_wall_times.append(round(time.perf_counter() - iteration_started, 4))
 
         assert best_plan is not None and best_result is not None
         if not disable_memory and allow_writeback:
             self._write_back_case(scenario, best_plan, best_result)
+        total_wall_time = round(time.perf_counter() - run_started, 4)
+        runtime_stats = {
+            "total_wall_time_sec": total_wall_time,
+            "avg_iteration_wall_time_sec": round(sum(iteration_wall_times) / len(iteration_wall_times), 4)
+            if iteration_wall_times
+            else 0.0,
+            "iteration_wall_time_sec": iteration_wall_times,
+            "total_candidate_evaluations": int(sum(iteration_candidate_counts)),
+            "avg_candidates_per_iteration": round(sum(iteration_candidate_counts) / len(iteration_candidate_counts), 4)
+            if iteration_candidate_counts
+            else 0.0,
+            "total_simulation_rollouts": int(total_simulation_rollouts),
+            "sim_runs_per_evaluation": max(1, int(sim_runs)),
+        }
         return {
+            "runtime_manifest": self._collect_runtime_manifest(),
+            "runtime_stats": runtime_stats,
             "experiment_config": {
                 "seed": self.seed,
                 "iterations": iterations,
@@ -2716,6 +2991,7 @@ class MilitaryResearchPipeline:
             "dodaf": {"ov5b": build_ov5b(best_plan, scenario), "ov6c": build_ov6c(best_plan)},
             "c2sim_xml": build_c2sim_xml(best_plan, scenario),
             "optimization_history": history,
+            "bottleneck_diagnostic": controller.bottleneck_detector.snapshot() if not disable_hope else None,
         }
 
     def _evaluate_plan(

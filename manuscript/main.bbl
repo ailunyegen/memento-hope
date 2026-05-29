@@ -1,0 +1,193 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{vaswani2017attention}
+A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones, A.~N. Gomez, L.~Kaiser, I.~Polosukhin, Attention is all you need, in: Advances in Neural Information Processing Systems, 2017, pp. 5998--6008.
+
+\bibitem{devlin2019bert}
+J.~Devlin, M.-W. Chang, K.~Lee, K.~Toutanova, {BERT}: Pre-training of deep bidirectional transformers for language understanding, in: Proceedings of NAACL-HLT, 2019, pp. 4171--4186.
+
+\bibitem{brown2020llm}
+T.~B. Brown, B.~Mann, N.~Ryder, M.~Subbiah, J.~Kaplan, P.~Dhariwal, A.~Neelakantan, P.~Shyam, G.~Sastry, A.~Askell, S.~Agarwal, A.~Herbert-Voss, G.~Krueger, T.~Henighan, R.~Child, A.~Ramesh, D.~M. Ziegler, J.~Wu, C.~Winter, C.~Hesse, M.~Chen, E.~Sigler, M.~Litwin, S.~Gray, B.~Chess, J.~Clark, C.~Berner, S.~McCandlish, A.~Radford, I.~Sutskever, D.~Amodei, Language models are few-shot learners, in: Advances in Neural Information Processing Systems, Vol.~33, 2020, pp. 1877--1901.
+
+\bibitem{openai2023gpt4}
+{OpenAI}, \href{https://arxiv.org/abs/2303.08774}{{GPT}-4 technical report} (2023).
+\newblock \href {http://arxiv.org/abs/2303.08774} {\path{arXiv:2303.08774}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2303.08774}
+
+\bibitem{touvron2023llama}
+H.~Touvron, T.~Lavril, G.~Izacard, X.~Martinet, M.-A. Lachaux, T.~Lacroix, B.~Roziere, N.~Goyal, E.~Hambro, F.~Azhar, A.~Rodriguez, A.~Joulin, E.~Grave, G.~Lample, \href{https://arxiv.org/abs/2302.13971}{{LLaMA}: Open and efficient foundation language models} (2023).
+\newblock \href {http://arxiv.org/abs/2302.13971} {\path{arXiv:2302.13971}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2302.13971}
+
+\bibitem{touvron2023llama2}
+H.~Touvron, L.~Martin, K.~Stone, P.~Albert, A.~Almahairi, Y.~Babaei, N.~Bashlykov, S.~Batra, P.~Bhargava, S.~Bhosale, D.~Costa, M.-A. Lachaux, G.~Moreira, K.~Mohammed, B.~Roziere, A.~Rodriguez, R.~Taori, H.~Martin, T.~Wang, R.~Stojnic, et~al., \href{https://arxiv.org/abs/2307.09288}{{Llama 2}: Open foundation and fine-tuned chat models} (2023).
+\newblock \href {http://arxiv.org/abs/2307.09288} {\path{arXiv:2307.09288}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2307.09288}
+
+\bibitem{zhao2023llmsurvey}
+W.~X. Zhao, K.~Zhou, J.~Li, T.~Tang, X.~Wang, Y.~Hou, Y.~Min, B.~Zhang, J.~Zhang, Z.~Dong, Y.~Du, C.~Chen, et~al., \href{https://arxiv.org/abs/2303.18223}{A survey of large language models} (2023).
+\newblock \href {http://arxiv.org/abs/2303.18223} {\path{arXiv:2303.18223}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2303.18223}
+
+\bibitem{yang2024chatgptsurvey}
+J.~Yang, H.~Jin, R.~Tang, X.~Han, Q.-W. Feng, H.~Jiang, B.~Yin, X.~Hu, J.~Lu, H.~Liu, et~al., Harnessing the power of {LLM}s in practice: A survey on {ChatGPT} and beyond, ACM Transactions on Knowledge Discovery from Data 18~(6) (2024) 1--32.
+
+\bibitem{liu2026commandagent}
+D.~Liu, Z.~Dong, et~al., Command-agent: Reconstructing warfare simulation and command decision-making using large language models, Defence TechnologyIn press, available online February 2026 (2026).
+
+\bibitem{geo2026commander}
+G.-C. Contributors, A framework of large language model commander agent for spatial reasoning in combat simulation, Scientific ReportsIn press, 2026 (2026).
+
+\bibitem{liu2026tacticalwargame}
+D.~Liu, Z.~Dong, et~al., Construction approach of {LLM}-empowered tactical wargame decision-making agents, Journal of System Simulation 38~(3), in Chinese (2026).
+
+\bibitem{warbench2026}
+{WARBENCH Contributors}, \href{https://arxiv.org/abs/2603.21280}{{WARBENCH}: A comprehensive benchmark for evaluating {LLM}s in military decision-making} (2026).
+\newblock \href {http://arxiv.org/abs/2603.21280} {\path{arXiv:2603.21280}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2603.21280}
+
+\bibitem{wei2022cot}
+J.~Wei, X.~Wang, D.~Schuurmans, M.~Bosma, B.~Ichter, F.~Xia, E.~Chi, Q.~V. Le, D.~Zhou, Chain-of-thought prompting elicits reasoning in large language models, in: Advances in Neural Information Processing Systems, Vol.~35, 2022, pp. 24824--24837.
+
+\bibitem{wang2023selfconsistency}
+X.~Wang, J.~Wei, D.~Schuurmans, Q.~V. Le, E.~H. Chi, S.~Narang, A.~Chowdhery, D.~Zhou, Self-consistency improves chain of thought reasoning in language models, Proceedings of ICLR (2023).
+
+\bibitem{yao2023react}
+S.~Yao, J.~Zhao, D.~Yu, N.~Du, I.~Shafran, K.~Narasimhan, Y.~Cao, {ReAct}: Synergizing reasoning and acting in language models, Proceedings of ICLR (2023).
+
+\bibitem{yao2023tree}
+S.~Yao, D.~Yu, J.~Zhao, I.~Shafran, T.~Griffiths, Y.~Cao, K.~Narasimhan, Tree of thoughts: Deliberate problem solving with large language models, Advances in Neural Information Processing Systems (2023).
+
+\bibitem{schick2023toolformer}
+T.~Schick, J.~Dwivedi-Yu, R.~Dessi, R.~Raileanu, M.~Lomeli, E.~Hambro, L.~Zettlemoyer, N.~Cancedda, T.~Scialom, Toolformer: Language models can teach themselves to use tools, Advances in Neural Information Processing Systems (2023).
+
+\bibitem{lewis2020rag}
+P.~Lewis, E.~Perez, A.~Piktus, F.~Petroni, V.~Karpukhin, N.~Goyal, H.~Kuttler, M.~Lewis, W.-t. Yih, T.~Rocktaschel, S.~Riedel, D.~Kiela, Retrieval-augmented generation for knowledge-intensive {NLP} tasks, in: Advances in Neural Information Processing Systems, Vol.~33, 2020, pp. 9459--9474.
+
+\bibitem{karpukhin2020dpr}
+V.~Karpukhin, B.~Oguz, S.~Min, P.~Lewis, L.~Wu, S.~Edunov, D.~Chen, W.-t. Yih, Dense passage retrieval for open-domain question answering, in: Proceedings of EMNLP, 2020, pp. 6769--6781.
+
+\bibitem{johnson2019faiss}
+J.~Johnson, M.~Douze, H.~Jegou, Billion-scale similarity search with {GPU}s, IEEE Transactions on Big Data 7~(3) (2019) 535--547.
+
+\bibitem{reimers2019sbert}
+N.~Reimers, I.~Gurevych, Sentence-{BERT}: Sentence embeddings using siamese {BERT}-networks, in: Proceedings of EMNLP-IJCNLP, 2019, pp. 3982--3992.
+
+\bibitem{graves2014ntm}
+A.~Graves, G.~Wayne, I.~Danihelka, \href{https://arxiv.org/abs/1410.5401}{Neural turing machines} (2014).
+\newblock \href {http://arxiv.org/abs/1410.5401} {\path{arXiv:1410.5401}}.
+\newline\urlprefix\url{https://arxiv.org/abs/1410.5401}
+
+\bibitem{weston2015memorynetworks}
+J.~Weston, S.~Chopra, A.~Bordes, Memory networks, Proceedings of ICLR (2015).
+
+\bibitem{sukhbaatar2015endtoendmemory}
+S.~Sukhbaatar, A.~Szlam, J.~Weston, R.~Fergus, End-to-end memory networks, in: Advances in Neural Information Processing Systems, 2015, pp. 2440--2448.
+
+\bibitem{aamodt1994cbr}
+A.~Aamodt, E.~Plaza, Case-based reasoning: Foundational issues, methodological variations, and system approaches, AI Communications 7~(1) (1994) 39--59.
+
+\bibitem{kolodner1993cbr}
+J.~Kolodner, Case-Based Reasoning, Morgan Kaufmann, San Mateo, 1993.
+
+\bibitem{shinn2023reflexion}
+N.~Shinn, F.~Cassano, E.~Germanos, A.~Gundersen, K.~Narasimhan, S.~Yao, Reflexion: Language agents with verbal reinforcement learning, Advances in Neural Information Processing Systems (2023).
+
+\bibitem{madaan2023selfrefine}
+A.~Madaan, N.~Tandon, P.~Gupta, S.~Hallinan, L.~Gao, S.~Wiegreffe, U.~Alon, N.~Dziri, S.~Prabhumoye, Y.~Yang, M.~Gupta, P.~Clark, Y.~Choi, H.~Hajishirzi, A.~Farhadi, A.~Sabharwal, Self-refine: Iterative refinement with self-feedback, Advances in Neural Information Processing Systems (2023).
+
+\bibitem{guo2024promptoptimizer}
+Q.~Guo, R.~Wang, J.~Guo, Y.~Li, S.~Liu, S.~Diao, B.~Zhang, M.~Zhang, H.~Ji, T.~Wang, et~al., Connecting large language models with evolutionary algorithms yields powerful prompt optimizers, Proceedings of ICLR (2024).
+
+\bibitem{zhou2025memento}
+H.~Zhou, Y.~Chen, S.~Guo, et~al., \href{https://arxiv.org/abs/2508.16153}{Memento: Fine-tuning {LLM} agents without fine-tuning {LLM}s} (2025).
+\newblock \href {http://arxiv.org/abs/2508.16153} {\path{arXiv:2508.16153}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2508.16153}
+
+\bibitem{park2023generativeagents}
+J.~S. Park, J.~C. O'Brien, C.~J. Cai, M.~R. Morris, P.~Liang, M.~S. Bernstein, Generative agents: Interactive simulacra of human behavior, in: Proceedings of UIST, 2023, pp. 1--22.
+
+\bibitem{jointchiefs2013jointtargeting}
+{Joint Chiefs of Staff}, {Joint Publication 3-60}: Joint targeting, Washington, D.C.: Joint Chiefs of Staff (2013).
+
+\bibitem{tirpak2000f2t2ea}
+J.~A. Tirpak, Find, fix, track, target, engage, assess, Air Force Magazine 83~(7) (2000) 24--29.
+
+\bibitem{alberts1999networkcentric}
+D.~S. Alberts, J.~J. Garstka, F.~P. Stein, Network Centric Warfare: Developing and Leveraging Information Superiority, 2nd Edition, CCRP Publication Series, Washington, D.C., 1999.
+
+\bibitem{law2015simulation}
+A.~M. Law, Simulation Modeling and Analysis, 5th Edition, McGraw-Hill Education, New York, 2015.
+
+\bibitem{dodaf2010}
+{Department of Defense}, {DoD Architecture Framework Version 2.02}, Washington, D.C.: Department of Defense (2010).
+
+\bibitem{ieee2010hla}
+{IEEE Computer Society}, {IEEE 1516-2010}: {IEEE} standard for modeling and simulation high level architecture---framework and rules, New York: IEEE (2010).
+
+\bibitem{siso2020c2sim}
+{Simulation Interoperability Standards Organization}, {SISO-STD-019-2020}: Standard for command and control systems-simulation systems interoperation, Orlando: SISO (2020).
+
+\bibitem{blais2021automated}
+C.~L. Blais, M.~Dechand, M.~Dembach, et~al., The use of automated reasoning with the command and control system to simulation system interoperation standard, Simulation Innovation Workshop (2021).
+
+\bibitem{hochreiter1997lstm}
+S.~Hochreiter, J.~Schmidhuber, Long short-term memory, Neural Computation 9~(8) (1997) 1735--1780.
+
+\bibitem{shazeer2017moe}
+N.~Shazeer, A.~Mirhoseini, K.~Maziarz, A.~Davis, Q.~Le, G.~Hinton, J.~Dean, Outrageously large neural networks: The sparsely-gated mixture-of-experts layer, Proceedings of ICLR (2017).
+
+\bibitem{lepikhin2021gshard}
+D.~Lepikhin, H.~Lee, Y.~Xu, D.~Chen, O.~Firat, Y.~Huang, M.~Krikun, N.~Shazeer, Z.~Chen, {GShard}: Scaling giant models with conditional computation and automatic sharding, Proceedings of ICLR (2021).
+
+\bibitem{fedus2022switch}
+W.~Fedus, B.~Zoph, N.~Shazeer, Switch transformers: Scaling to trillion parameter models with simple and efficient sparsity, Journal of Machine Learning Research 23~(120) (2022) 1--39.
+
+\bibitem{du2022glam}
+N.~Du, Y.~Huang, A.~M. Dai, S.~Tong, D.~Lepikhin, Y.~Xu, M.~Krikun, Y.~Zhou, A.~W. Yu, O.~Firat, et~al., {GLaM}: Efficient scaling of language models with mixture-of-experts, in: Proceedings of ICML, 2022, pp. 5547--5569.
+
+\bibitem{komatsuzaki2022sparseupcycling}
+A.~Komatsuzaki, J.~Puigcerver, J.~Lee-Thorp, N.~Ruiz, K.~Murthy, K.~Guu, A.~Kumar, G.~Gur-Ari, H.~Schwenk, J.~Dean, C.~Raffel, \href{https://arxiv.org/abs/2212.05055}{Sparse upcycling: Training mixture-of-experts from dense checkpoints} (2022).
+\newblock \href {http://arxiv.org/abs/2212.05055} {\path{arXiv:2212.05055}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2212.05055}
+
+\bibitem{puigcerver2024softmoe}
+J.~Puigcerver, A.~Roy, B.~Mustafa, G.~Ghiasi, O.~Firat, S.~Borgeaud, A.~Kumar, H.~Eichner, Y.~Huang, G.~Driessche, et~al., From sparse to soft mixtures of experts, Proceedings of ICLR (2024).
+
+\bibitem{doubov2024sparseupcyclinginference}
+S.~Doubov, N.~Sardana, V.~Chiley, Sparse upcycling: Inference inefficient finetuning, NeurIPS Workshop on Efficient Natural Language and Speech Processing (2024).
+
+\bibitem{he2024upcyclingllmmoe}
+E.~He, A.~Khattar, R.~Prenger, et~al., \href{https://arxiv.org/abs/2410.07524}{Upcycling large language models into mixture of experts} (2024).
+\newblock \href {http://arxiv.org/abs/2410.07524} {\path{arXiv:2410.07524}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2410.07524}
+
+\bibitem{mao2007sde}
+X.~Mao, Stochastic Differential Equations and Applications, 2nd Edition, Woodhead Publishing, Cambridge, 2007.
+
+\bibitem{khalil2002nonlinear}
+H.~K. Khalil, Nonlinear Systems, 3rd Edition, Prentice Hall, Upper Saddle River, NJ, 2002.
+
+\bibitem{nedbalek2025bottleneck}
+L.~Nedb\'{a}lek, A.~Nov\'{a}k, Bottleneck identification in resource-constrained project scheduling via constraint relaxation, in: Proceedings of the 14th International Conference on Operations Research and Enterprise Systems (ICORES), 2025, pp. 319--330.
+
+\bibitem{yu2020pcgrad}
+T.~Yu, S.~Kumar, A.~Gupta, S.~Levine, K.~Hausman, C.~Finn, Gradient surgery for multi-task learning, in: Advances in Neural Information Processing Systems, Vol.~33, 2020, pp. 5824--5836.
+
+\bibitem{sutton2018rl}
+R.~S. Sutton, A.~G. Barto, Reinforcement Learning: An Introduction, 2nd Edition, MIT Press, Cambridge, MA, 2018.
+
+\bibitem{silver2016alphago}
+D.~Silver, A.~Huang, C.~J. Maddison, A.~Guez, L.~Sifre, G.~van~den Driessche, J.~Schrittwieser, I.~Antonoglou, V.~Panneershelvam, M.~Lanctot, et~al., Mastering the game of go with deep neural networks and tree search, Nature 529~(7587) (2016) 484--489.
+
+\bibitem{jaderberg2017pbt}
+M.~Jaderberg, V.~Dalibard, S.~Osindero, W.~M. Czarnecki, J.~Donahue, A.~Razavi, O.~Vinyals, T.~Green, I.~Dunning, K.~Simonyan, et~al., \href{https://arxiv.org/abs/1711.09846}{Population based training of neural networks} (2017).
+\newblock \href {http://arxiv.org/abs/1711.09846} {\path{arXiv:1711.09846}}.
+\newline\urlprefix\url{https://arxiv.org/abs/1711.09846}
+
+\end{thebibliography}

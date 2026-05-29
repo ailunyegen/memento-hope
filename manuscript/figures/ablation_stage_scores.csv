@@ -1,0 +1,26 @@
+group_key,group_label,color,stage_key,stage_label,stage_score
+ablation_pure_llm,Pure LLM,#6b7280,detect,Detect,0.6227
+ablation_pure_llm,Pure LLM,#6b7280,disrupt,Disrupt,0.5959
+ablation_pure_llm,Pure LLM,#6b7280,breach,Breach,0.602
+ablation_pure_llm,Pure LLM,#6b7280,control,Control,0.6294
+ablation_pure_llm,Pure LLM,#6b7280,sustain,Sustain,0.6291
+ablation_memento,LLM + Memento,#3b82f6,detect,Detect,0.6263
+ablation_memento,LLM + Memento,#3b82f6,disrupt,Disrupt,0.6349
+ablation_memento,LLM + Memento,#3b82f6,breach,Breach,0.5766
+ablation_memento,LLM + Memento,#3b82f6,control,Control,0.6307
+ablation_memento,LLM + Memento,#3b82f6,sustain,Sustain,0.6505
+ablation_hope,LLM + Hope,#f59e0b,detect,Detect,0.6357
+ablation_hope,LLM + Hope,#f59e0b,disrupt,Disrupt,0.5954
+ablation_hope,LLM + Hope,#f59e0b,breach,Breach,0.579
+ablation_hope,LLM + Hope,#f59e0b,control,Control,0.6076
+ablation_hope,LLM + Hope,#f59e0b,sustain,Sustain,0.6187
+ablation_reflection_only,LLM + Reflection,#8b5cf6,detect,Detect,0.6281
+ablation_reflection_only,LLM + Reflection,#8b5cf6,disrupt,Disrupt,0.5961
+ablation_reflection_only,LLM + Reflection,#8b5cf6,breach,Breach,0.5816
+ablation_reflection_only,LLM + Reflection,#8b5cf6,control,Control,0.6344
+ablation_reflection_only,LLM + Reflection,#8b5cf6,sustain,Sustain,0.6548
+ablation_full,Full,#10b981,detect,Detect,0.6768
+ablation_full,Full,#10b981,disrupt,Disrupt,0.6668
+ablation_full,Full,#10b981,breach,Breach,0.6201
+ablation_full,Full,#10b981,control,Control,0.6702
+ablation_full,Full,#10b981,sustain,Sustain,0.6772

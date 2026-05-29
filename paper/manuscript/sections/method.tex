@@ -1,0 +1,104 @@
+The repository is organized around structured scenario, plan, simulation, and export objects rather than free-form prompting alone. This section deliberately limits itself to mechanisms that are directly supported by the current code and stored outputs.
+
+\subsection{Pipeline overview}
+
+Figure~\ref{fig:method-overview} presents the overall framework of the implemented planning pipeline. The framework starts from a structured scenario representation and couples two auxiliary mechanisms before each generation step: a Memento memory module that retrieves and filters prior cases, and a Hope adaptive controller that transforms scenario attributes into a bounded capability state. These two information sources, together with optional reflection patches from the previous iteration, are fused during prompt construction for LLM-based structured plan generation. The resulting candidate plan is then evaluated by the simulation layer through the repository's five-stage kill-chain abstraction, which yields mission-level metrics and stage-level deficits. These evaluation signals are used in two feedback paths: one path updates the adaptive capability state, and the other path produces reflection guidance for the next generation round. After the iterative loop terminates, the highest-scoring plan is selected and exported into the downstream structured artifacts used by the repository.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/method_pipeline_architecture.png}
+\caption{Overall framework of the Memento--HOPE-enhanced LLM planning pipeline. The framework maps structured scenario input to four tightly connected stages: memory retrieval and selection, adaptive capability modulation, LLM-based structured plan generation, and simulation-based evaluation. The solid arrows denote the main forward computation from scenario encoding to best-plan selection and export, whereas the dashed arrows denote the iterative feedback paths that inject reflection guidance and capability updates into subsequent planning rounds.}
+\label{fig:method-overview}
+\end{figure}
+
+\subsection{Structured scenario input and plan representation}
+
+The domain layer defines normalized capability dimensions (\texttt{fires}, \texttt{mobility}, \texttt{protection}, \texttt{awareness}, \texttt{ew}, \texttt{sustainment}, and \texttt{c2}), typed actions, force units, scenarios, plan phases, and complete combat plans. These objects enforce non-empty text fields, bounded numeric ratios, and structured phase/action serialization. The downstream simulator and exporters therefore operate on typed fields rather than on unconstrained narrative text.
+
+\subsection{Memory module: case retrieval, selection, and memory-conditioned weight initialization}
+
+The case-memory module stores records with mission type, terrain, objective, roles, key actions, lessons, outcomes, and metric summaries. When optional embedding dependencies are available, the module uses a Sentence-Transformer encoder with a FAISS index; otherwise it falls back to keyword retrieval \citep{lewis2020rag,reimers2019sbert,johnson2019faiss}. At the design level, that retrieval path remains closer to case-based reasoning than to standalone prompting \citep{aamodt1994cbr,kolodner1993cbr}. Retrieved items are scored by confidence, blended with a case-quality heuristic, and labeled as either \textit{imitate} or \textit{avoid} according to the source outcome.
+
+The pipeline does not pass all retrieved cases directly to the generator. Instead, it computes a scenario-dependent support score, sorts candidates by support, quality, and confidence, and keeps at most two selected memory hits in strict mode. In the current implementation, this two-hit cap is an engineering prompt-budget heuristic rather than a theorem-backed optimum: it is meant to reduce prompt crowding and limit negative transfer from weakly matched cases while still preserving at least one positive and one cautionary cue when both are available. For sparse cross-scenario transfer settings, the pipeline can also inject hand-authored scene priors for coastal assault, mountain reconnaissance, maritime sustainment, and urban defense scenes. These priors are represented as standard case records and enter the same scoring and selection path.
+
+From a data-lifecycle perspective, the implemented memory path is a four-step loop: offline case curation, line-delimited JSONL persistence, online retrieval and reranking, and optional write-back behind a quality gate. Each stored \texttt{CaseRecord} keeps a compact but typed field set. The mission-context fields are \texttt{case\_id}, \texttt{mission\_type}, \texttt{terrain}, \texttt{objective}, \texttt{friendly\_roles}, and \texttt{enemy\_roles}; the action-and-outcome fields are \texttt{key\_actions}, \texttt{lessons}, \texttt{outcome}, \texttt{tags}, and \texttt{metrics}; and the maintenance fields are \texttt{update\_count}, \texttt{last\_updated}, and \texttt{source\_scenarios}. The repository's \texttt{\_load\_records()} routine reads the JSONL bank one line at a time, \texttt{retrieve()} chooses the FAISS path when semantic backends are available and otherwise falls back to keyword similarity, and the pipeline-level \texttt{\_select\_memory\_hits()} stage reorders candidates by support score, quality, and confidence before truncation. If write-back is enabled, \texttt{\_write\_back\_case()} creates a candidate record only after the simulated plan clears mission-success, effectiveness, and minimum-stage thresholds, and \texttt{upsert\_record()} then merges or appends the result inside the same JSONL store. For the canonical ablation and generalization evidence used in this paper, that final write-back step is disabled in the recorded configurations, so the present manuscript should be read as documenting the memory read-and-use path rather than an online continual-learning experiment.
+
+\paragraph{Memory-conditioned weight initialization.}
+In the original design the Hope fast-weight target $\hat{\mathbf{W}}_{\text{fast}}$ depends solely on scenario attributes (terrain, weather, threat coefficients) through the \texttt{HOPEAdapter} network. The retrieved case memory only influences the LLM prompt, not the capability-weighting path. We introduce a lightweight coupling that lets retrieved case metrics participate in fast-weight initialization: when the Memento module retrieves cases whose stored stage-level metrics indicate a specific weakness (e.g., the most similar historical case failed badly at \texttt{breach}), a memory correction vector nudges the fast-weight target toward the capabilities that feed that weak stage.
+
+Formally, let $\mathcal{M} = \{\mathbf{m}_1, \ldots, \mathbf{m}_k\}$ be the stage-score vectors of the $k$ retrieved cases. For each case $i$ and each stage $j$, if $m_{i,j} < 0.55$, we accumulate a correction proportional to the deficit and the stage-to-capability mapping:
+\[
+\mathbf{r}_{\text{mem}} = \sum_{i=1}^{k} \sum_{j \in \mathcal{S}} \mathbb{1}[m_{i,j} < 0.55] \cdot (1 - m_{i,j}) \cdot 0.18 \cdot \mathbf{c}_j,
+\]
+where $\mathcal{S}$ is the set of five kill-chain stages and $\mathbf{c}_j$ is the stage-to-capability mapping for stage $j$. The correction is clamped to $[-0.18, 0.28]$ and blended with the adapter output: $\hat{\mathbf{W}}_{\text{fast}} \leftarrow \hat{\mathbf{W}}_{\text{fast}} + 0.30\,\mathbf{r}_{\text{mem}}$. This mechanism is intentionally lightweight---it does not require retraining the adapter or modifying the case bank schema---and it means that the pipeline's two auxiliary modules (memory and adaptive weighting) are no longer purely serial but share information through a common capability representation.
+
+\subsection{HOPE controller: adaptive weighting, bottleneck detection, and capability feedback}
+
+The adaptive controller maintains a slow capability-weight vector, a fast adjustment vector, and a neural adapter named \texttt{HOPEAdapter}. The scenario encoder converts terrain and weather into one-hot vectors and appends three scalar features: electronic-warfare threat, threat level, and time pressure. The adapter contains an input gate, a candidate projection, an output projection, and a value estimator that modulates a learned forget gate. In implementation terms, the forget gate depends on an estimated value term and a log-age term, which allows the hidden state to be refreshed during feedback updates while remaining stable during inference. Architecturally, this design borrows the language of gated recurrent updates \citep{hochreiter1997lstm}, but it remains a lightweight scenario-conditioned controller rather than a large conditional-computation family such as sparsely gated MoE, GShard, Switch Transformer, GLaM, sparse upcycling, soft MoE, or LLM-to-MoE upcycling systems \citep{shazeer2017moe,lepikhin2021gshard,fedus2022switch,du2022glam,komatsuzaki2022sparseupcycling,puigcerver2024softmoe,doubov2024sparseupcyclinginference,he2024upcyclingllmmoe}.
+
+Fast weights are updated by an Euler--Maruyama-style step:
+\[
+W_{\text{fast}} \leftarrow W_{\text{fast}} + \theta(\hat{W}_{\text{fast}} - W_{\text{fast}})\Delta t + \epsilon \sqrt{\Delta t}\,\xi,
+\]
+where the target vector $\hat{W}_{\text{fast}}$ comes from the adapter, $\theta$ is a recovery coefficient, and $\epsilon$ controls the noise term. In operational terms for the implemented controller, $\theta$ governs how quickly capability emphasis is pulled toward the scenario-conditioned target after feedback, $\epsilon$ controls the amount of exploratory perturbation retained under uncertainty, $\Delta t$ denotes one discrete planning iteration, and $\xi$ is the zero-mean random perturbation used to avoid a rigid fast-weight trajectory. These meanings are best understood as engineering interpretations inside the current simulator rather than as externally calibrated physical units. The resulting fast weights are clipped to scenario-dependent lower and upper bounds. The fused capability vector is then formed by adding a scaled fast component to the slow weights and enforcing mission- and threat-specific floors on key dimensions such as fires, mobility, awareness, and C2. The draft therefore uses standard stochastic-update and nonlinear-control vocabulary to describe the mechanism, but it does not claim a formal stability proof for the implemented controller \citep{mao2007sde,khalil2002nonlinear}.
+
+\paragraph{Capability feedback update.}
+After each planning iteration, the controller derives stage deficits from the simulator's five-stage scores (\texttt{detect}, \texttt{disrupt}, \texttt{breach}, \texttt{control}, and \texttt{sustain}). These deficits are projected onto capability dimensions through fixed stage-to-capability mappings and a bottleneck-boost term. The adapter is then trained with a smooth-$L_1$ objective toward a bounded desired fast-weight target. Slow weights are updated through a bounded transformation that depends on the utility gradient, a delay-correction term, and minimum floors on selected offensive dimensions. The current code therefore supports adaptive, bounded, feedback-driven weight updates, but this draft does not infer a formally verified optimizer or theorem-backed convergence guarantee from those implementation choices.
+
+\paragraph{Bottleneck-aware dynamic feedback allocation.}
+The fixed bottleneck-boost vector described above applies a static priority ordering (disrupt $>$ breach $>$ detect $>$ sustain $>$ control) that does not adapt to the current iteration's actual stage-score profile. However, the experimental evidence reported in Section~\ref{sec:results} consistently shows that \texttt{breach} is the most persistent weak point while the relative ranking of other stages varies across iterations and scenarios. To close this loop between diagnosis and action, we implement a lightweight \texttt{BottleneckDetector} module that explicitly tracks per-stage scores over a sliding window of six iterations and dynamically identifies the current bottleneck stage together with a severity score.
+
+Concretely, after each simulation evaluation the detector records the five stage scores. Let $\mathbf{s}^{(t)} = (s_{\text{detect}}, s_{\text{disrupt}}, s_{\text{breach}}, s_{\text{control}}, s_{\text{sustain}})^{(t)}$ denote the stage-score vector at iteration $t$. The bottleneck stage $b^{(t)}$ is the stage with the largest deficit $d_k = 1 - s_k$, and the severity $\sigma^{(t)}$ is the gap between $d_{b^{(t)}}$ and the mean deficit of the other four stages:
+\[
+\sigma^{(t)} = \max\!\bigl(0,\; d_{b^{(t)}} - \bar{d}_{\neg b^{(t)}}\bigr).
+\]
+This severity measure distinguishes true isolated bottlenecks (large $\sigma$) from uniformly weak performance across all stages (small $\sigma$). The capability boost vector is then computed as a severity-weighted linear combination of stage-to-capability mappings:
+\[
+\mathbf{b}^{(t)} = (0.40 + 1.6\,\sigma^{(t)}) \cdot \mathbf{c}_{b^{(t)}},
+\]
+where $\mathbf{c}_{b^{(t)}}$ is the fixed mapping from the bottleneck stage to the seven capability dimensions. This dynamic boost replaces the original static \texttt{bottleneck\_boost} in the feedback-update path, so the controller's utility gradient becomes
+\[
+\mathbf{g}^{(t)} = \mathbf{d}^{(t)} + \mathbf{b}^{(t)} - \eta(\mathbf{W}_{\text{slow}} - \mathbf{W}_{\text{doctrine}}),
+\]
+where $\mathbf{d}^{(t)}$ is the priority-weighted deficit vector and $\eta=0.05$ is the regularization coefficient. The practical effect is that the controller concentrates its limited adjustment budget on the stage that most urgently needs improvement in the current iteration, rather than distributing it according to a fixed template. This design also carries an intuitive operational interpretation: ``concentrate superior capability on the critical weak link,'' which aligns with established principles of dynamic resource allocation in military operations research. The approach is related to constraint-relaxation-based bottleneck identification in project scheduling \citep{nedbalek2025bottleneck}, but adapted here to the iterative feedback-driven setting of the planning pipeline.
+
+\subsection{Structured plan generation and reflection-based refinement}
+
+The plan-generation stage receives three classes of conditioning signals from the upstream modules: the structured scenario description, the selected memory hits labeled as \textit{imitate} or \textit{avoid}, and the fused capability state computed by the Hope controller. These elements are injected into prompt construction together with repository-local planning constraints and any optional reflection patch. The LLM is then asked to generate a candidate combat plan in a structured format rather than unconstrained free text.
+
+The resulting plan is normalized into typed phases, actions, unit allocations, and decision points so that downstream evaluation and export can operate on stable fields. In this sense, the LLM stage is not treated as a standalone text generator; it acts as the proposal engine inside a larger structured loop whose inputs and outputs are both repository-defined objects.
+
+\paragraph{Reflection-based refinement.}
+Reflection is handled separately from the adaptive weight update. When enabled, the pipeline calls a reflection prompt after simulation and passes it the structured scenario, the current best plan, and the most recent simulation diagnostics. The returned object is not free-form commentary; it is parsed into three repository-local fields: \texttt{diagnosis}, which lists the main failure symptoms; \texttt{variant\_instructions}, which specifies targeted changes for the next candidate plan; and \texttt{meta\_prompt\_patch}, which rewrites part of the planning prompt for the next round. In practice, the reflection strategy is therefore closer to a bounded critique-and-repair step than to unconstrained self-dialogue. Reflection can also be suppressed for some scene types depending on scenario properties and memory support, so the manuscript should not be read as claiming that every iteration always receives a reflection update \citep{shinn2023reflexion,madaan2023selfrefine}.
+
+\subsection{Simulation-based evaluation}
+
+The simulator evaluates each plan phase against a five-stage kill-chain model. Stage scores are combined into phase success, mission success, loss-exchange ratio (LER), survivability, command resilience, completion time, and an overall effectiveness score. The detect--disrupt--breach--control--sustain decomposition is best read as a repository-local operational abstraction that is loosely informed by joint-targeting workflows and network-centric command thinking rather than by any single formal doctrinal template \citep{jointchiefs2013jointtargeting,tirpak2000f2t2ea,alberts1999networkcentric}. More concretely, \texttt{detect} corresponds to situation and target discovery, \texttt{disrupt} to suppressive interference with enemy action, \texttt{breach} to breaking through defended obstacles or critical nodes, \texttt{control} to seizing and maintaining command over key objectives, and \texttt{sustain} to preserving tempo, support, and continuity. This mapping is intentionally loose and should be read as a theory-alignment bridge for simulation interpretation, not as a doctrinal one-to-one template. Under repeated stochastic evaluation, the pipeline aggregates multiple simulation runs and stores the mean, standard deviation, minimum, maximum, and 95\% confidence interval for selected metrics \citep{law2015simulation}.
+
+\subsection{Best-plan selection and standards-oriented export}
+
+The same selected plan can also be exported into repository-local DoDAF OV-5b, DoDAF OV-6c, and C2SIM representations \citep{dodaf2010,ieee2010hla,siso2020c2sim,blais2021automated}. These exporters are deterministic transformations from structured plan fields to machine-readable JSON or XML artifacts, which helps connect the narrative plan output to downstream modeling and interoperability workflows.
+
+Table~\ref{tab:export-correspondence} gives a representative export example from the selected Full-setting coastal joint-assault result bundle. The key point is that the repository does not export an unrelated post-processed summary: the same structured plan header and phase objects are preserved across the OV-5b activity view, the OV-6c event-trace view, and the C2SIM order representation, with a final OV-6c closure event used to attach simulation feedback to the next planning round.
+
+\begin{table}[ht]
+\centering
+\caption{Representative cross-standard export correspondence for the Full-setting coastal joint-assault example under the selected scene-out suite. The table is derived from \texttt{best\_plan.json}, \texttt{dodaf\_ov5b.json}, \texttt{dodaf\_ov6c.json}, and \texttt{c2sim.xml} in the same result directory.}
+\label{tab:export-correspondence}
+{\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{P{1.45cm}Y C{1.55cm} C{1.55cm} C{1.80cm}}
+\toprule
+Element & Structured plan object & OV-5b & OV-6c & C2SIM \\
+\midrule
+Operation header & Plan title, mission type, commander intent, end state, and control rules. & \shortstack{\texttt{operation\_}\\\texttt{name}} & \shortstack{\texttt{operation\_}\\\texttt{name}} & Header / order fields \\
+Phase 1 & \texttt{phases[0]} (\texttt{P1}); actions: \texttt{recon}, \texttt{c2}. & \texttt{ACT-01} & \texttt{EVT-01} & \texttt{Task P1} \\
+Phase 2 & \texttt{phases[1]} (\texttt{P2}); actions: \texttt{strike}, \texttt{mobility}, \texttt{ew}. & \texttt{ACT-02} & \texttt{EVT-02} & \texttt{Task P2} \\
+Phase 3 & \texttt{phases[2]} (\texttt{P3}); actions: \texttt{recon}, \texttt{strike}, \texttt{mobility}. & \texttt{ACT-03} & \texttt{EVT-03} & \texttt{Task P3} \\
+Phase 4 & \texttt{phases[3]} (\texttt{P4}); actions: \texttt{control}, \texttt{sustain}. & \texttt{ACT-04} & \texttt{EVT-04} & \texttt{Task P4} \\
+Post-plan feedback & Simulation assessment metrics and writeback gate. & -- & \texttt{EVT-05} & -- \\
+\bottomrule
+\end{tabularx}
+\par}
+\end{table}

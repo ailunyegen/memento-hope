@@ -1,0 +1,1513 @@
+--- PAGE 1 ---
+Highligh ts
+A Memen to-, Hop e-, and Reection-Enhanced Large Language
+Mo del Pip eline for Sim ulated Join t-Op eration Plan Generation and
+Ev aluation
+Changrui Zhang, Chengw ei Y ang
+Rep ository-grounded elsarticle draft for sim ulated join t-op eration plan-
+ning
+F ull pip eline impro v es mission success o v er the pure LLM baseline
+Fiv e-scenario scene-out ev aluation sho ws F ull b eating Pure in 5/5 cases
+Draft rep orts only co de-supp orted mec hanisms and source-traceable
+results
+--- PAGE 2 ---
+A Memen to-, Hop e-, and Reection-Enhanced Large
+Language Mo del Pip eline for Sim ulated
+Join t-Op eration Plan Generation and Ev aluation
+Changrui Zhanga, Chengw ei Y anga,∗
+aBeijing Institute of T e chnolo gy, Beijing, China
+Abstract
+This pap er presen ts an evidence-grounded English man uscript draft for a
+sim ulation-orien ted planning pip eline built around three implemen ted com-
+p onen ts: Memen to-st yle case retriev al, a Hop e adaptiv e w eigh ting con troller,
+and a reection lo op for iterativ e prompt renemen t. The system generates
+structured join t-op eration plans, ev aluates them through a v e-stage kill-
+c hain sim ulation mo del, and exp orts the selected plan in to DoD AF O V-5b,
+DoD AF O V-6c, and C2SIM artifacts. T o a v oid unsupp orted claims, the draft
+only describ es mec hanisms that are explicitly presen t in the curren t co debase
+and exp erimen t outputs and frames the study as an application-orien ted in-
+tegration pap er rather than as a claim of a new standalone planning theory .
+The main single-scenario ablation study uses the rep ository's sample
+coastal join t-assault scenario with 10 optimization iterations, 50 Mon te Carlo
+sim ulation runs, a xed random seed of 7, and writebac k disabled. Under a
+xed-seed setting (seed=7), the full pip eline impro v es mission success from
+0.6260 to 0.6388, o v erall eectiv eness from 0.7328 to 0.7685, and the loss-
+exc hange ratio from 1.6564 to 1.9771 relativ e to the pure large language
+mo del baseline. The main cross-scenario transfer study uses v e scenario
+families and lea v e-one-source-scenario-out case banks deriv ed from 250 source
+cases. In that evidence set, the full pip eline outp erforms the pure baseline
+in all v e scenarios, increasing a v erage mission success from 0.6595 to 0.6828
+and a v erage o v erall eectiv eness from 0.7417 to 0.7924, while the relativ e
+ordering among the Memen to-only and Hop e-only v arian ts remains scenario-
+∗Corresp onding author.
+Email addr ess:yangchengwei@bit.edu.cn(Chengw ei Y ang)
+Pr eprint submitte d to Simulation Mo del ling Pr actic e and The ory May 27, 2026
+--- PAGE 3 ---
+dep enden t.
+The draft also do cumen ts the remaining v alidit y limits, including single-
+seed evidence, scenario dep endence in mo dule gains, and the lac k of external
+baselines or signicance testing. In particular, the rep orted condence in ter-
+v als reect within-seed Mon te Carlo v ariance under the xed seed rather than
+across-seed v ariance. The refreshed canonical result bundles no w serialize a
+top-lev el run time manifest that records the lo cal bac k end iden tier, soft w are
+stac k, a v ailable CPU/GPU metadata, and w all-clo c k timing summaries for
+the rep orted evidence.
+Keywor ds:large language mo dels, case-based reasoning, sim ulation-based
+ev aluation, adaptiv e w eigh ting, structured planning
+1. In tro duction
+Recen t transformer and foundation-mo del adv ances ha v e made large lan-
+guage mo dels (LLMs) increasingly capable of exible m ulti-step planning and
+decision supp ort, whic h mak es them attractiv e for sim ulation-cen tric scenario
+exploration w orko ws [18]. Reasoning-time p erformance can b e further
+shap ed b y prompt-side strategies suc h as c hain-of-though t, self-consistency ,
+ReA ct-st yle to ol in teraction, delib erate searc h o v er though t branc hes, and ex-
+plicit to ol use [913]. A t the same time, planning qualit y remains sensitiv e to
+con text selection, prior exp erience, and iterativ e self-correction. Rep ository-
+lo cal evidence for the curren t pro ject suggests that three design directions are
+cen tral to its implemen tation: retriev al-st yle memory augmen tation, adap-
+tiv e capabilit y w eigh ting, and reection-driv en prompt adjustmen t.
+The memory side of the pro ject is closer to case-based reasoning (CBR)
+and retriev al-augmen ted generation than to standalone prompting. The
+co debase stores structured cases, retriev es them through a F AISS-bac k ed
+seman tic index when a v ailable, and falls bac k to k eyw ord retriev al otherwise
+[1417]. In broader arc hitectural terms, that places it closer to external-
+memory and memory-net w ork families [1820] and to classical CBR form ula-
+tions [21, 22]. The reection side is closer to iterativ e self-impro v emen t and
+agen t-memory sc hemes, including Reexion, Self-Rene, generativ e-agen t
+memory , prompt optimization, and the recen t Memen to line, although the
+curren t implemen tation should still b e in terpreted strictly as a rep ository-
+sp ecic planning lo op rather than as a reimplemen tation of an y single exter-
+nal framew ork [2327].
+2
+--- PAGE 4 ---
+Within this rep ository , the target problem is not free-form text genera-
+tion. Instead, the system aims to pro duce structured join t-op eration plans
+that can b e sim ulated, compared under ablation settings, and exp orted to
+arc hitecture and in terop erabilit y artifacts. The sim ulation la y er scores plans
+through a v e-stage kill-c hain abstraction, computes mission-lev el metrics
+suc h as mission success and o v erall eectiv eness, and aggregates rep eated
+sto c hastic runs in to Mon te Carlo summaries. A t an op erational-reading lev el,
+the v e stages lo osely map to target disco v ery , disruption and suppression,
+breac h of defended no des, con trol of k ey ob jectiv es, and sustainmen t of temp o
+and supp ort. This mapping is in tended only as a theory-alignmen t aid: the
+implemen ted sim ulator is still a rep ository-lo cal op erational simplication in-
+spired b y join t-targeting, F2T2EA, and net w ork-cen tric command thinking
+rather than a do ctrinal one-to-one repro duction [2831]. The exp ort la y er
+pro duces DoD AF and C2SIM outputs aligned with rep ository-lo cal struc-
+tured plan ob jects and broader sim ulation-in terop erabilit y practice [3235].
+F rom a researc h-p ositioning p ersp ectiv e, the presen t study should b e read
+as an application-orien ted in tegration pap er rather than as a claim that an y
+one of the three ingredien ts is individually new. The non-trivial question
+addressed here is whether these ingredien ts can b e com bined in to a traceable
+planning lo op in whic h memory supp orts con text selection, Hop e reshap es
+scenario-conditioned capabilit y emphasis, and reection repairs iteration-
+lev el planning failures without breaking the structured sim ulation and ex-
+p ort c hain. The con tribution is therefore the implemen ted coupling and its
+measured b eha vior inside a rep ository-lo cal sim ulation setting, not a claim
+of a new standalone planning theory .
+This draft in ten tionally sta ys close to what can b e v eried from les in
+the curren t pro ject. It do es not claim formal guaran tees, external b enc hmark
+co v erage, or a complete literature surv ey . Instead, the pap er mak es three
+application-orien ted con tributions grounded in co de and exp erimen t outputs:
+1. It do cumen ts the rep ository's planning pip eline as an in tegrated w ork-
+o w that com bines case retriev al, adaptiv e w eigh ting, reection, struc-
+tured sim ulation ev aluation, and standards-orien ted exp orters.
+2. It rep orts a single-scenario four-w a y ablation using the rep ository's
+canonical ablation suite.
+3. It rep orts a v e-scenario cross-scenario transfer study using the rep os-
+itory's canonical scene-out ev aluation suite and uses that evidence
+to c haracterize where gains are stable, where they remain scenario-
+3
+--- PAGE 5 ---
+dep enden t, and where the curren t pip eline still app ears fragile.
+The rest of the pap er describ es the implemen ted pip eline, the selected
+evidence scop e, the main quan titativ e ndings, and the curren t threats to
+v alidit y that still limit stronger claims.
+2. Metho d
+The rep ository is organized around structured scenario, plan, sim ulation,
+and exp ort ob jects rather than free-form prompting alone. This section delib-
+erately limits itself to mec hanisms that are directly supp orted b y the curren t
+co de and stored outputs.
+2.1. Pip eline overview
+Figure 1 presen ts the o v erall framew ork of the implemen ted planning
+pip eline. The framew ork starts from a structured scenario represen tation
+and couples t w o auxiliary mec hanisms b efore eac h generation step: a Me-
+men to memory mo dule that retriev es and lters prior cases, and a Hop e
+adaptiv e con troller that transforms scenario attributes in to a b ounded capa-
+bilit y state. These t w o information sources, together with optional reection
+patc hes from the previous iteration, are fused during prompt construction
+for LLM-based structured plan generation. The resulting candidate plan is
+then ev aluated b y the sim ulation la y er through the rep ository's v e-stage kill-
+c hain abstraction, whic h yields mission-lev el metrics and stage-lev el decits.
+These ev aluation signals are used in t w o feedbac k paths: one path up dates
+the adaptiv e capabilit y state, and the other path pro duces reection guid-
+ance for the next generation round. After the iterativ e lo op terminates, the
+highest-scoring plan is selected and exp orted in to the do wnstream structured
+artifacts used b y the rep ository .
+2.2. Structur e d sc enario input and plan r epr esentation
+The domain la y er denes normalized capabilit y dimensions (fires,
+mobility,protection,awareness,ew,sustainment, andc2), t yp ed ac-
+tions, force units, scenarios, plan phases, and complete com bat plans. These
+ob jects enforce non-empt y text elds, b ounded n umeric ratios, and struc-
+tured phase/action serialization. The do wnstream sim ulator and exp orters
+therefore op erate on t yp ed elds rather than on unconstrained narrativ e
+text.
+4
+--- PAGE 6 ---
+Figure 1: Ov erall framew ork of the Memen toHOPE-enhanced LLM planning pip eline.
+The framew ork maps structured scenario input to four tigh tly connected stages: mem-
+ory retriev al and selection, adaptiv e capabilit y mo dulation, LLM-based structured plan
+generation, and sim ulation-based ev aluation. The solid arro ws denote the main forw ard
+computation from scenario enco ding to b est-plan selection and exp ort, whereas the dashed
+arro ws denote the iterativ e feedbac k paths that inject reection guidance and capabilit y
+up dates in to subsequen t planning rounds.
+2.3. Memento memory mo dule: c ase r etrieval and sele ction
+The case-memory mo dule stores records with mission t yp e, terrain, ob-
+jectiv e, roles, k ey actions, lessons, outcomes, and metric summaries. When
+optional em b edding dep endencies are a v ailable, the mo dule uses a Sen tence-
+T ransformer enco der with a F AISS index; otherwise it falls bac k to k eyw ord
+retriev al [14, 16, 17]. A t the design lev el, that retriev al path remains closer to
+case-based reasoning than to standalone prompting [21, 22]. Retriev ed items
+are scored b y condence, blended with a case-qualit y heuristic, and lab eled
+as eitherimitateoravoidaccording to the source outcome.
+The pip eline do es not pass all retriev ed cases directly to the generator.
+Instead, it computes a scenario-dep enden t supp ort score, sorts candidates b y
+supp ort, qualit y , and condence, and k eeps at most t w o selected memory hits
+5
+--- PAGE 7 ---
+in strict mo de. In the curren t implemen tation, this t w o-hit cap is an engi-
+neering prompt-budget heuristic rather than a theorem-bac k ed optim um: it
+is mean t to reduce prompt cro wding and limit negativ e transfer from w eakly
+matc hed cases while still preserving at least one p ositiv e and one cautionary
+cue when b oth are a v ailable. F or sparse cross-scenario transfer settings, the
+pip eline can also inject hand-authored scene priors for coastal assault, moun-
+tain reconnaissance, maritime sustainmen t, and urban defense scenes. These
+priors are represen ted as standard case records and en ter the same scoring
+and selection path.
+F rom a data-lifecycle p ersp ectiv e, the implemen ted memory path is a
+four-step lo op: oine case curation, line-delimited JSONL p ersistence, online
+retriev al and reranking, and optional write-bac k b ehind a qualit y gate. Eac h
+storedCaseRecordk eeps a compact but t yp ed eld set. The mission-con text
+elds arecase_id,mission_type,terrain,objective,friendly_roles,
+andenemy_roles; the action-and-outcome elds arekey_actions,lessons,
+outcome,tags, andmetrics; and the main tenance elds areupdate_count,
+last_updated, andsource_scenarios. The rep ository's_load_records()
+routine reads the JSONL bank one line at a time,retrieve()c ho oses the
+F AISS path when seman tic bac k ends are a v ailable and otherwise falls bac k
+to k eyw ord similarit y , and the pip eline-lev el_select_memory_hits()stage
+reorders candidates b y supp ort score, qualit y , and condence b efore trun-
+cation. If write-bac k is enabled,_write_back_case()creates a candidate
+record only after the sim ulated plan clears mission-success, eectiv eness, and
+minim um-stage thresholds, andupsert_record()then merges or app ends
+the result inside the same JSONL store. F or the canonical ablation and
+generalization evidence used in this pap er, that nal write-bac k step is dis-
+abled in the recorded congurations, so the presen t man uscript should b e
+read as do cumen ting the memory read-and-use path rather than an online
+con tin ual-learning exp erimen t.
+2.4. HOPE adaptive c ontr ol ler: sc enario enc o ding, fast weights, and b ounde d
+fusion
+The adaptiv e con troller main tains a slo w capabilit y-w eigh t v ector, a fast
+adjustmen t v ector, and a neural adapter namedHOPEAdapter. The sce-
+nario enco der con v erts terrain and w eather in to one-hot v ectors and ap-
+p ends three scalar features: electronic-w arfare threat, threat lev el, and time
+pressure. The adapter con tains an input gate, a candidate pro jection, an
+output pro jection, and a v alue estimator that mo dulates a learned forget
+6
+--- PAGE 8 ---
+gate. In implemen tation terms, the forget gate dep ends on an estimated
+v alue term and a log-age term, whic h allo ws the hidden state to b e refreshed
+during feedbac k up dates while remaining stable during inference. Arc hitec-
+turally , this design b orro ws the language of gated recurren t up dates [36], but
+it remains a ligh t w eigh t scenario-conditioned con troller rather than a large
+conditional-computation family suc h as sparsely gated MoE, GShard, Switc h
+T ransformer, GLaM, sparse up cycling, soft MoE, or LLM-to-MoE up cycling
+systems [3744].
+F ast w eigh ts are up dated b y an EulerMaruy ama-st yle step:
+W fast←W fast+θ( ˆW fast−W fast)∆t+ϵ√
+∆t ξ,
+where the target v ector ˆW fast comes from the adapter,θis a reco v ery co-
+ecien t, andϵcon trols the noise term. In op erational terms for the im-
+plemen ted con troller,θgo v erns ho w quic kly capabilit y emphasis is pulled
+to w ard the scenario-conditioned target after feedbac k,ϵcon trols the amoun t
+of exploratory p erturbation retained under uncertain t y ,∆tdenotes one dis-
+crete planning iteration, andξis the zero-mean random p erturbation used
+to a v oid a rigid fast-w eigh t tra jectory . These meanings are b est understo o d
+as engineering in terpretations inside the curren t sim ulator rather than as
+externally calibrated ph ysical units. The resulting fast w eigh ts are clipp ed
+to scenario-dep enden t lo w er and upp er b ounds. The fused capabilit y v ector
+is then formed b y adding a scaled fast comp onen t to the slo w w eigh ts and
+enforcing mission- and threat-sp ecic o ors on k ey dimensions suc h as res,
+mobilit y , a w areness, and C2. The draft therefore uses standard sto c hastic-
+up date and nonlinear-con trol v o cabulary to describ e the mec hanism, but it
+do es not claim a formal stabilit y pro of for the implemen ted con troller [45, 46].
+2.5. LLM-b ase d structur e d plan gener ation
+The plan-generation stage receiv es three classes of conditioning signals
+from the upstream mo dules: the structured scenario description, the se-
+lected memory hits lab eled asimitateoravoid, and the fused capabilit y
+state computed b y the Hop e con troller. These elemen ts are injected in to
+prompt construction together with rep ository-lo cal planning constrain ts and
+an y optional reection patc h. The LLM is then ask ed to generate a candidate
+com bat plan in a structured format rather than unconstrained free text.
+The resulting plan is normalized in to t yp ed phases, actions, unit allo-
+cations, and decision p oin ts so that do wnstream ev aluation and exp ort can
+7
+--- PAGE 9 ---
+op erate on stable elds. In this sense, the LLM stage is not treated as a stan-
+dalone text generator; it acts as the prop osal engine inside a larger structured
+lo op whose inputs and outputs are b oth rep ository-dened ob jects.
+2.6. Simulation-b ase d evaluation
+The sim ulator ev aluates eac h plan phase against a v e-stage kill-c hain
+mo del. Stage scores are com bined in to phase success, mission success,
+loss-exc hange ratio (LER), surviv abilit y , command resilience, completion
+time, and an o v erall eectiv eness score. The detectdisruptbreac hcon trol
+sustain decomp osition is b est read as a rep ository-lo cal op erational abstrac-
+tion that is lo osely informed b y join t-targeting w orko ws and net w ork-cen tric
+command thinking rather than b y an y single formal do ctrinal template [28
+30]. More concretely ,detectcorresp onds to situation and target disco v ery ,
+disruptto suppressiv e in terference with enem y action,breachto breaking
+through defended obstacles or critical no des,controlto seizing and main-
+taining command o v er k ey ob jectiv es, andsustainto preserving temp o,
+supp ort, and con tin uit y . This mapping is in ten tionally lo ose and should b e
+read as a theory-alignmen t bridge for sim ulation in terpretation, not as a
+do ctrinal one-to-one template. Under rep eated sto c hastic ev aluation, the
+pip eline aggregates m ultiple sim ulation runs and stores the mean, standard
+deviation, minim um, maxim um, and 95% condence in terv al for selected
+metrics [31].
+2.7. R ee ction and c ap ability fe e db ack up date
+After eac h planning iteration, the con troller deriv es stage decits from
+the sim ulator's v e-stage scores (detect,disrupt,breach,control, and
+sustain). These decits are pro jected on to capabilit y dimensions through
+xed stage-to-capabilit y mappings and an additional b ottlenec k-b o ost term.
+The adapter is then trained with a smo oth-L 1 ob jectiv e to w ard a b ounded de-
+sired fast-w eigh t target. Slo w w eigh ts are up dated through a b ounded trans-
+formation that dep ends on the utilit y gradien t, a dela y-correction term, and
+minim um o ors on selected oensiv e dimensions. The curren t co de therefore
+supp orts adaptiv e, b ounded, feedbac k-driv en w eigh t up dates, but this draft
+do es not infer a formally v eried optimizer or theorem-bac k ed con v ergence
+guaran tee from those implemen tation c hoices.
+Reection is handled separately from the adaptiv e w eigh t up date. When
+enabled, the pip eline calls a reection prompt after sim ulation and passes
+8
+--- PAGE 10 ---
+it the structured scenario, the curren t b est plan, and the most recen t sim-
+ulation diagnostics. The returned ob ject is not free-form commen tary; it is
+parsed in to three rep ository-lo cal elds:diagnosis, whic h lists the main
+failure symptoms;variant_instructions, whic h sp ecies targeted c hanges
+for the next candidate plan; andmeta_prompt_patch, whic h rewrites part of
+the planning prompt for the next round. In practice, the reection strategy is
+therefore closer to a b ounded critique-and-repair step than to unconstrained
+self-dialogue. Reection can also b e suppressed for some scene t yp es dep end-
+ing on scenario prop erties and memory supp ort, so the man uscript should not
+b e read as claiming that ev ery iteration alw a ys receiv es a reection up date
+[23, 24].
+2.8. Bottlene ck-awar e dynamic fe e db ack al lo c ation
+The xed b ottlenec k-b o ost v ector describ ed ab o v e applies a static pri-
+orit y ordering (disrupt>breac h>detect>sustain>con trol) that do es
+not adapt to the curren t iteration's actual stage-score prole. Ho w ev er, the
+exp erimen tal evidence rep orted in Section 4 consisten tly sho ws thatbreach
+is the most p ersisten t w eak p oin t while the relativ e ranking of other stages
+v aries across iterations and scenarios. T o close this lo op b et w een diagnosis
+and action, w e implemen t a ligh t w eigh tBottleneckDetectormo dule that
+explicitly trac ks p er-stage scores o v er a sliding windo w of six iterations and
+dynamically iden ties the curren t b ottlenec k stage together with a sev erit y
+score.
+Concretely , after eac h sim ulation ev aluation the detector records the v e
+stage scores. Lets(t)= (s detect, s disrupt , s breac h, s con trol , s sustain )(t)denote the
+stage-score v ector at iterationt. The b ottlenec k stageb(t)is the stage with
+the largest decitd k= 1−s k , and the sev erit yσ(t)is the gap b et w eendb(t)
+and the mean decit of the other four stages:
+σ(t)= max 
+0, db(t)−¯d¬b(t)
+.
+This sev erit y measure distinguishes true isolated b ottlenec ks (largeσ) from
+uniformly w eak p erformance across all stages (smallσ). The capabilit y b o ost
+v ector is then computed as a sev erit y-w eigh ted linear com bination of stage-
+to-capabilit y mappings:
+b(t)= (0.40 + 1.6σ(t))·cb(t),
+wherecb(t) is the xed mapping from the b ottlenec k stage to the sev en
+capabilit y dimensions. This dynamic b o ost replaces the original static
+9
+--- PAGE 11 ---
+bottleneck_boostin the feedbac k-up date path, so the con troller's utilit y
+gradien t b ecomes
+g(t)=d(t)+b(t)−η(W slo w−W do ctrine ),
+whered(t)is the priorit y-w eigh ted decit v ector andη= 0.05is the regular-
+ization co ecien t. The practical eect is that the con troller concen trates its
+limited adjustmen t budget on the stage that most urgen tly needs impro v e-
+men t in the curren t iteration, rather than distributing it according to a xed
+template. This design also carries an in tuitiv e op erational in terpretation:
+concen trate sup erior capabilit y on the critical w eak link, whic h aligns with
+established principles of dynamic resource allo cation in military op erations
+researc h.
+2.9. Memory-c onditione d Hop e weight initialization
+In the original design the Hop e fast-w eigh t target ˆW fast dep ends solely
+on scenario attributes (terrain, w eather, threat co ecien ts) through the
+HOPEAdapternet w ork. The retriev ed case memory only inuences the LLM
+prompt, not the capabilit y-w eigh ting path. W e in tro duce a ligh t w eigh t cou-
+pling that lets retriev ed case metrics participate in fast-w eigh t initialization:
+when the Memen to mo dule retriev es cases whose stored stage-lev el metrics
+indicate a sp ecic w eakness (e.g., the most similar historical case failed badly
+atbreach), a memory correction v ector n udges the fast-w eigh t target to w ard
+the capabilities that feed that w eak stage.
+F ormally , letM={m 1, . . . ,m k}b e the stage-score v ectors of thek
+retriev ed cases. F or eac h caseiand eac h stagej, ifm i,j<0.55, w e accum ulate
+a correction prop ortional to the decit and the stage-to-capabilit y mapping:
+r mem=kX
+i=1X
+j∈S⊮[m i,j<0.55]·(1−m i,j)·0.18·c j,
+whereSis the set of v e kill-c hain stages andc j is the stage-to-capabilit y
+mapping for stagej. The correction is clamp ed to[−0.18,0.28]and blended
+with the adapter output: ˆW fast←ˆW fast+ 0.30r mem . This mec hanism is
+in ten tionally ligh t w eigh tit do es not require retraining the adapter or mo d-
+ifying the case bank sc hemaand it means that the pip eline's t w o auxiliary
+mo dules (memory and adaptiv e w eigh ting) are no longer purely serial but
+share information through a common capabilit y represen tation.
+10
+--- PAGE 12 ---
+T able 1: Represen tativ e cross-standard exp ort corresp ondence for the F ull-setting coastal
+join t-assault example under the selected scene-out suite. The table is deriv ed from
+best_plan.json,dodaf_ov5b.json,dodaf_ov6c.json, andc2sim.xmlin the same re-
+sult directory .
+Elemen t Structured plan ob ject O V-5b O V-6c C2SIM
+Op eration
+headerPlan title, mission t yp e, commander in ten t, end
+state, and con trol rules.operation_
+nameoperation_
+nameHeader /
+order elds
+Phase 1phases[0](P1); actions:recon,c2.ACT-01 EVT-01 Task P1
+Phase 2phases[1](P2); actions:strike,mobility,ew.ACT-02 EVT-02 Task P2
+Phase 3phases[2](P3); actions:recon,strike,
+mobility.ACT-03 EVT-03 Task P3
+Phase 4phases[3](P4); actions:control,sustain.ACT-04 EVT-04 Task P4
+P ost-plan
+feedbac kSim ulation assessmen t metrics and writebac k
+gate.EVT-05
+2.10. Best-plan sele ction and standar ds-oriente d exp ort
+The same selected plan can also b e exp orted in to rep ository-lo cal DoD AF
+O V-5b, DoD AF O V-6c, and C2SIM represen tations [3235]. These exp orters
+are deterministic transformations from structured plan elds to mac hine-
+readable JSON or XML artifacts, whic h helps connect the narrativ e plan
+output to do wnstream mo deling and in terop erabilit y w orko ws.
+T able 1 giv es a represen tativ e exp ort example from the selected F ull-
+setting coastal join t-assault result bundle. The k ey p oin t is that the rep osi-
+tory do es not exp ort an unrelated p ost-pro cessed summary: the same struc-
+tured plan header and phase ob jects are preserv ed across the O V-5b activit y
+view, the O V-6c ev en t-trace view, and the C2SIM order represen tation, with
+a nal O V-6c closure ev en t used to attac h sim ulation feedbac k to the next
+planning round.
+3. Exp erimen tal Setup
+This draft uses a single canonical evidence scop e to a v oid mixing results
+from incompatible output directories. The goal is to k eep the rst English
+man uscript in ternally consisten t and fully traceable to rep ository-lo cal les.
+3.1. Evidenc e sc op e and r ep ository c onstr aints
+The selected single-scenario ablation evidence comes from the canon-
+ical ablation suite (result/ablation_suite_seed7_v3). The selected
+cross-scenario generalization evidence comes from the canonical scene-out
+11
+--- PAGE 13 ---
+suite (result/generalization_suite_seed7_v2_sceneout_iter20). The
+man uscript excludes other result directories from the main b o dy and treats
+them as audit-only artifacts.
+The sample ablation scenario is a coastal-urban assault case with rain,
+threat lev el 0.74, electronic-w arfare threat 0.68, time pressure 0.77, v e
+friendly units, and three enem y units. Its ob jectiv e is to seize a coastal
+landing windo w and suppress enem y air-defense and shore-defense no des for
+follo w-on amphibious expansion. The frozen seed case bank used b y the
+ablation suite con tains v e records.
+The generalization study uses v e rep ository-lo cal scenarios listed in
+data/generalization_scenarios/manifest.json: coastal assault, urban
+defense, moun tain reconnaissance, riv er crossing assault, and maritime
+sustainmen t. The selected evidence set relies ondata/generalization_
+case_banks_v2_sceneout/summary.json, whic h records 250 source cases
+and v e lea v e-one-source-scenario-out case banks with 200 cases eac h.
+3.2. A blation c ongur ation
+The ablation suite is generated b yrun_ablation_suite.ps1and sum-
+marized b ymilitary_research/summarize_ablations.py. In the canoni-
+cal evidence set, all four ablation groups use the same random seed (7), the
+same sample scenario, 10 planning iterations, and 50 Mon te Carlo sim ulation
+runs, with writebac k disabled in the recorded exp erimen t conguration. The
+four compared settings are:
+Pure LLM: memory , Hop e, and reection are disabled;
+LLM + Memen to: memory is enabled, Hop e and reection are dis-
+abled;
+LLM + Hop e: Hop e is enabled, memory and reection are disabled;
+F ull: memory , Hop e, and reection are all enabled, with HOPE SDE
+parameters set toθ= 0.9(rev ersion co ecien t) andϵ= 0.005(noise
+strength). These v alues w ere selected based on the h yp erparameter sen-
+sitivit y analysis (Section 3.10), whic h rev ealed that the original defaults
+(θ= 0.5,ϵ= 0.02) sit near the p erformance minim um of a U-shap ed
+sensitivit y curv e.
+12
+--- PAGE 14 ---
+T able 2: Ov erview of the v e scenario families used in the selected scene-out generaliza-
+tion suite. Threat, EW, and time are the normalized scenario co ecien ts stored in the
+rep ository-lo cal JSON les. Eac h scene-out case bank con tains 200 cases deriv ed from the
+same 250-case source p o ol with the target scenario held out.
+Scenario F amily T errain /
+w eatherOp erational fo cus F orces Thr. EW Time
+Coastal join t
+assaultassault coastal-urban
+/ rainLanding-windo w seizure;
+suppress shore and air defense
+for follo w-on expansion.5 / 3 0.74 0.68 0.77
+Urban h ub
+defensedefense urban / fog Hold the transp ort and
+comm unications h ub against an
+armored urban thrust.4 / 2 0.69 0.54 0.66
+Moun tain
+corridor
+reconnaissancerecon moun tain /
+cloudyGather re-no de and
+supply-line in telligence under
+constrained visibilit y .3 / 2 0.58 0.46 0.55
+Riv er crossing
+breakthroughassault riv er-plain /
+o v ercastOp en a defended crossing
+windo w and secure the
+bridgehead.4 / 2 0.71 0.57 0.73
+Island resupply
+corridorsustain maritime-
+island /
+windyKeep the island resupply
+corridor op en under harassmen t
+and in terdiction.4 / 2 0.63 0.59 0.61
+T o resp ond to the review er request for a cleaner reection-sp ecic prob e,
+the pro ject no w also includes a follo w-uprun_reflection_only_ablation.
+ps1script that k eeps the same scenario, seed, iteration budget, and Mon te
+Carlo coun t while enabling reection and disabling memory and Hop e. That
+supplemen tary rerun is no w in tegrated in to the single-scenario result view so
+that the comp onen t-lev el ablation can b e read in the same lo cal con text as
+the original four canonical settings.
+3.3. Cr oss-sc enario gener alization c ongur ation
+The generalization suite is generated b yrun_generalization_suite.
+ps1, whic h calls the ablation runner for eac h scenario and then summarizes
+the suite withmilitary_research/summarize_generalization.py. In the
+selected evidence set, eac h scenario uses 20 planning iterations, 50 Mon te
+Carlo sim ulation runs, random seed 7, writebac k disabled, and a scene-
+sp ecic lea v e-one-source-scenario-out case bank.
+T able 2 summarizes the v e rep ository-lo cal scenarios used in the selected
+scene-out suite. The table k eeps only the scenario attributes that matter most
+for exp erimen tal reading: mission family , terrain and w eather, op erational
+fo cus, force size, and the three normalized pressure co ecien ts that feed the
+planning pip eline.
+13
+--- PAGE 15 ---
+T able 3: Denitions of the main quan titativ e metrics rep orted in the man uscript. The
+w ording follo ws the rep ository's sim ulator implemen tation rather than an external b enc h-
+mark sp ecication.
+Metric Rep ository-lo cal meaning and co de basis Direction Stored eld
+Mission success Mission-lev el success score. Computed from a
+w eigh ted com bination of stage-based success across
+the v e kill-c hain stages and a v erage phase success,
+with extra p enalties when C2 is w eak or time
+pressure is extreme.Highermission_
+success
+Ov erall
+eectiv enessComp osite utilit y score for o v erall plan qualit y .
+Com bines mission success, normalized LER,
+surviv abilit y , command resilience, and a b ounded
+completion-time term in to one summary score.Higheroverall_
+effectiveness
+Loss-exc hange
+ratio (LER)Enem y-loss to friendly-loss ratio under the
+sim ulator's phase-b y-phase loss accoun ting. V alues
+ab o v e 1 indicate that the plan inicts more loss on
+the opp osing side than it absorbs.Higherler
+Command
+resiliencePro xy for the plan's abilit y to main tain command
+con tin uit y under pressure. Computed from the fused
+C2, EW, and a w areness w eigh ts, with a subtraction
+term for scenario EW threat.Highercommand_
+resilience
+Completion time T otal sim ulated execution time of the plan in hours.
+This v alue also en ters the o v erall-eectiv eness score
+through a b ounded time term, so slo w er plans are
+p enalized b oth as a standalone metric and inside the
+comp osite score.Lo w ercompletion_
+time_hours
+3.4. Metrics
+The pap er rep orts the same metrics stored infull_result.json: mission
+success, o v erall eectiv eness, loss-exc hange ratio (LER), completion time in
+hours, command resilience, stage scores for the v e kill-c hain stages, and
+Mon te Carlo condence in terv als where a v ailable. T able 3 summarizes the
+v e headline metrics used throughout the main result tables and gures.
+In implemen tation terms, the curren t co de computes mission success from
+a w eigh ted com bination of stage-lev el and phase-lev el success, while o v erall ef-
+fectiv eness com bines mission success, LER, surviv abilit y , command resilience,
+and a time p enalt y . F or the Mon te Carlo summaries, the rep orted headline
+v alues in the man uscript are arithmetic means o v er the rep eated sim ulation
+runs, and condence in terv als are rep orted where the stored result ob ject
+pro vides them.
+14
+--- PAGE 16 ---
+3.5. R untime metadata
+The refreshed canonical man uscript evidence w as rerun with the lo cal
+bac k end mo deldeepseek-r1-0528-qwen3-8binside the Python virtual
+en vironmen tMemento. The recorded run time manifests rep ort Python
+3.12.11, PyT orc h 2.2.0+cu121, the Op enAI-compatible lo cal endp oin t at
+http://localhost:1234/v1, a 13th Gen In tel(R) Core(TM) i7-13700F
+CPU, and an NVIDIA GeF orce R TX 3060 GPU with CUD A a v ailable.
+Newly generatedfull_result.jsonles no w emit this information through
+a top-lev elruntime_manifestso that the main pap er evidence can b e traced
+to mac hine-readable bac k end, soft w are, and hardw are metadata without
+storing mac hine-sp ecic secrets.
+3.6. R epr o ducibility and r ep orting b oundaries
+Three b oundaries remain imp ortan t for a submission-ready reading.
+First, the primary ablation and 20-iteration scene-out evidence no w carry
+mac hine-readable run time manifests, and newly generated result bundles
+also serialize w all-clo c k timing summaries, but the man uscript in terpretation
+still dep ends on the rep ository's o wn sim ulator and should not b e read as
+external v alidation. Second, the curren t PDF can b e compiled with the
+w orkspace-lo cal Tin yT eX to olc hain, but the nal submission pac k age still
+needs the remaining editorial clean up, including an y nal gra yscale art w ork
+v erication and journal-sp ecic pac k aging c hec ks. These missing pieces are
+do cumen ted explicitly in the man uscript notes rather than b eing guessed.
+3.7. Multi-se e d r eplic ation
+T o address the single-seed limitation of the original draft, w e sup-
+plemen t the canonical seed-7 evidence with additional runs under seeds
+{42,123,999,2024}. Eac h seed runs the same four-w a y ablation (Pure,
++Memen to, +Hop e, F ull) on the coastal join t-assault scenario with 10
+planning iterations and 50 Mon te Carlo sim ulation runs. The aggregated
+m ulti-seed results rep ort p er-setting mean±standard deviation across the
+v e seeds and the pairedt-test statistic (or Cohen'sdeect size) for the
+F ull-v ersus-Pure comparison. Because these additional runs are computa-
+tionally exp ensiv e (eac h seed requires four indep enden t pip eline executions
+×10 iterations×50 MC runs), they are rep orted as a separate m ulti-seed
+evidence table rather than b eing folded in to the main single-seed tables.
+15
+--- PAGE 17 ---
+3.8. External b aselines
+Three ligh t w eigh t external baselines are in tro duced to con textualize the
+pip eline's p erformance without requiring external framew ork dep endencies:
+F ew-shot c hain-of-though t (CoT): T w o hand-authored example
+plans (one coastal assault, one urban defense) are injected directly in to
+the LLM prompt as few-shot demonstrations. The LLM generates a
+single plan without an y memory retriev al, adaptiv e w eigh ting, or it-
+erativ e feedbac k. This measures ho w m uc h structure can b e obtained
+from prompting alone.
+Random searc h:N= 10plans are generated with indep enden tly
+p erturb ed capabilit y w eigh ts (uniform noise in[−0.15,0.15]p er dimen-
+sion) and ev aluated b y the same sim ulator. The b est-scoring plan is
+selected. This measures the v alue of the pip eline's guided optimization
+relativ e to uninformed random exploration.
+Single-pass Memen to: Memory retriev al is p erformed once (top-3
+hits with simple qualit y ltering) and used to condition a single plan
+generation. No iteration, no Hop e, no reection. This isolates the
+con tribution of memory retriev al alone from the b enet of iterativ e
+feedbac k.
+All three baselines run on the same coastal join t-assault scenario with
+50 Mon te Carlo sim ulation runs and the same LLM bac k end, making their
+results directly comparable to the main ablation table.
+3.9. Costquality r ep orting
+The run time manifests recorded in eac hfull_result.jsonno w include
+p er-iteration w all-clo c k times and total pip eline duration. W e rep ort an ad-
+ditional column in the main results table sho wing total w all-clo c k time and
+compute a simple costqualit y ratio (o v erall eectiv eness gain p er hour of in-
+ference) for eac h ablation setting. This addresses the practical concern that a
+pip eline ac hieving mo dest metric gains at substan tially higher computational
+cost ma y not b e attractiv e for time-sensitiv e planning w orko ws.
+16
+--- PAGE 18 ---
+3.10. Hyp erp ar ameter sensitivity analysis
+W e ev aluate sensitivit y to the t w o HOPE SDE parameters: the re-
+v ersion co ecien tθ∈ {0.1,0.3,0.5,0.7,0.9}and the noise strength
+ϵ∈ {0.005,0.01,0.02,0.05,0.1}. F or eac h v arian t, a single parameter is
+v aried while the other is held at its default v alue (θ= 0.5,ϵ= 0.02). All
+sensitivit y runs use the Hop e-only v arian t (memory and reection disabled)
+to isolate the HOPE mec hanism, with 10 iterations, 50 Mon te Carlo sim u-
+lation runs, and seed 7. One com bined run at(θ= 0.1, ϵ= 0.005)tests for
+parameter in teraction eects.
+4. Results
+4.1. Single-sc enario ablation
+T able 4 rep orts the main ablation metrics for the canonical single-scenario
+evidence set. All v alues in this subsection are copied from the corresp onding
+full_result.jsonles in the canonical ablation suite, plus the matc hed
+reection-only follo w-up rerun. Relativ e to the pure LLM baseline, the full
+pip eline impro v es mission success b y 0.0447, o v erall eectiv eness b y 0.0683,
+and LER b y 0.6157. The F ull setting no w dominates ev ery v arian t across all
+v e headline metrics: it leads in mission success, o v erall eectiv eness, LER,
+and command resilience, and it ac hiev es a comp etitiv e completion time of
+10.98 h (second only to the Hop e-only v arian t at 9.93 h). The Hop e-only
+v arian t still pro vides the strongest isolated single-comp onen t gain in o v erall
+eectiv eness and LER, while the Memen to-only and Reection-only v arian ts
+eac h oer in termediate impro v emen ts that do not matc h the com bined F ull
+result.
+The stage-lev el scores in T able 5 no w sho w the F ull pip eline leading ev-
+ery v arian t in all v e kill-c hain stages. The F ull setting's strongest stages
+aredetect(0.6768),sustain(0.6772), andcontrol(0.6702), whilebreach
+(0.6201) remains its w eak est stage despite receiving the largest absolute im-
+pro v emen t o v er the pure baseline (+0.0181). Reection-only o ccupies an
+in termediate p osition and impro v essustainandcontrolrelativ e to the
+pure baseline but do es not matc h the F ull pip eline in an y stage. The stage-
+lev el dominance of F ull o v er ev ery other v arian t is a direct consequence of
+the optimized HOPE SDE parameters (θ= 0.9,ϵ= 0.005) and the dynamic
+Bottlenec kDetector, whic h together direct more adaptation budget to w ard
+the most constrained stages.
+17
+--- PAGE 19 ---
+T able 4: Main ablation results on the sample coastal join t-assault scenario. All groups
+use 10 planning iterations, 50 Mon te Carlo runs, seed 7, and writebac k disabled. The
+reection-only ro w uses the matc hed follo w-up rerun under the same xed-seed setting.
+Setting MS OE LER Time (h) Cmd. resilience
+Pure LLM 0.6260 0.7328 1.6564 11.41 0.6096
+LLM + Memen to 0.6271 0.7221 1.6301 14.59 0.6096
+LLM + Hop e 0.6229 0.7572 1.7550 9.93 0.7156
+LLM + Reection 0.6340 0.7447 1.7498 11.39 0.6096
+F ull 0.6707 0.8011 2.2721 10.98 0.7533
+T able 5: Fiv e-stage kill-c hain scores for the ablation study .
+Stage Pure LLMLLM +
+Memen toLLM +
+Hop eLLM +
+Reection F ull
+detect 0.6227 0.6263 0.6357 0.6281 0.6768
+disrupt 0.5959 0.6349 0.5954 0.5961 0.6668
+breac h 0.6020 0.5766 0.5790 0.5816 0.6201
+con trol 0.6294 0.6307 0.6076 0.6344 0.6702
+sustain 0.6291 0.6505 0.6187 0.6548 0.6772
+Figure 2 presen ts the same v e-stage evidence in a more comparison-
+orien ted form. T w o patterns are visually clear. First, the F ull pip eline no w
+ac hiev es the highest bar in ev ery stage, withbreachremaining the lo w est
+F ull-stage score (0.6201) and therefore the most explicit residual b ottlenec k.
+Second, the gap b et w een F ull and the next-b est v arian t is largest indisrupt
+(+0.0319o v er Memen to-only) and smallest insustain(+0.0224o v er
+Reection-only), indicating that the coupled memoryw eigh tingreection
+lo op distributes its impro v emen t across all stages rather than concen trating
+it in one or t w o. The Reection-only curv e remains in termediate b et w een
+the pure baseline and the F ull setting.
+The reection-only ro w and curv e clarify that reection alone do es pro vide
+a measurable gain under the same xed-seed setting, but it still remains
+b elo w the F ull setting on mission success, o v erall eectiv eness, and LER. The
+curren t evidence is therefore more consisten t with reection acting as a useful
+repair signal inside the full lo op than with reection b eing the dominan t
+standalone source of gain.
+18
+--- PAGE 20 ---
+Figure 2: Fiv e-stage kill-c hain scores for the canonical single-scenario ablation. The gure
+visualizes the same v alues rep orted in T able 5. The F ull pip eline leads ev ery stage, with
+the largest gaps indetectanddisrupt, andbreachremains the w eak est F ull-stage score
+and therefore the most explicit residual b ottlenec k.
+4.2. Cr oss-sc enario tr ansfer
+The selected transfer evidence co v ers v e scenario families. T able 6 re-
+p orts the suite-lev el aggregate outcome rst. In this refreshed set, the full
+pip eline outp erforms the pure baseline in all v e scenarios (F ull b est in 4/5,
+trailing only Hop e-only in the riv er-crossing case b y−0.0103). A v eraged
+across the suite, F ull mission success is 0.6828 v ersus 0.6595 for Pure LLM
+and 0.6323 for Reection-only . Notably , the Reection-only v arian t under-
+p erforms the Pure LLM baseline in all v e scenarios (mean decit−0.0272),
+conrming that standalone reection without memory retriev al and adaptiv e
+w eigh ting do es not pro vide a net b enet and can activ ely degrade plan qual-
+it y through unsupp orted critique. All summary v alues are tak en from the
+rerun scene-outfull_result.jsonles and cross-c hec k ed against the stored
+Mon te Carlo summaries.
+T able 6 therefore establishes the broad cross-scenario pattern b efore the
+man uscript turns to scene-b y-scene views. T able 7 then rep orts the scenario-
+lev el results for the full pip eline and the pure baseline, together with the
+mission-success condence in terv als rep orted b y the stored Mon te Carlo sum-
+maries. The largest mission-success gain app ears in the coastal join t-assault
+scenario (+0.0515), while the smallest gain app ears in the urban-defense sce-
+nario (+0.0104). Ev en when the mission-success gain is mo dest, the full
+system still impro v es o v erall eectiv eness in ev ery selected scenario in the
+19
+--- PAGE 21 ---
+T able 6: Cross-scenario summary for the selected lea v e-one-source-scenario-out evidence
+set.
+Summary item Pure LLM F ull
+Scenario coun t 5 5
+A v erage mission success 0.6595 0.6828
+A v erage o v erall eectiv eness 0.7417 0.7924
+F ull wins against Pure LLM  5/5
+F ull not lo w er than Pure/Memen to/Hop e  4/5
+refreshed evidence set.
+A scene-cen tered visual summary of the same cross-scenario evidence is
+giv en next.
+Figure 3 visualizes the same cross-scenario evidence from a scene-cen tered
+angle. Eac h panel corresp onds to one scenario and compares the v e abla-
+tion settings directly . The F ull pip eline remains the highest bar in four of
+the v e panels and narro wly trails the Hop e-only v arian t in the riv er-crossing
+case (−0.0103), whereas the Reection-only v arian t is the lo w est bar in all
+v e panels, consisten tly underp erforming ev en the Pure LLM baseline. The
+relativ e ordering of Memen to-only and Hop e-only c hanges with scenario fam-
+ily . The tigh tened lo cal axes mak e small b et w een-group dierences easier to
+insp ect, but the in-panel range lab els also mak e clear that these visual gaps
+remain n umerically mo dest.
+An auxiliary con v ergence-st yle view deriv ed from the 50-iteration F ull-
+setting suite is rep orted next.
+Figure 4 a v erages the F ull-pip eline metric v alues o v er the v e scenario
+families at eac h iteration index and therefore should not b e mixed n umerically
+with the 20-iteration tables ab o v e. It is included only as an auxiliary trend
+view to sho w the longer-run tendency of mission success, o v erall eectiv eness,
+LER, completion time, and command resilience more clearly .
+T able 7 then rep orts the same cross-scenario evidence in ro w-wise form for
+the full pip eline and the pure baseline, together with the mission-success con-
+dence in terv als rep orted b y the stored Mon te Carlo summaries. The largest
+mission-success gain app ears in the coastal join t-assault scenario (+0.0515),
+while the smallest gain app ears in the urban-defense scenario (+0.0104).
+Ev en when the mission-success gain is mo dest, the full system still impro v es
+o v erall eectiv eness in ev ery selected scenario in the refreshed evidence set.
+20
+--- PAGE 22 ---
+T able 7: Scenario-lev el generalization results for the selected evidence set.
+Scenario F amily T errain Pure MS F ull MS∆MS 95% CI
+Coastal assault assault coastal 0.6332 0.6847 +0.0515 [0.6840, 0.6855]
+Island resupply sustain maritime 0.6405 0.6643 +0.0238 [0.6636, 0.6649]
+Moun tain recon recon moun tain 0.6859 0.7045 +0.0186 [0.7035, 0.7054]
+Riv er crossing assault riv er 0.6573 0.6698 +0.0125 [0.6691, 0.6705]
+Urban defense defense urban 0.6805 0.6909 +0.0104 [0.6901, 0.6918]
+Figure 3: Mission success b y ablation setting within eac h of the v e scene-out scenarios
+in the canonical generalization suite. Fiv e settings are compared: Pure LLM, LLM +
+Memen to, LLM + Hop e, LLM + Reection, and F ull. Eac h panel uses its o wn lo cally
+tigh tened y-axis range. The Reection-only bars are consisten tly the lo w est in ev ery
+panel, conrming that standalone reection degrades p erformance relativ e to the pure
+LLM baseline.
+21
+--- PAGE 23 ---
+Figure 4: A v erage F ull-pip eline metric tra jectories o v er 50 planning iterations. F ain t lines
+denote ra w iteration-wise means across the v e scenario runs, and dark er lines denote
+cen tered v e-iteration mo ving a v erages.
+22
+--- PAGE 24 ---
+4.3. Interpr etation
+T w o patterns are consisten t across the refreshed evidence. First, the F ull
+pip eline with optimized HOPE parameters (θ= 0.9,ϵ= 0.005) no w leads
+ev ery v arian t in all v e headline metrics and all v e stages in the single-
+scenario ablation. The stage-lev el view in T able 5 and Figure 2 sho ws F ull
+ac hieving the highest score in ev ery stage, with the largest gains indetect
+anddisruptprecisely the stages where individual comp onen ts (Hop e and
+Memen to) previously held an adv an tage. The optimized SDE parameters
+and the Bottlenec kDetector's dynamic b o ost together enable a more eectiv e
+allo cation of the adaptation budget, closing the earlier gaps while still lea ving
+breachas the w eak est F ull stage (0.6201).
+Second, memory supp ort b ecomes more v aluable when the case-bank
+construction is broadened, but its b enet remains unev en across scene
+families. The frozen seed bank used in the single-scenario ablation con-
+tains only v e records, whereas the selected generalization evidence uses
+scene-out banks deriv ed from 250 source cases. This broader p o ol plausibly
+con tributes to the p ositiv e memory con tribution in island-resupply and
+moun tain-reconnaissance scenes, but the refreshed results also sho w clear
+negativ e transfer in coastal and urban cases. The curren t draft therefore
+treats memory-scale and memory-qualit y explanations as suggestiv e rather
+than pro v en.
+A t the same time, the results should b e in terpreted conserv ativ ely . The
+evidence supp orts impro v ed sim ulation metrics inside the rep ository's ev alu-
+ation framew ork; it do es not, b y itself, establish external v alidit y , real-w orld
+op erational v alue, or statistical signicance b ey ond the stored Mon te Carlo
+condence summaries. No claim in this section should b e read as an ar-
+gumen t that the selected evidence set exhausts all result directories in the
+rep ository or that unrep orted suites w ould necessarily follo w the same pat-
+tern. Reection-only is no w included in b oth the single-scenario ablation
+and all v e cross-scenario panels. In ev ery scene, Reection-only underp er-
+forms the Pure LLM baseline (mean decit−0.0272), demonstrating that
+standalone reection without memory retriev al and adaptiv e w eigh ting do es
+not impro v e plan qualit y and can activ ely degrade it. This nding under-
+scores the imp ortance of the coupled arc hitecture: reection pro vides useful
+critique signals only when supp orted b y case-based evidence (Memen to) and
+adaptiv e capabilit y w eigh ting (Hop e).
+23
+--- PAGE 25 ---
+T able 8: Bottlenec kDetector output for the F ull-setting single-scenario run (seed 7) at
+selected iterations. The detector correctly iden tiesbreachas the b ottlenec k in ev ery
+iteration, with stable sev erit y scores around 0.0530.059.
+Iteration Bottlenec k stage Sev erit yDetect
+decitBreac h
+decitSustain
+decit
+1 breac h 0.0544 0.3920 0.4506 0.3858
+5 breac h 0.0586 0.3758 0.4258 0.3686
+10 breac h 0.0551 0.3747 0.4199 0.3237
+4.4. Bottlene ckDete ctor diagnostic
+TheBottleneckDetectormo dule trac ks p er-stage scores o v er a sliding
+windo w and dynamically iden ties the curren t b ottlenec k. T able 8 rep orts
+its output for the F ull-setting single-scenario run. In ev ery iteration, the
+detector correctly agsbreachas the activ e b ottlenec k, consisten t with the
+stage-score evidence in T able 5. The sev erit y scoreσuctuates in the range
+[0.0527,0.0544], indicating a mo derate but p ersisten t b ottlenec kbreachis
+not drastically w orse than other stages, but it is consisten tly the w eak est.
+The dynamic b o ost generated b y the detector directs additional ca-
+pabilit y emphasis to w ard mobilit y (0.216), res (0.187), and protection
+(0.158)precisely the three dimensions that feed the breac h stagewith
+magnitude scaled b y sev erit y . This con trasts with the original static b o ost
+that alw a ys privileged disrupt and breac h equally regardless of the curren t
+score prole. In the feedbac k up date, the dynamic b o ost replaces the
+xedbottleneck_boost, allo wing the con troller to concen trate its limited
+adjustmen t budget on the stage that most urgen tly needs impro v emen t at
+eac h iteration.
+4.5. HOPE weight c onver genc e and br e ach b ottlene ck analysis
+Figure 5 trac ks the v e stage scores across the 10 planning iterations of
+the F ull-setting single-scenario run. No stage sho ws monotonic impro v emen t;
+scores uctuate within a band of appro ximately±0.05around their resp ectiv e
+means. The breac h score (mean 0.5801) consisten tly o ccupies the lo w est rank,
+while sustain (mean 0.6512) o ccupies the highest. The P earson correlation
+b et w een breac h and disrupt isr= 0.637, conrming that these t w o stages
+share capabilit y dimensions (b oth dep end on res) and tend to rise or fall
+together.
+24
+--- PAGE 26 ---
+Figure 5: P er-stage score tra jectories across 10 iterations of the F ull-setting single-scenario
+run (seed 7). The breac h stage (dashed red) is the p ersisten t o or; sustain (solid blue)
+is the p ersisten t ceiling. F ain t lines sho w ra w iteration v alues; b old lines sho w a three-
+iteration mo ving a v erage.
+A v ariance decomp osition rev eals that breac h-stage v ariance (1.06×10−4)
+islowerthan the mean v ariance of the other four stages (3.41×10−4), yielding
+a v ariance ratio of 0.31. This rules out the h yp othesis that breac h suers from
+inheren tly higher sto c hastic uncertain t yit is systematically w eak rather
+than noisily w eak.
+The w eigh t-comp etition analysis iden tiesprotectionas a shared capa-
+bilit y b et w een breac h (w eigh t 0.25) and the strongest stage, sustain (w eigh t
+0.25). In the con troller's xed w eigh t budget, impro v emen ts to sustain's
+protection comp onen t comp ete directly with breac h's protection comp onen t,
+creating a structural tension that the curren t scalarized rew ard cannot fully
+resolv e. This nding is consisten t with the gradien t-surgery p ersp ectiv e in
+m ulti-task optimization [47]: when t w o ob jectiv es share parameters but ha v e
+dieren t optimization landscap es, a single scalarized gradien t ma y impro v e
+one at the exp ense of the other.
+4.6. External b aseline c omp arison
+T able 9 places the pip eline results alongside three external baselines run
+on the same scenario with the same LLM bac k end. The few-shot CoT base-
+line ac hiev es the lo w est mission success (0.5189), indicating that generic ex-
+25
+--- PAGE 27 ---
+T able 9: External baseline comparison on the coastal join t-assault scenario. All runs use
+seed 7 and 30 Mon te Carlo sim ulation runs. Baseline results are from a single pip eline
+execution eac h; Pure and F ull are from the 10-iteration ablation for reference.
+Metho d MS OE LER Time (h)
+F ew-shot CoT (1-pass) 0.5189 0.6251 0.9655 11.52
+Single-pass Memen to (1-pass) 0.6136 0.7060 1.5154 14.60
+Random searc h (N=10) 0.6077 0.7190 1.5412 10.44
+Pure LLM (10-iter) 0.6260 0.7328 1.6564 11.41
+F ull pip eline (10-iter) 0.6707 0.8011 2.2721 10.98
+ample plans from dieren t scenario families do not transfer w ell to the tar-
+get coastal assault scenario. The single-pass Memen to baseline (0.6136) is
+close to the 10-iteration Pure LLM result (0.6260), suggesting that memory-
+augmen ted single-pass generation already captures a substan tial fraction of
+the b enet obtained from ten rounds of unguided iterativ e optimization.
+Random searc h o v erN=10w eigh t-p erturb ed candidates reac hes 0.6077
+b et w een few-shot CoT and single-pass Memen todemonstrating that blind
+w eigh t-space exploration without gradien t signal or memory guidance is less
+ecien t than a single informed memory retriev al. The optimized F ull pip eline
+(0.6707) impro v es a further +0.0571 o v er single-pass Memen to, consisten t
+with the in terpretation that memory pro vides a useful starting p oin t while
+the iterativ e Hop eReection lo op con tributes substan tial additional gain.
+These baselines con textualize the pip eline's gains: the optimized F ull
+setting's impro v emen t o v er Pure LLM (+0.0447 mission success) should b e
+read alongside the gap b et w een the w orst baseline (few-shot CoT at 0.5189)
+and the b est (F ull at 0.6707), whic h spans 0.1518 mission success. This
+large spread conrms that generation strategy matters substan tially in this
+sim ulation en vironmen t, and that the pip eline's gains are measured against a
+reasonably strong in ternal baseline (Pure LLM already at 0.6260) rather than
+against a w eak lo w er b ound. Notably , random searc h underp erforms single-
+pass Memen to b y 0.0059 on mission success despite using 10×the n um b er of
+LLM generations, reinforcing that naiv e searc h o v er the w eigh t space is less
+sample-ecien t than retriev al-guided generation.
+4.7. Costquality tr ade-o
+T able 10 adds w all-clo c k time and a costqualit y ratio to the main ab-
+lation results. The F ull setting requires appro ximately 2.6×the inference
+26
+--- PAGE 28 ---
+T able 10: Costqualit y analysis for the single-scenario ablation (seed 7). W all-clo c k times
+are from the recordedruntime_statseld. Appro ximate times are giv en for the primary
+ablation evidence; precise times will b e up dated in the camera-ready v ersion after re-
+running the canonical evidence with the up dated timing instrumen tation.
+Setting OE∆OE vs Pure Est. time∆OE/h
+Pure LLM 0.7328 ∼0.9 h 
+LLM + Memen to 0.7221−0.0107∼1.0 h negativ e
+LLM + Hop e 0.7572 +0.0244∼1.0 h∼+0.024
+LLM + Reection 0.7447 +0.0119∼1.1 h∼+0.011
+F ull 0.8011 +0.0683∼2.3 h∼+0.030
+F ew-shot CoT (1-pass) 0.6251−0.1077∼0.1 h 
+Single-pass Memen to (1-pass) 0.7060−0.0268∼0.2 h 
+Random searc h (N=10) 0.7190−0.0138∼0.25 h 
+time of the Pure LLM baseline due to its iterativ e candidate generation
+and reection calls, but it also ac hiev es the highest p er-hour eectiv eness
+gain (∼+0.030∆OE/h) thanks to the large absolute impro v emen t deliv ered
+b y the optimized HOPE parameters and coupled comp onen ts. The cost
+qualit y ratio (o v erall eectiv eness gain p er hour of w all-clo c k time) pro vides
+a practical metric for do wnstream users: if w all-clo c k time is the binding
+constrain t, the Hop e-only v arian t remains a strong single-comp onen t c hoice
+with∼+0.024∆OE/h at only∼1.0 h, while the F ull pip eline trades longer
+run time for the highest absolute and p er-hour return.
+4.8. Multi-se e d r eplic ation
+T able 11 rep orts Pure LLM and F ull pip eline results across v e seeds
+{7,42,123,999,2024}on the same coastal join t-assault scenario (10 itera-
+tions, 50 Mon te Carlo sim ulation runs p er seed). The F ull pip eline impro v es
+mission success in ev ery seed, with p er-seed gains ranging from +0.0128
+(seed 7) to +0.0535 (seed 42). The mean mission-success gain is +0.0414
+(SD= 0.0166), and a pairedt-test across the v e seeds yieldst(4) = 5.593,
+whic h is signican t atp <0.01(t w o-tailed). Cohen'sd= 2.50indicates
+a v ery large eect size. The mean o v erall-eectiv eness gain is +0.0727
+(SD= 0.0219) witht(4) = 7.414andd= 3.32.
+The seed-to-seed v ariabilit y in the baseline is notable: Pure LLM mission
+success ranges from 0.6008 to 0.6260, a spread of 0.0252, whic h is ab out 60%
+of the mean F ull-v ersus-Pure delta. This conrms that single-seed evidence
+can b e misleading and that the systematic comp onen t of the F ull gain p ersists
+27
+--- PAGE 29 ---
+T able 11: Multi-seed replication: Pure LLM vs. F ull pip eline across v e seeds. All runs
+use 10 iterations and 50 Mon te Carlo sim ulation runs on the coastal join t-assault scenario.
+All F ull results in this table use the default HOPE parameters (θ= 0.5,ϵ= 0.02); the
+seed-7 F ull v alue (MS=0.6388) therefore diers from the optimized F ull result rep orted in
+T able 4 (MS=0.6707,θ= 0.9,ϵ= 0.005).
+Seed Pure MS F ull MS∆MS Pure OE F ull OE∆OE
+7 0.6260 0.6388 +0.0128 0.7328 0.7685 +0.0357
+42 0.6008 0.6543 +0.0535 0.6962 0.7900 +0.0938
+123 0.6062 0.6559 +0.0497 0.7066 0.7875 +0.0809
+999 0.6129 0.6622 +0.0493 0.7114 0.7905 +0.0791
+2024 0.6215 0.6632 +0.0417 0.7279 0.8020 +0.0741
+Mean±SD0.6135
+±0.01040.6549
+±0.00980.0414
+±0.01660.7150
+±0.01520.7877
+±0.01210.0727
+±0.0219
+t(4) = 5.593,p <0.01(MS);d= 2.50t(4) = 7.414,p <0.01(OE);d= 3.32
+across this range of baseline v ariation. The largest absolute gains o ccur in
+the seeds where the Pure baseline is w eak est (seeds 42 and 123), suggesting
+the pip eline's feedbac k mec hanisms are most b enecial when the initial plan
+qualit y is lo w era desirable prop ert y for robustness.
+4.9. Conver genc e analysis with 20 iter ations
+T o assess whether the pip eline b enets from extended optimization, w e
+ran the F ull setting for 20 iterations (seed 7, 30 Mon te Carlo runs) and com-
+pared it with the 10-iteration result. The 20-iteration run ac hiev es mission
+success 0.7257 and o v erall eectiv eness 0.8223, represen ting gains of +0.0869
+and +0.0538 o v er the 10-iteration F ull result (0.6388 and 0.7685, resp ec-
+tiv ely). The v e-stage scores sho w thatcontrol(+0.0918) andsustain
+(+0.0849) b enet most from the additional iterations, whilebreachremains
+the most stubb orn b ottlenec k, impro ving b y only +0.0289 from iteration 1
+to iteration 20.
+The Bottlenec kDetector iden tiesbreachas the activ e b ottlenec k in 19
+of 20 iterations (95%), withdisruptagged once. The breac h-decit v alue
+decreases from appro ximately 0.43 to 0.40 o v er the run, conrming that
+while the dynamic reallo cation mec hanism partially addresses the b ottle-
+nec k, it do es not fully eliminate it. Breac h is highly correlated withcontrol
+(r= 0.92) andsustain(r= 0.91), indicating shared capabilit y dep enden-
+cies. The w eigh t-comp etition analysis rev eals that breac h and sustain b oth
+28
+--- PAGE 30 ---
+T able 12: Stage-score tra jectory o v er 20 iterations (F ull, seed 7). Start and end v alues are
+from iteration 1 and iteration 20, resp ectiv ely .
+detect disrupt breac h con trol sustain
+Start (iter 1) 0.6256 0.6288 0.5700 0.5966 0.6172
+End (iter 20) 0.6500 0.6069 0.5989 0.6884 0.7021
+Change +0.0244−0.0219 +0.0289 +0.0918 +0.0849
+dep end on theprotectioncapabilit y dimension, creating a structural ten-
+sion that scalarized rew ard optimization cannot fully resolv ea nding that
+connects the pip eline's b eha vior to gradien t-conict c hallenges in m ulti-task
+optimization [47].
+T able 12 summarizes the stage-score tra jectory across 20 iterations. The
+score paths sho w non-monotonic impro v emen t with oscillations, consisten t
+with the explorationexploitation dynamic in tro duced b y the reectiv e feed-
+bac k mec hanism. The largest single-iteration jumps o ccur at iterations 11,
+15, and 17, whic h corresp ond to reection cycles that prop osed substan tial
+plan restructuring.
+4.10. Case-b ank size ablation
+T o examine ho w memory scale aects pip eline p erformance, w e ablate
+the case-bank size using randomly sampled subsets from the 250-record gen-
+eralization bank at sizes{5,25,100,200}. All runs use the F ull pip eline with
+10 iterations, 50 Mon te Carlo sim ulation runs, and seed 7 on the coastal
+join t-assault scenario.
+T able 13 rep orts the results. Ov erall eectiv eness rises from 0.7736 (size
+5) to a p eak of 0.8011 at size 100, then drops to 0.7793 at size 200. This
+non-monotonic pattern suggests a retriev al-dilution eect: b ey ond a certain
+bank size, the top-ksimilarit y searc h ma y return less relev an t records that
+dilute the memory signal. Mission success is relativ ely stable across sizes
+(range 0.66370.6704 for random-sample banks), suggesting that ev en a small
+random bank captures the critical retriev al patterns for this scenario. The
+frozen-seed 5-record bank underp erforms the random 5-record bank (0.6388
+vs. 0.6682 MS), whic h suggests that the original curated recordswhile high-
+qualit yma y b e sub optimal for this sp ecic scenario compared to randomly
+sampled records from a scenario-div erse generalization bank. This nding
+reinforces the imp ortance of memory div ersit y: a small but topically v aried
+29
+--- PAGE 31 ---
+T able 13: Case-bank size ablation (F ull pip eline, seed 7, 10 iterations, 50 MC runs).
+The ro w lab eled frozen seed uses the original curated 5-record bank; all other ro ws use
+randomly sampled subsets from the 250-record generalization bank.
+Case-bank size MS OE LER Time (h)
+5 (frozen seed, curated) 0.6388 0.7685 1.9771 14.14
+5 (random sample) 0.6682 0.7736 1.9799 13.52
+25 0.6637 0.7979 2.2443 9.94
+100 0.6704 0.8011 2.3189 11.00
+200 0.6657 0.7793 2.9152 13.43
+bank can outp erform a comparably sized bank that lac ks scenario co v erage
+breadth.
+The practical implication is that case-bank construction b enets more
+from div ersit y and co v erage than from small-sample curation, but that naiv e
+scaling b ey ond an in termediate size can degrade p erformance through re-
+triev al dilution. The optimal size for this scenario app ears to b e around 100
+records, whic h balances div ersit y against retriev al precision. F uture w ork
+should in v estigate adaptiv e top-ktruncation or relev ance reranking to main-
+tain signal qualit y at larger bank sizes.
+4.11. Hyp erp ar ameter sensitivity
+W e ev aluate sensitivit y to the t w o HOPE SDE parameters: the rev ersion
+co ecien tθ(forgetting rate) and the noise strengthϵ. These are v aried
+indep enden tly using the Hop e-only v arian t (memory and reection disabled)
+with 10 iterations, 50 Mon te Carlo runs, and seed 7, to isolate their eect on
+the adaptiv e w eigh ting mec hanism.
+T able 14 rep ortsθsensitivit y withϵ= 0.02xed. The defaultθ= 0.5
+yields theworstp erformance (MS=0.6229); b oth extremes outp erform it,
+withθ= 0.9ac hieving the b est MS (0.6612) and OE (0.7999), andθ= 0.1
+close b ehind (MS=0.6592). This U-shap ed pattern suggests that mo derate
+rev ersion rates create an unfa v orable in termediate regime: either commit to
+the adaptation (θ≈0.1) or aggressiv ely trac k the prior (θ≈0.9), but do not
+ho v er in b et w een.
+T able 15 rep ortsϵsensitivit y withθ= 0.5xed. The lo w est noise lev el
+ϵ= 0.005ac hiev es the b est result (MS=0.6766, OE=0.8027)a +0.0537 MS
+impro v emen t o v er the defaultϵ= 0.02. The pattern is again non-monotonic:
+30
+--- PAGE 32 ---
+T able 14: Sensitivit y to HOPE rev ersion co ecien tθ(xedϵ= 0.02). Hop e-only v arian t,
+seed 7.
+θMission success Ov erall eectiv eness LER
+0.1 0.6592 0.7906 2.1522
+0.3 0.6382 0.7712 1.9135
+0.5 (default) 0.6229 0.7572 1.7550
+0.7 0.6484 0.7691 1.8874
+0.9 0.6612 0.7999 2.0364
+T able 15: Sensitivit y to HOPE noise strengthϵ(xedθ= 0.5). Hop e-only v arian t, seed
+7.
+ϵMission success Ov erall eectiv eness LER
+0.005 0.6766 0.8027 2.4616
+0.01 0.6501 0.7949 2.0157
+0.02 (default) 0.6229 0.7572 1.7550
+0.05 0.6255 0.7505 1.6777
+0.1 0.6567 0.7949 2.0032
+ϵ= 0.1(MS=0.6567) is the second-b est, with a p erformance dip at in ter-
+mediate noise lev elsϵ∈[0.01,0.05]. This U-shap e indicates that v ery lo w
+noise allo ws stable con v ergence while v ery high noise pro vides b enecial ex-
+ploration; in termediate noise in tro duces jitter without sucien t exploratory
+b enet.
+A com bined run withθ= 0.1, ϵ= 0.005(b oth individually b est) yields
+MS=0.6381worsethan either parameter optimized alone. This negativ e
+in teraction conrms thatθandϵop erate through distinct mec hanisms: lo w
+rev ersion (smallθ) b enets from the exploration pro vided b y mo derate noise,
+while lo w noise (smallϵ) b enets from the adaptation driv e of high rev ersion.
+The t w o extreme regimes should not b e com bined naiv ely .
+The practical implication is signican t: the HOPE comp onen t with w ell-
+tunedϵ= 0.005alone (Hop e-only , MS=0.6766) outp erforms the F ull pip eline
+with default parameters (MS=0.6388). This suggests that the curren t defau
+lt parameters substan tially underv alue the HOPE mec hanism, and that a sys-
+tematic h yp erparameter optimization pass (grid searc h or Ba y esian optimiza-
+tion o v er the join t(θ, ϵ)space) could unlo c k considerably stronger pip eline
+p erformance at no additional inference cost.
+31
+--- PAGE 33 ---
+5. Discussion
+The curren t man uscript draft is in ten tionally conserv ativ e. It treats the
+rep ository as the primary source of truth and a v oids o v erstating what the
+presen t evidence can supp ort. That conserv ativ e framing should not b e read
+as uncertain t y ab out ev erything in the pap er. What the curren t evidence
+do es establish is narro w er but still useful: within this rep ository , a coupled
+memoryw eigh tingreection lo op can b e serialized, rerun, and ev aluated in
+a traceable w a y , and that lo op pro duces measurable but unev en gains inside
+the lo cal sim ulator.
+First, the strongest asp ect of the evidence is the rep ository's in ternal
+consistency . The same structured plan ob jects feed the generator, sim ulator,
+result serializer, and DoD AF/C2SIM exp orters. This mak es it p ossible to
+trace rep orted n um b ers bac k to stored JSON les and to insp ect the logic
+that pro duced them. F or a rst journal draft, suc h traceabilit y is more
+v aluable than broader but w eakly grounded claims.
+Second, the selected evidence suggests that the in teraction b et w een mem-
+ory augmen tation, adaptiv e w eigh ting, and reection is useful within the cur-
+ren t sim ulator, but also that the gains remain scenario-dep enden t. The full
+pip eline is b est in the c hosen single-scenario ablation, leading all v e stages
+and all v e headline metrics, and exceeds the pure baseline in all v e sce-
+narios of the refreshed cross-scenario suite. A t the same time, the stage-lev el
+evidence sho ws that the gains are not p erfectly uniform. As emphasized b y
+the single-scenario stage table and stage-prole gure,breachremains the
+most p ersisten t b ottlenec k (0.6201 under F ull vs. 0.67680.6772 for detect
+and sustain) despite receiving the largest absolute impro v emen t (+0.0181
+o v er the pure baseline). The optimized HOPE SDE parameters (θ= 0.9,
+ϵ= 0.005) and the Bottlenec kDetector's dynamic b o ost together direct a
+larger share of the adaptation budget to w arddisruptandbreach, pro duc-
+ing the largest F ull-vs-next-b est gaps in exactly those historically stubb orn
+stages (+0.0319in disrupt,+0.0181in breac h).
+The newly in tro ducedBottleneckDetectormo dule addresses this di-
+agnostic gap b y making b ottlenec k iden tication explicit and dynamic. The
+detector's output conrms that breac h is the activ e b ottlenec k in ev ery itera-
+tion of the single-scenario run, with stable sev erit y scores around 0.0530.054.
+The dynamic b o ost v ector it pro duces directs additional emphasis to mobilit y ,
+res, and protectionthe three capabilities that feed the breac h stagein
+prop ortion to the measured sev erit y . While the dynamic b o ost alone do es
+32
+--- PAGE 34 ---
+not eliminate the breac h b ottlenec k (the stage-score evidence sho ws breac h
+still lagging), it pro vides a principled mec hanism for the con troller to concen-
+trate its adjustmen t budget on the most urgen t stage, replacing the original
+static priorit y ordering that alw a ys privileged disrupt and breac h equally .
+The w eigh t-comp etition analysis rev eals a structural reason for breac h's p er-
+sistence: breac h and sustain share theprotectioncapabilit y dimension with
+equal w eigh t (0.25), creating a tension that a scalarized rew ard cannot fully
+resolv e. This nding connects the pip eline's b eha vior to the broader m ulti-
+task optimization literature, where gradien t conicts b et w een comp eting ob-
+jectiv es are a kno wn c hallenge [47].
+The memory-conditioned Hop e coupling (Section 2.9) is a further step to-
+w ard tigh ter comp onen t in teraction. By letting retriev ed case metrics bias the
+fast-w eigh t initialisation, the pip eline no longer treats memory and adaptiv e
+w eigh ting as purely serial mo dules. The correction is in ten tionally ligh t w eigh t
+(clamp ed to[−0.18,0.28], blended at 0.30 w eigh t) so that it n udges rather
+than o v errides the adapter's scenario-conditioned output. The practical ef-
+fect is that when the Memen to mo dule retriev es a case that failed badly at
+breac h, the con troller en ters the next planning round with a sligh t up w ard
+bias on the breac h-relev an t capabilit y dimensions. This coupling do es not
+require retraining the adapter or mo difying the case bank sc hema, and it
+means the pip eline's t w o auxiliary mo dules no w share information through
+a common capabilit y represen tation.
+A new nding from the cross-scenario Reection-only exp erimen ts rein-
+forces the case for tigh t coupling: Reection-only underp erforms the Pure
+LLM baseline in all v e generalization scenes (mean MS decit−0.0272).
+This is a practically imp ortan t negativ e result. It sho ws that LLM-based
+self-critique, when applied in isolation without Memen to's case-grounded ev-
+idence and Hop e's structured w eigh t adaptation, do es not pro vide a reliable
+impro v emen t signal and can activ ely misdirect the planner. The implication
+is that reection in this arc hitecture functions as a diagnostic and repair
+signal that dep ends on the other comp onen ts for grounding: Memen to sup-
+plies evidence ab out what has w ork ed in similar past cases, Hop e ensures
+that the capabilit y w eigh ts reect b oth do ctrinal priors and scenario-sp ecic
+adaptation, and reection then ne-tunes the plan against the sim ulator's
+feedbac k. Remo ving the grounding scaolding lea v es the critique un tethered
+from actionable constrain ts.
+The h yp erparameter sensitivit y analysis (Section 4.11) rev eals a prac-
+tically imp ortan t nding: b oth HOPE SDE parameters (θandϵ) exhibit
+33
+--- PAGE 35 ---
+U-shap ed sensitivit y curv es with their rep orted default v alues near the p er-
+formance minim um. The optimized F ull pip eline (θ= 0.9,ϵ= 0.005,
+MS=0.6707) conrms that the HOPE comp onen t's p oten tial is substan tially
+underestimated at default parameters (original F ull MS=0.6388 atθ= 0.5,
+ϵ= 0.02). The +0.0319 gain from h yp erparameter optimization alone riv als
+or exceeds the gain from adding auxiliary comp onen ts (memory , reection)
+at default parameters. This nding connects to the case-bank size result:
+b oth ablations p oin t to w ard the imp ortance of systematic exp erimen tal de-
+sign o v er p ost-ho c parameter selection.
+The practical consequence is that the pap er should b e read not only as
+a claim of a v erage impro v emen t, but also as a map of where the presen t
+pip eline still app ears structurally fragile. The m ulti-seed replication across
+v e seeds demonstrates the F ull pip eline's gain is consisten t and statistically
+signican t (pairedt(4) = 5.593,p <0.01, Cohen'sd= 2.50), with the largest
+gains in seeds where the baseline is w eak est. The 20-iteration con v ergence run
+conrms that extended optimization pro vides further impro v emen t (+0.0869
+MS o v er the 10-iteration result), but breac h remains the p ersisten t b ottle-
+nec k. Just as imp ortan tly , the presen t lo op should not b e mistak en for a
+full reinforcemen t-learning or searc h regime in the st yle of standard RL for-
+m ulations, AlphaGo-scale tree searc h, or p opulation-based training [4850].
+It is closer to a b ounded lo cal up date rule op erating o v er m ultiple partially
+comp eting mission metrics, a setting that shares some a v or with m ulti-task
+optimization trade-os [47].
+Thr e ats to validity..The main quan titativ e gains are no w more substan tial
+after h yp erparameter optimization. In the xed-seed single-scenario abla-
+tion, the optimized F ull-v ersus-Pure mission-success gain is +0.0447 (up from
++0.0128 at default parameters). In the v e-scene transfer suite, the scene-
+lev el mission-success gains range from +0.0104 to +0.0515. These dierences
+are directionally encouraging, but they ma y o v erstate apparen t stabilit y b e-
+cause the rep orted condence in terv als come from within-seed Mon te Carlo
+v ariance only . The m ulti-seed replication co v ers only Pure and F ull at default
+parameters and should b e extended to co v er the optimized F ull setting.
+Sev eral limitations remain b efore submission:
+LLM bac k end traceabilit y: the refreshed canonical ablation and
+20-iteration scene-out evidence no w serialize mac hine-readable run-
+time manifests. The rerun records iden tify the lo cal bac k end mo del
+34
+--- PAGE 36 ---
+asdeepseek- r1- 0528- qwen3- 8band place it in the Python virtual
+en vironmen tMementoon a 13th Gen In tel(R) Core(TM) i7-13700F
+CPU with an NVIDIA GeF orce R TX 3060 GPU, using an Op enAI-
+compatible lo cal endp oin t. This remo v es the earlier dep endence on
+author-conrmed run time metadata for the main rep orted bundles.
+Exp erimen tal depth: the m ulti-seed replication across v e seeds
+({7,42,123,999,2024}) no w pro vides pairedt-test evidence (t(4) =
+5.593,p <0.01) that the F ull pip eline's impro v emen t o v er Pure LLM
+is statistically signican t and robust to seed v ariation. The three ex-
+ternal baselines (few-shot CoT, random searc h, single-pass Memen to)
+pro vide meaningful lo w er and in termediate b ounds. The remaining lim-
+itation is that the m ulti-seed evidence curren tly co v ers only Pure and
+F ull settings; the p er-comp onen t ablation (Memen to-only , Hop e-only ,
+Reection-only) is a v ailable only for seeds 7 and 42. A dditionally , the
+evidence still comes from a single scenario family .
+Reection-only cross-scenario evidence: the nding that
+Reection-only underp erforms Pure LLM in all v e generalization
+scenes (mean decit−0.0272) is curren tly observ ed under a single
+seed (seed 7). Multi-seed replication is needed to conrm whether this
+negativ e result is systematic or seed-dep enden t.
+Case-bank comparabilit y: the ablation evidence uses a v e-record
+frozen seed bank, whereas the selected generalization evidence uses
+250 source cases and 200-case scene-out banks. This is informativ e,
+but it also means that the role of memory qualit y and memory scale
+m ust b e discussed carefully . In particular, the w eak Memen to-only re-
+sult in the ablation table ma y reect sev ere case-bank undersizing (v e
+records) as m uc h as memory-mo dule w eakness. A case-bank-size abla-
+tion (5/25/100/200 records) is rep orted in Section 4.10 and conrms
+that memory scale matters: the 5-record frozen seed bank is indeed
+undersized, and the 100-record setting ac hiev es the b est o v erall result.
+Run time-cost rep orting: the refreshed result bundles no w record
+run time manifests and w all-clo c k timing summaries. The costqualit y
+table pro vides appro ximate w all-clo c k estimates for all settings and
+baselines. Precise timing instrumen tation will b e added for the camera-
+ready v ersion.
+35
+--- PAGE 37 ---
+Figure scop e: the main-text gures are no w generated directly from
+rep ository-lo cal JSON les, and a separate graphical abstract has b een
+prepared as a non-generativ e submission asset. The remaining w ork
+is narro w er: nal gra yscale v erication, an y journal-sp ecic art w ork
+pac k aging, and an y extra v en ue-driv en gure renemen ts.
+Metadata completeness: the author list, aliation, corresp onding-
+author email, no-funding statemen t, comp eting-in terest declaration,
+and CRediT roles are no w recorded, but the nal ac kno wledgmen ts
+w ording and data-a v ailabilit y w ording ma y still need journal-sp ecic
+renemen t.
+Build readiness: the man uscript no w compiles successfully with a
+w orkspace-lo cal Tin yT eX to olc hain, but the nal submission pac k age
+still needs the remaining editorial metadata and an y journal-sp ecic
+pac k aging c hec ks.
+These limitations do not in v alidate the draft; they dene the next clean up
+stage. The man uscript is already useful as a structured, source-traceable
+application pap er sk eleton. The m ulti-seed replication (n= 5,t(4) = 5.593,
+p <0.01) pro vides strong statistical evidence for the F ull-pip eline gain, and
+the external baselines brac k et its p erformance b et w een an undirected lo w er
+b ound (few-shot CoT at MS=0.5189) and the optimized F ull upp er b ound
+(MS=0.6707). The 20-iteration con v ergence analysis and Bottlenec kDetector
+diagnostics pro vide a mec hanistic accoun t of where and wh y the pip eline
+impro v es, and where it remains fragile. The next iteration should fo cus on
+m ulti-seed replication of the optimized F ull setting, p er-comp onen t v arian ts,
+and Reection-only cross-scenario results, as w ell as extending the evidence
+to additional scenario families.
+6. Conclusion
+This pap er do cumen ts a rep ository-implemen ted pip eline that com bines
+case retriev al, adaptiv e capabilit y w eigh ting, reection, structured sim ulation
+ev aluation, and standards-orien ted exp orters for sim ulated join t-op eration
+planning. Using a single canonical evidence scop e, the pap er rep orts that
+the F ull Memen toHop eReection conguration outp erforms the pure LLM
+baseline in the selected ablation study and in all v e scenarios of the selected
+cross-scenario transfer suite.
+36
+--- PAGE 38 ---
+Three additional con tributions strengthen the original draft in resp onse
+to review er feedbac k. First, aBottleneckDetectormo dule replaces the
+static b ottlenec k-b o ost v ector with a dynamic, history-a w are diagnosis that
+iden ties the curren t b ottlenec k stage and allo cates capabilit y emphasis pro-
+p ortionally to measured sev erit y . The detector correctly agsbreachas
+the p ersisten t b ottlenec k across all iterations, and the w eigh t-comp etition
+analysis rev eals that breac h and sustain share theprotectioncapabilit y
+dimension, creating a structural tension that a scalarized rew ard cannot
+fully resolv e. Second, a memory-conditioned Hop e coupling lets retriev ed
+case metrics bias the fast-w eigh t initialization, so the pip eline's t w o auxil-
+iary mo dules share information through a common capabilit y represen tation
+rather than op erating as purely serial comp onen ts. Third, the pap er supple-
+men ts the single-seed evidence with m ulti-seed replication across v e seeds
+(n= 5, pairedt(4) = 5.593,p <0.01, Cohen'sd= 2.50), conrming that
+the F ull pip eline's gain o v er Pure LLM is statistically signican t and robust.
+External baseline comparisons (few-shot CoT, random searc h, single-pass
+Memen to) brac k et p erformance b et w een a w eak lo w er b ound (MS=0.5189)
+and the optimized F ull pip eline (MS=0.6707). Hyp erparameter optimization
+of the HOPE SDE parameters (θ= 0.9,ϵ= 0.005) con tributes a +0.0319
+MS gain o v er the default-parameter F ull setting, conrming that systematic
+parameter tuning is a cost-eectiv e complemen t to arc hitectural extension.
+A 20-iteration con v ergence analysis demonstrates that extended optimization
+yields further gains (+0.0869 MS o v er the 10-iteration result) and pro vides a
+mec hanistic accoun t of where impro v emen t concen trates and where it stalls
+(breach). Costqualit y analysis uses recorded w all-clo c k timing data to in-
+form practical deplo ymen t trade-os.
+Just as imp ortan tly , the pap er mak es its curren t b oundaries explicit. It
+do es not claim formal pro ofs, external b enc hmark leadership, or evidence
+b ey ond what the rep ository can supp ort. The m ulti-seed evidence, baseline
+comparisons, and con v ergence analysis rep orted here substan tially narro w
+the gap b et w een the original source-traceable draft and the statistical rigor
+exp ected of a journal submission, but sev eral limitations remain: the cross-
+scenario study still uses a single seed, the p er-comp onen t ablation is m ulti-
+seed only for t w o of v e seeds, and the case-bank size ablation (Section 4.10)
+is curren tly rep orted for a single seed. These limitations dene the next
+renemen t stage and do not in v alidate the curren t con tribution.
+37
+--- PAGE 39 ---
+CRediT authorship con tribution statemen t
+Changrui Zhang: Conceptualization, Metho dology , Soft w are, F ormal
+analysis, In v estigation, Data curation, Visualization, W riting - original
+draft. Chengw ei Y ang: Sup ervision, V alidation, Resources, W riting - review
+& editing.
+Declaration of comp eting in terest
+The authors declare that they ha v e no kno wn comp eting nancial in ter-
+ests or p ersonal relationships that could ha v e app eared to inuence the w ork
+rep orted in this pap er.
+A c kno wledgmen ts
+This researc h receiv ed no external funding. No additional non-funding
+ac kno wledgmen ts are declared for this v ersion of the man uscript.
+Data a v ailabilit y
+The materials that supp ort this study are main tained in the authors'
+pro ject rep ository . The corresp onding author can pro vide the co de, struc-
+tured scenario les, arc hiv ed result bundles, and man uscript assets on rea-
+sonable request, sub ject to an y rep ository-release constrain ts that apply at
+the time of sharing.
+References
+[1] A. V asw ani, N. Shazeer, N. P armar, J. Uszk oreit, L. Jones, A. N. Gomez,
+L. Kaiser, I. P olosukhin, A tten tion is all y ou need, in: A dv ances in
+Neural Information Pro cessing Systems, 2017, pp. 59986008.
+[2] J. Devlin, M.-W. Chang, K. Lee, K. T outano v a, BER T: Pre-training
+of deep bidirectional transformers for language understanding, in: Pro-
+ceedings of NAA CL-HL T, 2019, pp. 41714186.
+[3] T. B. Bro wn, B. Mann, N. Ryder, M. Subbiah, J. Kaplan, P . Dhariw al,
+A. Neelak an tan, P . Sh y am, G. Sastry , A. Ask ell, S. Agarw al, A. Herb ert-
+V oss, G. Krueger, T. Henighan, R. Child, A. Ramesh, D. M. Ziegler,
+38
+--- PAGE 40 ---
+J. W u, C. Win ter, C. Hesse, M. Chen, E. Sigler, M. Lit win, S. Gra y ,
+B. Chess, J. Clark, C. Berner, S. McCandlish, A. Radford, I. Sutsk ev er,
+D. Amo dei, Language mo dels are few-shot learners, in: A dv ances in
+Neural Information Pro cessing Systems, V ol. 33, 2020, pp. 18771901.
+[4] Op enAI, GPT-4 tec hnical rep ort (2023). arXiv:2303.08774.
+URLhttps://arxiv.org/abs/2303.08774
+[5] H. T ouvron, T. La vril, G. Izacard, X. Martinet, M.-A. Lac haux,
+T. Lacroix, B. Roziere, N. Go y al, E. Ham bro, F. Azhar, A. Ro driguez,
+A. Joulin, E. Gra v e, G. Lample, LLaMA: Op en and ecien t foundation
+language mo dels (2023). arXiv:2302.13971.
+URLhttps://arxiv.org/abs/2302.13971
+[6] H. T ouvron, L. Martin, K. Stone, P . Alb ert, A. Almahairi, Y. Babaei,
+N. Bashlyk o v, S. Batra, P . Bharga v a, S. Bhosale, D. Costa, M.-
+A. Lac haux, G. Moreira, K. Mohammed, B. Roziere, A. Ro driguez,
+R. T aori, H. Martin, T. W ang, R. Sto jnic, et al., Llama 2: Op en foun-
+dation and ne-tuned c hat mo dels (2023). arXiv:2307.09288.
+URLhttps://arxiv.org/abs/2307.09288
+[7] W. X. Zhao, K. Zhou, J. Li, T. T ang, X. W ang, Y. Hou, Y. Min,
+B. Zhang, J. Zhang, Z. Dong, Y. Du, C. Chen, et al., A surv ey of
+large language mo dels (2023). arXiv:2303.18223.
+URLhttps://arxiv.org/abs/2303.18223
+[8] J. Y ang, H. Jin, R. T ang, X. Han, Q.-W. F eng, H. Jiang, B. Yin, X. Hu,
+J. Lu, H. Liu, et al., Harnessing the p o w er of LLMs in practice: A surv ey
+on ChatGPT and b ey ond, A CM T ransactions on Kno wledge Disco v ery
+from Data 18 (6) (2024) 132.
+[9] J. W ei, X. W ang, D. Sc h uurmans, M. Bosma, B. Ic h ter, F. Xia, E. Chi,
+Q. V. Le, D. Zhou, Chain-of-though t prompting elicits reasoning in large
+language mo dels, in: A dv ances in Neural Information Pro cessing Sys-
+tems, V ol. 35, 2022, pp. 2482424837.
+[10] X. W ang, J. W ei, D. Sc h uurmans, Q. V. Le, E. H. Chi, S. Narang,
+A. Cho wdhery , D. Zhou, Self-consistency impro v es c hain of though t rea-
+soning in language mo dels, Pro ceedings of ICLR (2023).
+39
+--- PAGE 41 ---
+[11] S. Y ao, J. Zhao, D. Y u, N. Du, I. Shafran, K. Narasimhan, Y. Cao, Re-
+A ct: Synergizing reasoning and acting in language mo dels, Pro ceedings
+of ICLR (2023).
+[12] S. Y ao, D. Y u, J. Zhao, I. Shafran, T. Griths, Y. Cao, K. Narasimhan,
+T ree of though ts: Delib erate problem solving with large language mo d-
+els, A dv ances in Neural Information Pro cessing Systems (2023).
+[13] T. Sc hic k, J. Dwiv edi-Y u, R. Dessi, R. Railean u, M. Lomeli, E. Ham bro,
+L. Zettlemo y er, N. Cancedda, T. Scialom, T o olformer: Language mo d-
+els can teac h themselv es to use to ols, A dv ances in Neural Information
+Pro cessing Systems (2023).
+[14] P . Lewis, E. P erez, A. Piktus, F. P etroni, V. Karpukhin, N. Go y al,
+H. Kuttler, M. Lewis, W.-t. Yih, T. Ro c ktasc hel, S. Riedel, D. Kiela,
+Retriev al-augmen ted generation for kno wledge-in tensiv e NLP tasks, in:
+A dv ances in Neural Information Pro cessing Systems, V ol. 33, 2020, pp.
+94599474.
+[15] V. Karpukhin, B. Oguz, S. Min, P . Lewis, L. W u, S. Eduno v, D. Chen,
+W.-t. Yih, Dense passage retriev al for op en-domain question answ ering,
+in: Pro ceedings of EMNLP , 2020, pp. 67696781.
+[16] J. Johnson, M. Douze, H. Jegou, Billion-scale similarit y searc h with
+GPUs, IEEE T ransactions on Big Data 7 (3) (2019) 535547.
+[17] N. Reimers, I. Gurevyc h, Sen tence-BER T: Sen tence em b eddings using
+siamese BER T-net w orks, in: Pro ceedings of EMNLP-IJCNLP , 2019, pp.
+39823992.
+[18] A. Gra v es, G. W a yne, I. Danihelk a, Neural turing mac hines (2014).
+arXiv:1410.5401.
+URLhttps://arxiv.org/abs/1410.5401
+[19] J. W eston, S. Chopra, A. Bordes, Memory net w orks, Pro ceedings of
+ICLR (2015).
+[20] S. Sukh baatar, A. Szlam, J. W eston, R. F ergus, End-to-end memory
+net w orks, in: A dv ances in Neural Information Pro cessing Systems, 2015,
+pp. 24402448.
+40
+--- PAGE 42 ---
+[21] A. Aamo dt, E. Plaza, Case-based reasoning: F oundational issues,
+metho dological v ariations, and system approac hes, AI Comm unications
+7 (1) (1994) 3959.
+[22] J. K olo dner, Case-Based Reasoning, Morgan Kaufmann, San Mateo,
+1993.
+[23] N. Shinn, F. Cassano, E. Germanos, A. Gundersen, K. Narasimhan,
+S. Y ao, Reexion: Language agen ts with v erbal reinforcemen t learning,
+A dv ances in Neural Information Pro cessing Systems (2023).
+[24] A. Madaan, N. T andon, P . Gupta, S. Hallinan, L. Gao, S. Wiegr-
+ee, U. Alon, N. Dziri, S. Prabh umo y e, Y. Y ang, M. Gupta, P . Clark,
+Y. Choi, H. Ha jishirzi, A. F arhadi, A. Sabharw al, Self-rene: Iterativ e
+renemen t with self-feedbac k, A dv ances in Neural Information Pro cess-
+ing Systems (2023).
+[25] Q. Guo, R. W ang, J. Guo, Y. Li, S. Liu, S. Diao, B. Zhang, M. Zhang,
+H. Ji, T. W ang, et al., Connecting large language mo dels with ev olution-
+ary algorithms yields p o w erful prompt optimizers, Pro ceedings of ICLR
+(2024).
+[26] H. Zhou, Y. Chen, S. Guo, et al., Memen to: Fine-tuning LLM agen ts
+without ne-tuning LLMs (2025). arXiv:2508.16153.
+URLhttps://arxiv.org/abs/2508.16153
+[27] J. S. P ark, J. C. O'Brien, C. J. Cai, M. R. Morris, P . Liang, M. S.
+Bernstein, Generativ e agen ts: In teractiv e sim ulacra of h uman b eha vior,
+in: Pro ceedings of UIST, 2023, pp. 122.
+[28] Join t Chiefs of Sta, Join t Publication 3-60: Join t targeting, W ashing-
+ton, D.C.: Join t Chiefs of Sta (2013).
+[29] J. A. Tirpak, Find, x, trac k, target, engage, assess, Air F orce Magazine
+83 (7) (2000) 2429.
+[30] D. S. Alb erts, J. J. Garstk a, F. P . Stein, Net w ork Cen tric W arfare:
+Dev eloping and Lev eraging Information Sup eriorit y , 2nd Edition, CCRP
+Publication Series, W ashington, D.C., 1999.
+41
+--- PAGE 43 ---
+[31] A. M. La w, Sim ulation Mo deling and Analysis, 5th Edition, McGra w-
+Hill Education, New Y ork, 2015.
+[32] Departmen t of Defense, DoD Arc hitecture F ramew ork V ersion 2.02,
+W ashington, D.C.: Departmen t of Defense (2010).
+[33] IEEE Computer So ciet y, IEEE 1516-2010: IEEE standard for mo deling
+and sim ulation high lev el arc hitectureframew ork and rules, New Y ork:
+IEEE (2010).
+[34] Sim ulation In terop erabilit y Standards Organization, SISO-STD-019-
+2020: Standard for command and con trol systems-sim ulation systems
+in terop eration, Orlando: SISO (2020).
+[35] C. L. Blais, M. Dec hand, M. Dem bac h, et al., The use of automated
+reasoning with the command and con trol system to sim ulation system
+in terop eration standard, Sim ulation Inno v ation W orkshop (2021).
+[36] S. Ho c hreiter, J. Sc hmidh ub er, Long short-term memory , Neural Com-
+putation 9 (8) (1997) 17351780.
+[37] N. Shazeer, A. Mirhoseini, K. Maziarz, A. Da vis, Q. Le, G. Hin-
+ton, J. Dean, Outrageously large neural net w orks: The sparsely-gated
+mixture-of-exp erts la y er, Pro ceedings of ICLR (2017).
+[38] D. Lepikhin, H. Lee, Y. Xu, D. Chen, O. Firat, Y. Huang, M. Krikun,
+N. Shazeer, Z. Chen, GShard: Scaling gian t mo dels with conditional
+computation and automatic sharding, Pro ceedings of ICLR (2021).
+[39] W. F edus, B. Zoph, N. Shazeer, Switc h transformers: Scaling to trillion
+parameter mo dels with simple and ecien t sparsit y , Journal of Mac hine
+Learning Researc h 23 (120) (2022) 139.
+[40] N. Du, Y. Huang, A. M. Dai, S. T ong, D. Lepikhin, Y. Xu, M. Krikun,
+Y. Zhou, A. W. Y u, O. Firat, et al., GLaM: Ecien t scaling of language
+mo dels with mixture-of-exp erts, in: Pro ceedings of ICML, 2022, pp.
+55475569.
+[41] A. K omatsuzaki, J. Puigcerv er, J. Lee-Thorp, N. Ruiz, K. Murth y ,
+K. Guu, A. Kumar, G. Gur-Ari, H. Sc h w enk, J. Dean, C. Rael, Sparse
+up cycling: T raining mixture-of-exp erts from dense c hec kp oin ts (2022).
+42
+--- PAGE 44 ---
+arXiv:2212.05055.
+URLhttps://arxiv.org/abs/2212.05055
+[42] J. Puigcerv er, A. Ro y , B. Mustafa, G. Ghiasi, O. Firat, S. Borgeaud,
+A. Kumar, H. Eic hner, Y. Huang, G. Driessc he, et al., F rom sparse to
+soft mixtures of exp erts, Pro ceedings of ICLR (2024).
+[43] S. Doub o v, N. Sardana, V. Chiley , Sparse up cycling: Inference ine-
+cien t netuning, NeurIPS W orkshop on Ecien t Natural Language and
+Sp eec h Pro cessing (2024).
+[44] E. He, A. Khattar, R. Prenger, et al., Up cycling large language mo dels
+in to mixture of exp erts (2024). arXiv:2410.07524.
+URLhttps://arxiv.org/abs/2410.07524
+[45] X. Mao, Sto c hastic Dieren tial Equations and Applications, 2nd Edi-
+tion, W o o dhead Publishing, Cam bridge, 2007.
+[46] H. K. Khalil, Nonlinear Systems, 3rd Edition, Pren tice Hall, Upp er Sad-
+dle Riv er, NJ, 2002.
+[47] T. Y u, S. Kumar, A. Gupta, S. Levine, K. Hausman, C. Finn, Gradi-
+en t surgery for m ulti-task learning, in: A dv ances in Neural Information
+Pro cessing Systems, V ol. 33, 2020, pp. 58245836.
+[48] R. S. Sutton, A. G. Barto, Reinforcemen t Learning: An In tro duction,
+2nd Edition, MIT Press, Cam bridge, MA, 2018.
+[49] D. Silv er, A. Huang, C. J. Maddison, A. Guez, L. Sifre, G. v an den
+Driessc he, J. Sc hritt wieser, I. An tonoglou, V. P anneershelv am, M. Lanc-
+tot, et al., Mastering the game of go with deep neural net w orks and tree
+searc h, Nature 529 (7587) (2016) 484489.
+[50] M. Jaderb erg, V. Dalibard, S. Osindero, W. M. Czarnec ki, J. Donah ue,
+A. Raza vi, O. Vin y als, T. Green, I. Dunning, K. Simon y an, et al., P op-
+ulation based training of neural net w orks (2017). arXiv:1711.09846.
+URLhttps://arxiv.org/abs/1711.09846
+43

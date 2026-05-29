@@ -1,0 +1,174 @@
+ 好的，以下是我以**《Simulation Modelling Practice and Theory》（SIMPAT）**期刊审稿人身份，对你论文初稿 1.2
+  版的全面审阅意见。
+
+  ---
+  审稿报告：总体评价
+
+  推荐决定：大修（Major Revision）
+
+  本稿是对其上一版本（1.1）的显著改进。作者已经回应了先前审稿意见中的多项核心关切——特别是引入了多种子重复实验、超参数敏
+  感性分析、外部基线、BottleneckDetector 模块、以及 case-bank 规模消融实验。这些增补大幅增强了论文的实验深度和可信度。然
+  而，论文仍存在若干需要修正的问题，尤其是在统计严谨性、方法论的阐述完整性、以及论文结构等方面。
+
+  ---
+  一、主要优点
+
+  1. 诚实的实验定位与清晰的贡献声明：论文始终强调这是 application-oriented integration
+  paper，不做超出现有代码支持的过度声明。这种保守且可追溯的写作方式值得赞赏。
+  2. 多种子重复实验（Table 11）：5 个种子的配对 t 检验 t(4)=5.593, p<0.01, Cohen's d=2.50，为 Full pipeline
+  的增益提供了坚实统计基础，这是回应审稿意见的关键改进。
+  3. BottleneckDetector 的引入与诊断分析：该模块直接回应了数据中暴露的 breach
+  持续弱势问题，并提供了具有军事运筹学直观解释的动态资源分配机制。Table 8 的诊断输出和 weight-competition 分析（breach
+  vs sustain 共享 protection 维度）是有洞察力的发现。
+  4. 超参数敏感性分析（Tables 14-15）：揭示了 θ 和 ϵ 的 U
+  形敏感性曲线以及默认参数处于性能最低点这一关键发现，且发现两者不能简单地同时取极端值，这是有实际指导价值的结果。
+  5. 外部基线的引入：few-shot CoT、random search、single-pass Memento 三个基线提供了有价值的性能上下界。
+  6. Case-bank 规模消融实验（Table 13）：发现了非单调的检索稀释效应，这是有信息量的发现。
+
+  ---
+  二、主要问题（需在修稿中解决）
+
+  问题 1：两种不同版本的 Full 结果混用，导致比较一致性风险
+
+  论文同时报告了两组不同的 Full-pipeline 结果：
+  - Table 4：MS=0.6707, OE=0.8011（使用优化参数 θ=0.9, ϵ=0.005）
+  - Table 11（multi-seed）：seed-7 的 Full MS=0.6388, OE=0.7685（使用默认参数 θ=0.5, ϵ=0.02）
+
+  论文在 Table 11 的脚注中说明了这一差异，但这带来一个严重问题：
+
+  - 多种子实验仅覆盖默认参数的 Full，未覆盖优化参数的 Full。然而论文在 Discussion（Section 5, 第 5 段）中声称 "the
+  multi-seed replication demonstrates the Full pipeline's gain is consistent and statistically significant (paired
+  t(4)=5.593, p<0.01)"，这里引用的是 Table 11 的默认参数结果。
+  - 紧接着在同段中又讨论了优化参数的 Full（MS=0.6707）和其超参数优化带来的 +0.0319 MS 增益。
+  - 读者无法分辨 Table 11 的统计显著性结论是否适用于优化参数版本。
+
+  修改建议：必须在多种子实验中补充优化参数 θ=0.9, ϵ=0.005 的 Full 设置（即使只跑 2-3
+  个种子以节省计算成本），或在所有讨论中明确限定 "statistical significance" 只适用于默认参数版本。
+
+  问题 2：置信区间仅反映 within-seed 蒙特卡洛方差，不能声称 "跨种子" 稳定性
+
+  Table 7 报告的 95% CI（例如 Coastal assault: [0.6840, 0.6855]）仅来自同一 seed 内 50 次 MC 模拟的方差。这些 CI
+  的宽度非常窄（~0.001-0.002），可能会误导读者认为 pipeline 输出高度稳定。然而，Table 11 显示 Pure LLM 的跨种子标准差为
+  ±0.0104，是 within-seed CI 宽度的约 5 倍。
+
+  修改建议：
+  1. 在 Table 7 中增加跨种子标准差列（若跨场景种子也做了多种子实验），或
+  2. 至少在正文和表格标题中醒目标注 "CIs reflect within-seed Monte Carlo variance only, not across-seed variability."
+
+  问题 3：Cross-scenario Reflection-only 的负结果（-0.0272）缺乏多种子验证
+
+  Section 4.3/5 中反复强调 "Reflection-only underperforms Pure LLM in all five generalization scenes (mean deficit
+  -0.0272)" 作为一个重要发现。然而：
+  - 该结果仅来自 seed 7（单种子）
+  - 论文自身在 "Threats to validity"（第 4 段末尾）中承认 "Multi-seed replication is needed to confirm whether this
+  negative result is systematic or seed-dependent"
+  - 但在 Discussion 中已经将其作为 "practically important negative result" 进行了过度推广
+
+  修改建议：降低对此负结果的确定性表述力度，例如将 "confirming that standalone reflection does not provide a net benefit
+   and can actively degrade plan quality" 改为 "suggesting that standalone reflection may not reliably provide a net
+  benefit under the current setting"，除非补充多种子数据。
+
+  问题 4：Hyperparameter 优化与消融实验的混合比较不一致
+
+  Table 4（单场景消融）中的 Full 使用优化参数（θ=0.9, ϵ=0.005），但 Table 6-7（跨场景泛化）中的 Full
+  使用的是默认参数（从跨场景 suite 配置推断）。而 Table 11（多种子）中的 Full 也使用默认参数。这意味着：
+  - 不同实验组中 "Full" 的含义不一致
+  - 跨场景泛化的 Full 效果可能被低估（如果用优化参数可能会更好）
+
+  修改建议：在所有结果表格的标题或脚注中，明确标注每个 Full 设置所使用的 θ 和 ϵ
+  值。最好在同一表格中同时报告默认和优化参数两行 Full 结果，以便直接比较。
+
+  问题 5：方法论描述过于碎片化，关键机制散落各节
+
+  当前 Method 部分（Section 2）包含 10 个子节（2.1-2.10），但核心的 Memento、Hope、Reflection 三个组件的描述分散在
+  2.3、2.4、2.7 三个不相邻的小节中，中间穿插了结构性介绍（2.2）、LLM 生成（2.5）和仿真（2.6）。新增的
+  BottleneckDetector（2.8）和 Memory-conditioned Hope（2.9）进一步增加了碎片化。
+
+  修改建议：考虑将相关机制重组。例如：
+  - 2.2 Scenario & Plan（保持）
+  - 2.3 Memory Module（合并 2.3 + 2.9 的 Memory-conditioned Hope 部分）
+  - 2.4 HOPE Controller（合并 2.4 + 2.7 的 capability feedback + 2.8 的 BottleneckDetector）
+  - 2.5 Reflection Loop（保持 2.7 的 reflection 部分）
+  - 2.6 Simulation & Evaluation（合并 2.5 + 2.6）
+  - 2.7 Best-plan Selection & Export（保持 2.10）
+
+  这样每个组件的完整逻辑链在一处可读完。
+
+  问题 6：原文标题提到 "Joint-Operation"，但分析语义是作战级别而非联合
+
+  论文标题包含 "Joint-Operation Plan Generation"，且领域层定义了 fires, mobility, protection, awareness, ew,
+  sustainment, c2 七个能力维度。但在军事术语中，"joint" 指多军种联合（如 Joint Chiefs of Staff
+  [28]）。而你的仿真实验中涉及的 5 个场景（coastal assault, urban defense, mountain recon, river crossing, maritime
+  sustainment）覆盖了不同作战类型，但并没有明确说明这是多军种联合操作。
+
+  修改建议：在 Introduction 或 Method 开头明确界定 "joint-operation" 在本文中的含义——如果确实是多军种联合，请在 scenario
+   描述中体现（如海军/陆军/空军力量的区分）；如果仅是复杂作战计划的泛称，建议使用 "combined-arms" 或 "multi-phase"
+  等更准确的术语。
+
+  ---
+  三、次要问题
+
+  3.1 CRediT 角色声明的完整性
+
+  Section 3.5 提到 "CRediT roles are now recorded"，但论文末尾的 CRediT 声明仅列出了 Changrui Zhang 的大量角色，而
+  Chengwei Yang 仅有 "Supervision, Validation, Resources, Writing - review & editing"。如果 Yang
+  教授有实质性方法论贡献，应补充。此外，如目标期刊要求，是否应补充 "Project administration" 和 "Funding acquisition"
+  角色？
+
+  3.2 参考文献的时效性
+
+  论文引用的最新论文是 [26] Zhou et al. 2025 (arXiv:2508.16153, Memento: Fine-tuning LLM Agents)。但当前日期是 2026 年 5
+   月。一篇面向 SIMPAT 的投稿应补充 2025-2026 年与 LLM-based planning、军事仿真相关的最新工作。特别建议补充：
+  - LLM 在军事决策/仿真中的其他应用（如有）
+  - Bottleneck detection 在 operations research 中的更多相关工作
+  - 多智能体/多目标优化在军事场景中的应用
+
+  3.3 Figure 编号与引用
+
+  论文正文中引用了 Figure 1-5，但实际 PDF 中 Figure 4（convergence trajectories）是在 Section 4.2 中讨论 50-iteration
+  平均轨迹时才出现的。建议核实所有 figure 是否都已正确嵌入 PDF，以及编号是否连续。
+
+  3.4 LLM 后端的可复现性
+
+  虽然 runtime_manifest 记录了 deepseek-r1-0528-qwen3-8b 作为后端模型，但关键细节缺失：
+  - temperature 和 top-p 参数？
+  - prompt 模板是否附带在 supplementary material 中？
+  - 每次 LLM 调用的最大 token 数？
+
+  这些对可复现性至关重要，尤其是对于声称 "structured plan generation" 的系统。
+
+  3.5 语法与格式问题
+
+  PDF 文本提取显示大量单词被错误断开（如 "M odel", "P ip eline", "c hain", "exp erimen tal" 等），这似乎是 TinyTeX
+  编译时的连字符处理问题。建议在 camera-ready 前仔细校对，确保所有单词拼写完整。
+
+  ---
+  四、逐节评分
+
+  ┌───────────────────┬─────────────┬───────────────────────────────────────────────────────────────────────────────┐
+  │       维度        │ 评分（1-5） │                                     评价                                      │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 原创性            │ 3           │ 组合式创新，BottleneckDetector 和 Memory-Hope                                 │
+  │                   │             │ 耦合是亮点，但单独看每个组件均非首创                                          │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 方法论严谨性      │ 3           │ 多种子实验和超参数分析大幅改进，但 Full 版本不一致和 CI 误用仍需修正          │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 实验充分性        │ 3.5         │ 外部基线、case-bank 消融、超参数敏感性分析均有贡献，但跨场景多种子仍缺失      │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 写作质量          │ 3           │ 结构清晰、保守诚实，但碎片化严重、术语不统一、拼写断词问题明显                │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 贡献的可复现性    │ 3           │ runtime_manifest 是好实践，但 temperature/prompt 等关键信息缺失               │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────────────────────────────┤
+  │ 与 SIMPAT         │ 4           │ 应用导向的仿真建模与分析定位符合期刊范围                                      │
+  │ 的匹配度          │             │                                                                               │
+  └───────────────────┴─────────────┴───────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  五、总结
+
+  本稿在 v1.2 版本上取得了实质进步——多种子实验、超参数优化、外部基线和 BottleneckDetector
+  的引入回应了先前的核心关切。当前版本的主要问题是不同实验组中 "Full"
+  的超参数配置不一致、跨种子统计声明的范围模糊、以及方法论描述的碎片化。这些问题均可在一次集中的修稿周期内解决。
+
+  如果作者能在下一轮修稿中解决上述主要问题 1-4（特别是实验一致性问题），并适当改进写作组织，本文将达到 SIMPAT
+  的发表标准。
