@@ -1,4 +1,0 @@
-\item Repository-grounded elsarticle draft for simulated joint-operation planning
-\item Full pipeline improves mission success over the pure LLM baseline
-\item Five-scenario scene-out evaluation shows Full beating Pure in 5/5 cases
-\item Draft reports only code-supported mechanisms and source-traceable results

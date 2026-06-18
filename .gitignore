@@ -31,3 +31,27 @@ manuscript/main_temp.*
 *.pt
 *.tiff
 paper/manuscript/*.pdf
+
+# Excluded from 毕设代码 (not core to the thesis)
+client/
+server/
+manuscript/
+text/
+paper/template_elsarticle/
+uv.lock
+.vscode/
+memory/ckpts/
+memory/dummy_memo.jsonl
+memory/memory.jsonl
+memory/training_data.jsonl
+data/deepresearcher.jsonl
+code_tool.log
+pyrightconfig.json
+
+# LaTeX build artifacts in paper/manuscript
+paper/manuscript/*.aux
+paper/manuscript/*.bbl
+paper/manuscript/*.blg
+paper/manuscript/*.spl
+paper/manuscript/*.fdb_latexmk
+paper/manuscript/*.fls
