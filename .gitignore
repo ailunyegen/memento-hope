@@ -47,6 +47,7 @@ memory/training_data.jsonl
 data/deepresearcher.jsonl
 code_tool.log
 pyrightconfig.json
+searxng-docker/
 
 # LaTeX build artifacts in paper/manuscript
 paper/manuscript/*.aux
