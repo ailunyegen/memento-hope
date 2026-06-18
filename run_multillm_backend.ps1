@@ -1,7 +1,7 @@
 param(
     [string]$BackendName = "deepseek-cloud",
     [string]$BaseURL = "https://api.deepseek.com/v1",
-    [string]$ApiKey = "REDACTED_DEEPSEEK_KEY",
+    [string]$ApiKey = "your_deepseek_api_key_here",
     [string]$Model = "deepseek-chat",
     [string]$Scenario = "data/sample_joint_operation.json",
     [string]$CaseBank = "data/military_case_bank_frozen_seed.jsonl",
