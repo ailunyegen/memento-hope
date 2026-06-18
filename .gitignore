@@ -6,3 +6,23 @@ __pycache__/
 result/
 *.log
 .tools/
+.reasonix/
+
+# LaTeX build artifacts
+*.aux
+*.blg
+*.bbl
+*.spl
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+manuscript/main*.pdf
+manuscript/main_*.aux
+manuscript/main_*.bbl
+manuscript/main_*.blg
+manuscript/main_*.spl
+manuscript/main_temp.*

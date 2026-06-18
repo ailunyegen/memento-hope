@@ -20,8 +20,6 @@ from .case_memory import CaseBank
 from .domain import CAPABILITY_KEYS, CombatPlan, Scenario, SimulationResult
 from .engine import (
     SLOW_WEIGHT_LIBRARY,
-    DualMemoryController,
-    LocalLLMPlanner,
     PlanGenerator,
     PlanSimulator,
 )
@@ -405,7 +403,8 @@ def _aggregate_runs(runs: List[SimulationResult]) -> SimulationResult:
 
 def _summary(values: List[float]) -> Dict[str, float]:
     mean = sum(values) / len(values)
-    variance = sum((v - mean) ** 2 for v in values) / len(values)
+    # Use sample variance (n-1) so confidence intervals are honest at small n.
+    variance = sum((v - mean) ** 2 for v in values) / (len(values) - 1) if len(values) > 1 else 0.0
     std = math.sqrt(variance)
     ci = 1.96 * std / math.sqrt(len(values))
     return {
@@ -420,16 +419,21 @@ def _summary(values: List[float]) -> Dict[str, float]:
 
 
 def _simple_select(raw_hits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Simple memory selection for single-pass baseline (no strict filters)."""
+    """Simple memory selection for single-pass baseline (no strict filters).
+
+    Returns new dicts so the caller's *raw_hits* are never mutated.
+    """
     selected: List[Dict[str, Any]] = []
     for hit in raw_hits:
         rec = hit["record"]
         if rec.outcome == "success" and hit["score"] >= 0.35:
-            hit["usage_mode"] = "imitate"
-            selected.append(hit)
+            hit_copy = dict(hit)
+            hit_copy["usage_mode"] = "imitate"
+            selected.append(hit_copy)
         elif rec.outcome != "success" and hit["score"] >= 0.30:
-            hit["usage_mode"] = "avoid"
-            selected.append(hit)
+            hit_copy = dict(hit)
+            hit_copy["usage_mode"] = "avoid"
+            selected.append(hit_copy)
         if len(selected) >= 2:
             break
     return selected

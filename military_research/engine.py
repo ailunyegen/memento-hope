@@ -232,7 +232,9 @@ class HOPEAdapter(nn.Module):
             updated_t_create = (1.0 - bounded_refresh) * self.t_create + bounded_refresh * self.t_current
             self.t_create.copy_(updated_t_create)
         
-        # 输出
+        # 输出 ── 使用*旧*隐藏状态 h 计算输出，即 "commit-then-predict" 模式：
+        # 当 update_state=True 时，当前步的输出不反映刚刚更新的 hidden_state，
+        # 新状态要到下一轮 forward 才会影响输出。这避免了推理阶段的漂移。
         output = self.i2o(x) + self.h2o(h)  # [batch, output_dim]
         
         # 应用基于价值和时间的遗忘
@@ -254,10 +256,7 @@ class DualMemoryController(nn.Module):
         super().__init__()
         self.doctrine_profile = doctrine_profile
         self.current_scenario: Scenario | None = None
-        if seed is not None:
-            torch.manual_seed(seed)
-            if torch.cuda.is_available():
-                torch.cuda.manual_seed_all(seed)
+        # SDE noise uses self.torch_generator exclusively — no global seed side-effects.
         self.torch_generator = torch.Generator()
         if seed is not None:
             self.torch_generator.manual_seed(seed)
@@ -2282,7 +2281,7 @@ class MilitaryResearchPipeline:
                 "cpu": self._detect_cpu_name(),
                 "gpu": gpu_name,
                 "cuda_available": cuda_available,
-                "cuda_version": getattr(torch.version, "cuda", None) if cuda_available else None,
+                "cuda_version": getattr(getattr(torch, "version", None), "cuda", None) if cuda_available else None,
             },
         }
 

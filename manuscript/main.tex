@@ -9,7 +9,9 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
+\usepackage{cmap}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage[section]{placeins}
@@ -17,6 +19,12 @@
 \usepackage[hyphens]{url}
 \input{glyphtounicode}
 \pdfgentounicode=1
+% -- Explicit glyph-to-unicode mappings placed AFTER glyphtounicode to override --
+\pdfglyphtounicode{fi}{0066 0069}
+\pdfglyphtounicode{fl}{0066 006C}
+\pdfglyphtounicode{ff}{0066 0066}
+\pdfglyphtounicode{ffi}{0066 0066 0069}
+\pdfglyphtounicode{ffl}{0066 0066 006C}
 
 \setlength{\emergencystretch}{2em}
 \hyphenpenalty=500
@@ -95,7 +103,7 @@ This research received no external funding. No additional non-funding acknowledg
 \section*{Data availability}
 The materials that support this study are maintained in the authors' project repository. The corresponding author can provide the code, structured scenario files, archived result bundles, and manuscript assets on reasonable request, subject to any repository-release constraints that apply at the time of sharing.
 
-\bibliographystyle{../template_elsarticle/elsarticle/elsarticle-num}
+\bibliographystyle{../paper/template_elsarticle/elsarticle/elsarticle-num}
 {\sloppy\bibliography{references}}
 
 \end{document}
