@@ -3,11 +3,7 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List
 
-from .domain import ActionItem, CombatPlan, Scenario
-
-
-def _action_texts(actions: List[ActionItem]) -> List[str]:
-    return [f"{action.action_type}: {action.description}" for action in actions]
+from .domain import CombatPlan, Scenario
 
 
 def build_ov5b(plan: CombatPlan, scenario: Scenario) -> Dict[str, Any]:

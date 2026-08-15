@@ -12,7 +12,7 @@ import json
 import math
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 
 def load_optimization_history(full_result_path: str | Path) -> List[Dict[str, Any]]:

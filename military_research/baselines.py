@@ -10,11 +10,10 @@ dependencies, as requested by the reviewer:
 
 from __future__ import annotations
 
-import copy
 import json
 import math
 import random
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from .case_memory import CaseBank
 from .domain import CAPABILITY_KEYS, CombatPlan, Scenario, SimulationResult
@@ -139,54 +138,6 @@ FEWSHOT_COT_EXAMPLES: List[Dict[str, Any]] = [
         ],
     },
 ]
-
-
-def _build_fewshot_user_prompt(scenario: Scenario) -> str:
-    """Construct a few-shot CoT user prompt with 2 example plans."""
-    examples_json = []
-    for ex in FEWSHOT_COT_EXAMPLES:
-        examples_json.append(
-            {
-                "title": ex["title"],
-                "commander_intent": ex["commander_intent"],
-                "theory_of_victory": ex["theory_of_victory"],
-                "phases": [
-                    {
-                        "phase_id": p["phase_id"],
-                        "name": p["name"],
-                        "intent": p["intent"],
-                        "actions": p["actions"],
-                        "allocated_units": p["allocated_units"],
-                        "decision_points": p["decision_points"],
-                        "expected_effects": p["expected_effects"],
-                    }
-                    for p in ex["phases"]
-                ],
-            }
-        )
-
-    parts: List[str] = []
-    parts.append("【Few-Shot Chain-of-Thought 作战方案生成】\n")
-    parts.append("以下提供 2 个不同场景的高质量作战方案示例，展示标准格式与推理深度。\n")
-    parts.append("请先分析示例中的推理模式，再为目标场景生成一个结构相同的方案。\n")
-    parts.append("=" * 50)
-    parts.append("【示例方案】")
-    for i, ex_json in enumerate(examples_json, 1):
-        parts.append(f"\n--- 示例 {i} ---")
-        parts.append(
-            json.dumps(ex_json, ensure_ascii=False, indent=2)
-        )
-    parts.append("\n" + "=" * 50)
-    parts.append("【目标场景】")
-    parts.append(json.dumps(scenario.to_dict(), ensure_ascii=False, indent=2))
-    parts.append("\n【生成要求】")
-    parts.append("- 模仿示例的推理深度和结构化程度")
-    parts.append("- 严格输出 JSON，字段名与示例一致")
-    parts.append("- 必须使用中文作战内容")
-    parts.append("- 每个阶段至少 2 条动作、2 个决策点、2 个预期效果")
-    parts.append("- phase_id 仅使用 P1/P2/P3/P4")
-    parts.append("- action_type 从: recon, strike, ew, mobility, protection, control, sustain, c2 中选择")
-    return "\n".join(parts)
 
 
 # ---------------------------------------------------------------------------
