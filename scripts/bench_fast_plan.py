@@ -39,6 +39,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mc-runs", type=int, default=50, help="System 1 预案质量核验的 MC 次数")
     parser.add_argument("--llm", action="store_true", help="开启 LLM 对比测速（需本地模型服务）")
     parser.add_argument("--fast-iterations", type=int, default=3, help="Fast 模式迭代轮数")
+    parser.add_argument("--delta-all-scenes", action="store_true",
+                        help="跨场景 Delta 泛化：5 个泛化场景各跑一轮 System 1 + Delta Loop，输出增益表")
+    parser.add_argument("--delta-max-iters", type=int, default=8,
+                        help="Delta-all-scenes 模式下每场景 Delta 迭代上限")
+    parser.add_argument("--early-stop-ms", type=float, default=0.70,
+                        help="Delta Loop 达标自动提前截断的 mission_success 门限")
     return parser.parse_args()
 
 
@@ -138,8 +144,82 @@ def bench_llm_modes(scenario: Scenario, bank: CaseBank, args) -> dict:
     return out
 
 
+def run_delta_all_scenes(args) -> None:
+    """5 个泛化场景的 System 1 + Delta Loop 增益表（约 2-3 分钟）。"""
+    scenes = [
+        "coastal_joint_assault",
+        "island_resupply_corridor",
+        "mountain_corridor_recon",
+        "river_crossing_breakthrough",
+        "urban_hub_defense",
+    ]
+    rows = []
+    for scene in scenes:
+        scenario_path = Path(f"data/generalization_scenarios/{scene}.json")
+        case_bank_path = Path(f"data/generalization_case_banks_v2_sceneout/{scene}.jsonl")
+        if not scenario_path.exists() or not case_bank_path.exists():
+            print(f"[skip] {scene}: 场景或案例库缺失")
+            continue
+        scenario = Scenario.from_dict(json.loads(scenario_path.read_text(encoding="utf-8")))
+        pipeline = MilitaryResearchPipeline(case_bank_path, seed=args.seed)
+
+        stream_events = []
+        result = pipeline.run(
+            scenario,
+            fast_first=True,
+            delta_refine=True,
+            delta_max_iters=args.delta_max_iters,
+            early_stop_ms=args.early_stop_ms,
+            sim_runs=args.mc_runs,
+            allow_writeback=False,
+            stream_callback=stream_events.append,
+        )
+        em = result.get("emergency") or {}
+        s1_ms = (em.get("simulation") or {}).get("mission_success")
+        delta_hist = result.get("delta_history") or []
+        accepted = sum(1 for h in delta_hist if h.get("accepted"))
+        rows.append(
+            {
+                "scene": scene,
+                "mission_type": scenario.mission_type,
+                "system1_ms": s1_ms,
+                "system1_latency_ms": em.get("latency_ms"),
+                "delta_final_ms": result["best_simulation"]["mission_success"],
+                "delta_rounds": len(delta_hist),
+                "accepted_ratio": round(accepted / len(delta_hist), 3) if delta_hist else None,
+                "delta_wall_sec": result["runtime_stats"].get("delta_wall_sec"),
+                "gain": round(result["best_simulation"]["mission_success"] - s1_ms, 4) if s1_ms is not None else None,
+                "best_ms_trajectory": [h.get("best_ms") for h in delta_hist],
+            }
+        )
+        print(f"[done] {scene}: System1={s1_ms:.4f} -> Delta={result['best_simulation']['mission_success']:.4f} "
+              f"(gain={rows[-1]['gain']:+.4f}, {len(delta_hist)}轮, {rows[-1]['accepted_ratio']}接受率, "
+              f"{result['runtime_stats'].get('delta_wall_sec')}s)")
+
+    print("\n===== 5 场景 Delta vs System 1 增益表 =====")
+    header = f"{'场景':<26}{'任务族':<9}{'System1 MS':>10}{'Delta MS':>10}{'增益':>9}{'轮数':>5}{'接受率':>7}{'耗时':>7}"
+    print(header)
+    for r in rows:
+        print(
+            f"{r['scene']:<26}{r['mission_type']:<9}"
+            f"{r['system1_ms']:>10.4f}{r['delta_final_ms']:>10.4f}{r['gain']:>+9.4f}"
+            f"{r['delta_rounds']:>5}{r['accepted_ratio']:>7.2f}{r['delta_wall_sec']:>7.1f}"
+        )
+
+    out_dir = Path("result/delta_generalization")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "gain_table.json").write_text(
+        json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"\n增益表已存 result/delta_generalization/gain_table.json")
+
+
 def main() -> None:
     args = parse_args()
+    if args.delta_all_scenes:
+        run_delta_all_scenes(args)
+        return
+
     scenario, bank = _load(args)
     print(f"场景: {scenario.name} | mission_type={scenario.mission_type} | terrain={scenario.terrain}")
     print(f"案例库: {args.case_bank} (records={len(bank.records)}, backend={bank.backend})")
