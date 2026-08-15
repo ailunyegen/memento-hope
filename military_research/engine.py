@@ -588,46 +588,6 @@ class LocalLLMPlanner:
             schema_name="combat_plan",
             schema=self._plan_json_schema(),
         )
-        memory_briefs = [self._format_case_brief(hit) for hit in memory_hits]
-        system_prompt = (
-            "你是一个面向联合作战筹划的大模型规划器。"
-            "请为给定场景生成逻辑自洽、可仿真执行、可导出 DoDAF/C2SIM 的作战方案。"
-            "你必须返回严格 JSON。"
-            "所有字段值都必须是正常中文作战内容。"
-            "不要把字段名、schema说明、markdown、代码块、提示词、JSON格式说明写入任何字段值。"
-            "phase_id 只允许使用 P1、P2、P3 这类格式。"
-            "allocated_units 必须来自输入中的友军单元名称。"
-            "每个阶段至少给出2条动作、2个决策点、2个预期效果。"
-            "不要输出空泛口号，每条动作都要对应具体兵力与作战行为。"
-        )
-        payload = {
-            "task": "generate_variant_plan",
-            "output_language": "zh-CN",
-            "phase_count_target": 4,
-            "scenario": scenario.to_dict(),
-            "hope_weights": {
-                "slow_weights": SLOW_WEIGHT_LIBRARY.get(
-                    scenario.doctrine_profile,
-                    SLOW_WEIGHT_LIBRARY["balanced_joint"],
-                ),
-                "fast_weights": fast_weights,
-                "fused_weights": fused_weights,
-            },
-            "memento_memory_cases": memory_briefs,
-            "iteration_index": iteration_index,
-            "previous_best_plan": self._plan_digest(previous_best_plan),
-            "reflection": reflection or {
-                "diagnosis": ["先给出首版方案，突出多域协同、塑形-打击-夺控-稳控闭环。"],
-                "variant_instructions": ["确保每个阶段都具体、简洁、可执行。"],
-                "meta_prompt_patch": "优先输出干净、简洁、专业的联合作战中文字段值。",
-            },
-        }
-        return self._chat_json(
-            system_prompt,
-            self._build_generate_user_prompt(payload),
-            schema_name="combat_plan",
-            schema=self._plan_json_schema(),
-        )
 
     def reflect(
         self,
@@ -641,33 +601,6 @@ class LocalLLMPlanner:
             "不得输出真实作战指挥、现实目标攻击、武器部署或现实行动建议。"
             "你需要根据仿真失败教训，给出下一轮 Prompt 的反思增量。"
             "只输出严格 JSON。"
-        )
-        payload = {
-            "task": "reflect_and_prepare_next_prompt",
-            "scenario": scenario.to_dict(),
-            "best_plan_summary": self._plan_digest(best_plan),
-            "simulation_result": best_result.to_dict(),
-            "required_schema": {
-                "diagnosis": ["string"],
-                "variant_instructions": ["string"],
-                "meta_prompt_patch": "string",
-            },
-        }
-        reflection = self._chat_json(
-            system_prompt,
-            self._build_reflection_user_prompt(payload),
-            schema_name="reflection_patch",
-            schema=self._reflection_json_schema(),
-        )
-        reflection.setdefault("diagnosis", [])
-        reflection.setdefault("variant_instructions", [])
-        reflection.setdefault("meta_prompt_patch", "")
-        return reflection
-        system_prompt = (
-            "你是作战方案优化器。"
-            "你需要根据仿真失败教训，给出下一轮 Prompt 的反思增量。"
-            "只输出严格 JSON。"
-            "不要复述 schema，不要输出乱码，不要写与任务无关的格式说明。"
         )
         payload = {
             "task": "reflect_and_prepare_next_prompt",
@@ -743,34 +676,6 @@ class LocalLLMPlanner:
             f"base_url={self.base_url}, model={self.model}, schema={schema_name}, "
             f"json_schema_errors={schema_errors}, fallback_errors={fallback_errors}"
         )
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                temperature=0.1,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": schema_name,
-                        "schema": schema,
-                    },
-                },
-            )
-        except Exception as exc:
-            raise RuntimeError(
-                f"Failed to connect to local LLM at {self.base_url}. "
-                "Please ensure LM Studio or another OpenAI-compatible server is running."
-            ) from exc
-
-        content = response.choices[0].message.content or ""
-        cleaned = self._extract_json_block(content)
-        try:
-            return json.loads(cleaned)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(f"Local LLM returned invalid JSON: {content}") from exc
 
     def _resolve_model(self) -> str:
         if self.model:
@@ -842,22 +747,6 @@ class LocalLLMPlanner:
             "confidence": hit["confidence"],
             "quality": hit.get("quality"),
             "usage_mode": usage_mode,
-            "mission_type": record.mission_type,
-            "terrain": record.terrain,
-            "objective": record.objective,
-            "friendly_roles": record.friendly_roles,
-            "enemy_roles": record.enemy_roles,
-            "key_actions": record.key_actions,
-            "lessons": record.lessons,
-            "outcome": record.outcome,
-            "metrics": record.metrics,
-        }
-        record: CaseRecord = hit["record"]
-        return {
-            "case_id": record.case_id,
-            "similarity": hit["score"],
-            "confidence": hit["confidence"],
-            "quality": hit.get("quality"),
             "mission_type": record.mission_type,
             "terrain": record.terrain,
             "objective": record.objective,
@@ -971,89 +860,6 @@ class LocalLLMPlanner:
         )
         return "\n".join(lines)
 
-    def _build_markdown_report_preview(self, result: Dict[str, Any]) -> str:
-        best_plan = result["best_plan"]
-        sim = result["best_simulation"]
-        experiment = result.get("experiment_config", {})
-        monte = sim.get("monte_carlo_stats", {})
-
-        def render_action(action: Any) -> str:
-            if isinstance(action, dict):
-                action_type = action.get("action_type", "other")
-                description = action.get("description", "")
-                return f"{action_type}: {description}".strip(": ")
-            if isinstance(action, ActionItem):
-                return f"{action.action_type}: {action.description}"
-            return str(action)
-
-        def format_toggle(flag_name: str) -> str:
-            return "??" if experiment.get(flag_name) else "??"
-
-        lines = [
-            "# ??????????",
-            "",
-            "## ????",
-            "- ????????????????????????",
-            "- ?????????????????????????????",
-            "",
-            "## 1. ????",
-            f"- ?????{experiment.get('seed', 'N/A')}",
-            f"- ???????{experiment.get('iterations', 'N/A')}",
-            f"- Memory?{format_toggle('disable_memory')}",
-            f"- Hope?{format_toggle('disable_hope')}",
-            f"- Reflection?{format_toggle('disable_reflection')}",
-            f"- Writeback?{'??' if experiment.get('allow_writeback') is False else '??'}",
-            f"- ?????{experiment.get('sim_runs', 'N/A')}",
-            f"- ?????{experiment.get('scenario_path', 'N/A')}",
-            f"- ??????{experiment.get('case_bank_path', 'N/A')}",
-            f"- ?????{experiment.get('output_dir', 'N/A')}",
-            "",
-            "## 2. ??????",
-            f"- ?????{best_plan['title']}",
-            f"- ?????{best_plan['commander_intent']}",
-            f"- ?????{best_plan['theory_of_victory']}",
-            f"- Memento ??????{len(best_plan.get('memory_insights', []))}",
-            "",
-            "## 3. ????",
-            f"- ??????{sim['mission_success']:.2%}",
-            f"- LER?{sim['ler']:.2f}",
-            f"- ?????{sim['completion_time_hours']:.2f} ??",
-            f"- ????{sim['survivability']:.2%}",
-            f"- ?????{sim['command_resilience']:.2%}",
-            f"- ?????{sim['overall_effectiveness']:.2%}",
-            "",
-            "## 4. ??????",
-        ]
-        for stage_name, score in sim.get("stage_scores", {}).items():
-            lines.append(f"- {stage_name}: {score:.2%}")
-
-        if monte:
-            lines.extend(["", "## 5. Monte Carlo ??"])
-            for metric_name, stats in monte.items():
-                lines.append(
-                    f"- {metric_name}: mean={stats.get('mean', 'N/A')}, std={stats.get('std', 'N/A')}, "
-                    f"95% CI=[{stats.get('ci95_low', 'N/A')}, {stats.get('ci95_high', 'N/A')}], "
-                    f"min={stats.get('min', 'N/A')}, max={stats.get('max', 'N/A')}, n={stats.get('n', 'N/A')}"
-                )
-
-        lines.extend(["", "## 6. ???????"])
-        for item in sim.get("notes", []):
-            lines.append(f"- {item}")
-
-        lines.extend(["", "## 7. ????"])
-        for item in sim.get("recommendations", []):
-            lines.append(f"- {item}")
-
-        lines.extend(["", "## 8. ????", ""])
-        for phase in best_plan.get("phases", []):
-            lines.append(f"### {phase['phase_id']} {phase['name']}")
-            lines.append(f"- ???{phase['intent']}")
-            lines.append(f"- ???{', '.join(phase.get('allocated_units', []))}")
-            action_texts = [render_action(action) for action in phase.get("actions", [])]
-            lines.append(f"- ???{'?'.join(action_texts)}")
-            lines.append("")
-        return "\n".join(lines)
-
     def _build_reflection_user_prompt(self, payload: Dict[str, Any]) -> str:
         scenario = payload["scenario"]
         best_plan = payload["best_plan_summary"]
@@ -1064,35 +870,6 @@ class LocalLLMPlanner:
             "安全边界：",
             "- 仅用于虚拟场景下的方案生成与仿真评估研究。",
             "- 不得输出真实作战指挥、现实目标攻击、武器部署或现实行动建议。",
-            "",
-            "场景：",
-            f"- 名称：{scenario['name']}",
-            f"- 目标：{scenario['objective']}",
-            "",
-            "当前较优方案：",
-            f"- 标题：{best_plan['title']}",
-            f"- 指挥意图：{best_plan['commander_intent']}",
-            f"- 阶段：{'；'.join(best_plan['phase_names'])}",
-            "",
-            "仿真结果：",
-            f"- 任务成功度：{result['mission_success']}",
-            f"- LER：{result['ler']}",
-            f"- 完成时间：{result['completion_time_hours']}",
-            f"- 指挥韧性：{result['command_resilience']}",
-            f"- 五阶段评分：{json.dumps(result.get('stage_scores', {}), ensure_ascii=False)}",
-            f"- 失败教训：{'；'.join(result['notes'])}",
-            "",
-            "输出要求：",
-            "- diagnosis 聚焦失败根因。",
-            "- variant_instructions 聚焦下一轮可执行改进方向。",
-            "- meta_prompt_patch 写成一句简短的提示增强语。",
-        ]
-        return "\n".join(lines)
-        scenario = payload["scenario"]
-        best_plan = payload["best_plan_summary"]
-        result = payload["simulation_result"]
-        lines = [
-            "请根据以下仿真结果给出下一轮 Prompt 反思增量。",
             "",
             "场景：",
             f"- 名称：{scenario['name']}",
@@ -1135,48 +912,6 @@ class LocalLLMPlanner:
                 "name": {"type": "string"},
                 "intent": {"type": "string"},
                 "actions": {"type": "array", "items": action_schema},
-                "allocated_units": {"type": "array", "items": {"type": "string"}},
-                "decision_points": {"type": "array", "items": {"type": "string"}},
-                "expected_effects": {"type": "array", "items": {"type": "string"}},
-            },
-            "required": [
-                "phase_id",
-                "name",
-                "intent",
-                "actions",
-                "allocated_units",
-                "decision_points",
-                "expected_effects",
-            ],
-            "additionalProperties": False,
-        }
-        return {
-            "type": "object",
-            "properties": {
-                "title": {"type": "string"},
-                "commander_intent": {"type": "string"},
-                "theory_of_victory": {"type": "string"},
-                "risk_controls": {"type": "array", "items": {"type": "string"}},
-                "assessment_metrics": {"type": "array", "items": {"type": "string"}},
-                "phases": {"type": "array", "items": phase_schema, "minItems": 4},
-            },
-            "required": [
-                "title",
-                "commander_intent",
-                "theory_of_victory",
-                "risk_controls",
-                "assessment_metrics",
-                "phases",
-            ],
-            "additionalProperties": False,
-        }
-        phase_schema = {
-            "type": "object",
-            "properties": {
-                "phase_id": {"type": "string"},
-                "name": {"type": "string"},
-                "intent": {"type": "string"},
-                "actions": {"type": "array", "items": {"type": "string"}},
                 "allocated_units": {"type": "array", "items": {"type": "string"}},
                 "decision_points": {"type": "array", "items": {"type": "string"}},
                 "expected_effects": {"type": "array", "items": {"type": "string"}},
@@ -1338,32 +1073,6 @@ class PlanGenerator:
     def _infer_stage_name(self, index: int) -> str:
         return ["detect", "disrupt", "breach", "control"][min(index, 3)] if index < 4 else "sustain"
 
-    def _default_actions_legacy(self, stage_name: str, phase: PlanPhase, scenario: Scenario) -> List[str]:
-        objective = scenario.objective
-        templates = {
-            "detect": [
-                f"{phase.allocated_units[0]}前出侦察并回传敌关键节点位置，形成{objective}的初始目标图谱。",
-                f"{phase.allocated_units[1]}同步建立抗干扰信息链路，完成侦察结果与火力单元的实时共享。",
-            ],
-            "disrupt": [
-                f"{phase.allocated_units[0]}对敌防空、岸防或通信节点实施先制压制，削弱其反制能力。",
-                f"{phase.allocated_units[1]}对主突击轴实施电子干扰或指挥协同，压缩敌方响应窗口。",
-            ],
-            "breach": [
-                f"{phase.allocated_units[0]}沿主突击轴快速机动，依托压制窗口突入关键地域。",
-                f"{phase.allocated_units[1]}对突破口两翼实施火力与防护协同，保障突击群连续推进。",
-            ],
-            "control": [
-                f"{phase.allocated_units[0]}完成关键地域夺控后迅速展开稳控部署，封控敌方反扑通道。",
-                f"{phase.allocated_units[1]}接续指挥与态势更新，维持区域控制和兵力协同。",
-            ],
-            "sustain": [
-                f"{phase.allocated_units[0]}组织补给、伤员后送和战损恢复，维持后续持续作战能力。",
-                f"{phase.allocated_units[1]}准备再打击与增援接替，防止既得控制成果回吐。",
-            ],
-        }
-        return templates.get(stage_name, [f"{phase.name}补充动作一。", f"{phase.name}补充动作二。"])
-
     def _default_decision_points(self, stage_name: str, scenario: Scenario) -> List[str]:
         templates = {
             "detect": [
@@ -1443,53 +1152,22 @@ class PlanGenerator:
             else:
                 insights.append(f"正样本 {record.case_id}（相似度 {hit['score']:.2f}）提示复用：{lessons}")
         return insights
-        if not memory_hits:
-            return ["未检索到高置信案例，本轮方案主要依赖模型推理与任务先验。"]
-        insights: List[str] = []
-        for hit in memory_hits:
-            record: CaseRecord = hit["record"]
-            lessons = "；".join(record.lessons[:2])
-            insights.append(f"案例{record.case_id}（相似度 {hit['score']:.2f}）提示：{lessons}")
-        return insights
-
-    def _build_phase_legacy(self, payload: Dict[str, Any], default_index: int) -> PlanPhase:
-        phase_id = str(payload.get("phase_id") or "").strip() or f"P{default_index}"
-        phase_name = str(payload.get("name") or "").strip() or f"Phase {default_index}"
-        phase_actions: List[ActionItem] = []
-        raw_actions = payload.get("actions")
-        if isinstance(raw_actions, list):
-            for item in raw_actions:
-                try:
-                    phase_actions.append(ActionItem.from_any(item))
-                except ValueError:
-                    continue
-        if not phase_actions:
-            phase_actions = [
-                ActionItem(action_type="other", description="Placeholder action one"),
-                ActionItem(action_type="other", description="Placeholder action two"),
-            ]
-        return PlanPhase(
-            phase_id=phase_id,
-            name=phase_name,
-            intent=str(payload.get("intent") or "").strip() or f"Execute tasks around {phase_id}.",
-            actions=phase_actions,
-            allocated_units=self._ensure_list(payload.get("allocated_units"), fallback=["Pending unit assignment"]),
-            decision_points=self._ensure_list(payload.get("decision_points"), fallback=["Pending decision point"]),
-            expected_effects=self._ensure_list(payload.get("expected_effects"), fallback=["Pending expected effect"]),
-        )
-
-    def _ensure_list_legacy(self, value: Any, fallback: List[str]) -> List[str]:
-        if isinstance(value, list):
-            cleaned = [str(item).strip() for item in value if str(item).strip()]
-            if cleaned:
-                return cleaned
-        return list(fallback)
 
     def _sanitize_text(self, value: Any, fallback: str) -> str:
         text = str(value or "").strip()
         if not text:
             return fallback
-        bad_markers = ["<|", "analysis", "final<|message|>", "commentary", "json_schema"]
+        bad_markers = [
+            "<|",
+            "analysis",
+            "final<|message|>",
+            "commentary",
+            "json_schema",
+            "方案生成器反思约束",
+            "保留当前方案",
+            "反思修正",
+            "variant instruction",
+        ]
         if any(marker in text.lower() for marker in bad_markers):
             return fallback
         if text.count("…") > 20 or text.count(".") > 30:
@@ -2674,14 +2352,6 @@ class MilitaryResearchPipeline:
             and not memory_hits
         )
 
-    def _prefer_hope_anchor(self, scenario: Scenario, memory_support: float) -> bool:
-        terrain_family = self._terrain_family(scenario.terrain)
-        if scenario.mission_type == "assault" and terrain_family == "river":
-            return memory_support <= 0.55
-        if scenario.mission_type == "assault" and terrain_family == "coastal":
-            return memory_support <= 0.46
-        return memory_support <= 0.42
-
     def _suppress_reflection_for_scene(self, scenario: Scenario, memory_support: float) -> bool:
         terrain_family = self._terrain_family(scenario.terrain)
         if scenario.mission_type == "assault" and terrain_family == "river":
@@ -2717,6 +2387,23 @@ class MilitaryResearchPipeline:
             return False
         return True
 
+    def _rule_based_reflection(self, best_result: SimulationResult) -> Dict[str, Any]:
+        """规则化反思：零 LLM 调用，直接由仿真诊断输出构造反思增量。
+
+        仿真器的 notes / recommendations 本身即为规则化诊断（见
+        ``PlanSimulator._build_failure_notes`` 与 ``_recommend``），此处仅做
+        字段搬运并附加一条稳定化 prompt 补丁，用于快速模式的迭代驱动。
+        """
+        notes = list(best_result.notes or [])
+        recommendations = list(best_result.recommendations or [])
+        diagnosis = notes[:2] or ["当前方案整体稳定，聚焦最弱阶段局部修正。"]
+        variant_instructions = recommendations[:2] or ["保持现有阶段结构，仅修正最弱阶段动作。"]
+        return {
+            "diagnosis": diagnosis,
+            "variant_instructions": variant_instructions,
+            "meta_prompt_patch": "仅针对仿真诊断的最弱阶段做局部修正，其余阶段保持稳定。",
+        }
+
     def run(
         self,
         scenario: Scenario,
@@ -2728,12 +2415,22 @@ class MilitaryResearchPipeline:
         allow_writeback: bool = True,
         sde_theta: float = 0.5,
         sde_epsilon: float = 0.02,
+        single_candidate: bool = False,
+        rule_based_reflection: bool = False,
+        fast_first: bool = False,
+        delta_refine: bool = False,
+        delta_max_iters: int = 12,
+        early_stop_ms: float = 0.635,
+        stream_callback=None,
     ) -> Dict[str, Any]:
         controller = DualMemoryController(scenario.doctrine_profile, seed=self.seed,
                                            sde_theta=sde_theta, sde_epsilon=sde_epsilon)
         generator = PlanGenerator()
         simulator = PlanSimulator(self.rng)
 
+        emergency: Dict[str, Any] | None = None
+        delta_history: List[Dict[str, Any]] = []
+        delta_wall_sec: float | None = None
         history: List[Dict[str, Any]] = []
         best_plan: CombatPlan | None = None
         best_result: SimulationResult | None = None
@@ -2744,6 +2441,49 @@ class MilitaryResearchPipeline:
         iteration_wall_times: List[float] = []
         iteration_candidate_counts: List[int] = []
         total_simulation_rollouts = 0
+
+        if fast_first or delta_refine:
+            # ── System 1（快道）：第 0 秒应急预案，零 LLM 调用 ──
+            from .fast_pipeline import System1FastPlanner
+
+            s1 = System1FastPlanner(self.case_bank, seed=self.seed)
+            s1_started = time.perf_counter()
+            emergency_plan, warped_scenario = s1.build_emergency_plan(scenario)
+            emergency_latency_ms = round((time.perf_counter() - s1_started) * 1000, 1)
+            emergency_artifacts = s1.export(emergency_plan, warped_scenario)
+            emergency_sim = s1.simulate(
+                emergency_plan, warped_scenario, runs=max(1, int(sim_runs))
+            )
+            emergency = {
+                "tier": "System-1-Emergency",
+                "latency_ms": emergency_latency_ms,
+                "plan": emergency_plan.to_dict(),
+                "simulation": emergency_sim.to_dict(),
+                "artifacts": emergency_artifacts,
+            }
+            if stream_callback is not None:
+                stream_callback(dict(emergency))
+            # System 2（慢道）以应急预案为起点续跑：LLM 迭代在既有方案基础上
+            # 保留高分阶段、仅修正最弱阶段（与现有“反思约束”语义一致）。
+            best_plan = emergency_plan
+            best_result = emergency_sim
+
+        if delta_refine:
+            # ── System 2（慢道）：Delta Loop 增量修补替代全量迭代 ──
+            from .fast_pipeline import DeltaRefiner
+
+            refiner = DeltaRefiner(llm=generator.llm, seed=self.seed, sim_runs=max(1, int(sim_runs)))
+            delta_started = time.perf_counter()
+            best_plan, delta_history = refiner.refine(
+                scenario=warped_scenario,
+                anchor_plan=emergency_plan,
+                iterations=delta_max_iters,
+                stream_callback=stream_callback,
+                early_stop_ms=early_stop_ms,
+            )
+            delta_wall_sec = round(time.perf_counter() - delta_started, 2)
+            best_result = refiner._simulate(warped_scenario, best_plan)
+            iterations = 0  # Delta Loop 即 System 2 主循环，跳过全量迭代
 
         for iteration in range(iterations):
             iteration_started = time.perf_counter()
@@ -2880,6 +2620,16 @@ class MilitaryResearchPipeline:
                     elif self._prefer_reflection_only(scenario, memory_hits) and active_reflection is not None:
                         candidate_specs.append(reflection_only)
 
+            if single_candidate and len(candidate_specs) > 1:
+                # 快速模式：收敛为单个候选，消除候选竞争带来的多倍 LLM 调用。
+                # 优先级 fusion_full > guided_full > memory_anchor > hope_baseline > reflection_only。
+                priority = ["fusion_full", "guided_full", "memory_anchor", "hope_baseline", "reflection_only"]
+                chosen = next(
+                    (spec for label in priority for spec in candidate_specs if spec["label"] == label),
+                    candidate_specs[0],
+                )
+                candidate_specs = [chosen]
+
             iteration_candidate_counts.append(len(candidate_specs))
             candidate_results: List[Tuple[str, CombatPlan, SimulationResult, List[Dict[str, Any]]]] = []
             for spec in candidate_specs:
@@ -2922,11 +2672,14 @@ class MilitaryResearchPipeline:
             if not disable_hope:
                 controller.integrate_feedback(plan, result, best_plan=best_plan, best_result=best_result)
             if not disable_reflection:
-                reflection = (
-                    generator.reflect(scenario, best_plan, best_result)
-                    if self._should_use_reflection(scenario, best_result, {"diagnosis": ["bootstrap"]})
-                    else None
-                )
+                if self._should_use_reflection(scenario, best_result, {"diagnosis": ["bootstrap"]}):
+                    reflection = (
+                        self._rule_based_reflection(best_result)
+                        if rule_based_reflection
+                        else generator.reflect(scenario, best_plan, best_result)
+                    )
+                else:
+                    reflection = None
             else:
                 reflection = None
             iteration_wall_times.append(round(time.perf_counter() - iteration_started, 4))
@@ -2947,6 +2700,8 @@ class MilitaryResearchPipeline:
             else 0.0,
             "total_simulation_rollouts": int(total_simulation_rollouts),
             "sim_runs_per_evaluation": max(1, int(sim_runs)),
+            "delta_wall_sec": delta_wall_sec,
+            "delta_rounds": len(delta_history) if delta_history else None,
         }
         return {
             "runtime_manifest": self._collect_runtime_manifest(),
@@ -2960,6 +2715,12 @@ class MilitaryResearchPipeline:
                 "disable_reflection": disable_reflection,
                 "allow_writeback": allow_writeback,
                 "sim_runs": sim_runs,
+                "single_candidate": single_candidate,
+                "rule_based_reflection": rule_based_reflection,
+                "fast_first": fast_first,
+                "delta_refine": delta_refine,
+                "delta_max_iters": delta_max_iters,
+                "early_stop_ms": early_stop_ms,
             },
             "scenario": scenario.to_dict(),
             "memory_hits": [
@@ -2990,6 +2751,8 @@ class MilitaryResearchPipeline:
             "dodaf": {"ov5b": build_ov5b(best_plan, scenario), "ov6c": build_ov6c(best_plan)},
             "c2sim_xml": build_c2sim_xml(best_plan, scenario),
             "optimization_history": history,
+            "delta_history": delta_history or None,
+            "emergency": emergency,
             "bottleneck_diagnostic": controller.bottleneck_detector.snapshot() if not disable_hope else None,
         }
 

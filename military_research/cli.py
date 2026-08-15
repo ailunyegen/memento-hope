@@ -35,6 +35,18 @@ def parse_args() -> argparse.Namespace:
                         help="HOPE SDE reversion coefficient (forgetting rate).")
     parser.add_argument("--hope-epsilon", type=float, default=0.02,
                         help="HOPE SDE noise strength.")
+    parser.add_argument("--fast-first", action="store_true",
+                        help="两段式：System 1 毫秒级应急预案先行，System 2 以预案为起点续跑优化。")
+    parser.add_argument("--single-candidate", action="store_true",
+                        help="快速模式：每轮仅生成 1 个候选方案（消除候选竞争的多倍 LLM 调用）。")
+    parser.add_argument("--rule-reflection", action="store_true",
+                        help="快速模式：反思改为规则化诊断（复用仿真 notes/recommendations，零 LLM 调用）。")
+    parser.add_argument("--delta-refine", action="store_true",
+                        help="System 2 走 Delta Loop 增量修补（锚定应急预案，仅局部打补丁 + 门禁回滚）。")
+    parser.add_argument("--delta-max-iters", type=int, default=12,
+                        help="Delta Loop 迭代上限（默认 12 轮）。")
+    parser.add_argument("--early-stop-ms", type=float, default=0.635,
+                        help="Delta Loop 达标自动提前截断的 mission_success 门限。")
     return parser.parse_args()
 
 
@@ -58,6 +70,13 @@ def main() -> None:
             allow_writeback=not args.disable_writeback,
             sde_theta=args.hope_theta,
             sde_epsilon=args.hope_epsilon,
+            single_candidate=args.single_candidate,
+            rule_based_reflection=args.rule_reflection,
+            fast_first=args.fast_first,
+            delta_refine=args.delta_refine,
+            delta_max_iters=args.delta_max_iters,
+            early_stop_ms=args.early_stop_ms,
+            stream_callback=_print_stream_tier,
         )
         result.setdefault("experiment_config", {})
         result["experiment_config"]["scenario_path"] = str(Path(args.scenario))
@@ -98,6 +117,17 @@ def main() -> None:
             indent=2,
         )
     )
+
+
+def _print_stream_tier(payload: dict) -> None:
+    """两段式流式回调：打印 System 1 应急推送（指控终端可在此接入推送逻辑）。"""
+    tier = payload.get("tier")
+    if tier == "System-1-Emergency":
+        print(
+            f"[stream] {tier}: latency_ms={payload.get('latency_ms')} "
+            f"plan={payload.get('plan', {}).get('title', '')} "
+            f"c2sim_bytes={len(str(payload.get('artifacts', {}).get('c2sim_xml', '')))}"
+        )
 
 
 def _run_baseline(args: argparse.Namespace, scenario: Scenario, rng: random.Random) -> dict:
