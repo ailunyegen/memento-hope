@@ -1,26 +1,21 @@
 scene_key,scene_label,group_key,group_label,mission_success
-coastal_joint_assault,Coastal,ablation_pure_llm,Pure LLM,0.6332
-coastal_joint_assault,Coastal,ablation_memento,LLM + Memento,0.6092
-coastal_joint_assault,Coastal,ablation_hope,LLM + Hope,0.6251
-coastal_joint_assault,Coastal,ablation_reflection_only,LLM + Reflection,0.6113
-coastal_joint_assault,Coastal,ablation_full,Full,0.6847
-island_resupply_corridor,Island,ablation_pure_llm,Pure LLM,0.6405
-island_resupply_corridor,Island,ablation_memento,LLM + Memento,0.6597
-island_resupply_corridor,Island,ablation_hope,LLM + Hope,0.6486
-island_resupply_corridor,Island,ablation_reflection_only,LLM + Reflection,0.6209
-island_resupply_corridor,Island,ablation_full,Full,0.6643
-mountain_corridor_recon,Mountain,ablation_pure_llm,Pure LLM,0.6859
-mountain_corridor_recon,Mountain,ablation_memento,LLM + Memento,0.696
-mountain_corridor_recon,Mountain,ablation_hope,LLM + Hope,0.6992
-mountain_corridor_recon,Mountain,ablation_reflection_only,LLM + Reflection,0.6579
-mountain_corridor_recon,Mountain,ablation_full,Full,0.7045
-river_crossing_breakthrough,River,ablation_pure_llm,Pure LLM,0.6573
-river_crossing_breakthrough,River,ablation_memento,LLM + Memento,0.658
-river_crossing_breakthrough,River,ablation_hope,LLM + Hope,0.6801
-river_crossing_breakthrough,River,ablation_reflection_only,LLM + Reflection,0.6275
-river_crossing_breakthrough,River,ablation_full,Full,0.6698
-urban_hub_defense,Urban,ablation_pure_llm,Pure LLM,0.6805
-urban_hub_defense,Urban,ablation_memento,LLM + Memento,0.6391
-urban_hub_defense,Urban,ablation_hope,LLM + Hope,0.69
-urban_hub_defense,Urban,ablation_reflection_only,LLM + Reflection,0.644
-urban_hub_defense,Urban,ablation_full,Full,0.6909
+coastal_joint_assault,Coastal,ablation_pure_llm,Pure LLM,0.5898
+coastal_joint_assault,Coastal,ablation_memento,LLM + Memento,0.5855
+coastal_joint_assault,Coastal,ablation_hope,LLM + Hope,0.6084
+coastal_joint_assault,Coastal,ablation_full,Full,0.6044
+island_resupply_corridor,Island,ablation_pure_llm,Pure LLM,0.6487
+island_resupply_corridor,Island,ablation_memento,LLM + Memento,0.64
+island_resupply_corridor,Island,ablation_hope,LLM + Hope,0.6528
+island_resupply_corridor,Island,ablation_full,Full,0.6593
+mountain_corridor_recon,Mountain,ablation_pure_llm,Pure LLM,0.6882
+mountain_corridor_recon,Mountain,ablation_memento,LLM + Memento,0.6985
+mountain_corridor_recon,Mountain,ablation_hope,LLM + Hope,0.716
+mountain_corridor_recon,Mountain,ablation_full,Full,0.7171
+river_crossing_breakthrough,River,ablation_pure_llm,Pure LLM,0.6484
+river_crossing_breakthrough,River,ablation_memento,LLM + Memento,0.6748
+river_crossing_breakthrough,River,ablation_hope,LLM + Hope,0.6919
+river_crossing_breakthrough,River,ablation_full,Full,0.6784
+urban_hub_defense,Urban,ablation_pure_llm,Pure LLM,0.6752
+urban_hub_defense,Urban,ablation_memento,LLM + Memento,0.674
+urban_hub_defense,Urban,ablation_hope,LLM + Hope,0.6511
+urban_hub_defense,Urban,ablation_full,Full,0.665

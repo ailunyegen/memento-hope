@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parents[3]
-FIG_DIR = ROOT / "paper" / "manuscript" / "figures"
+ROOT = Path(__file__).resolve().parents[2]
+FIG_DIR = ROOT / "manuscript" / "figures"
 
+# 数据源（可在命令行覆盖为 4090 套件）
 ABLA_DIR = ROOT / "result" / "ablation_suite_seed7_v3"
+REFLECTION_DIR = ROOT / "result" / "ablation_reflection_only_seed7"
 ITER20_DIR = ROOT / "result" / "generalization_suite_seed7_v2_sceneout_iter20"
 ITER50_DIR = ROOT / "result" / "generalization_suite_seed7_v2_sceneout_iter50"
 
@@ -66,6 +68,9 @@ def export_bar_data() -> list[dict]:
     for scene_key, scene_label in SCENES:
         for group_key, group_label, _ in GROUPS:
             result_path = ITER20_DIR / scene_key / group_key / "full_result.json"
+            if not result_path.exists():
+                # 4090 scene-out 套件不含 reflection 变体，跳过缺失组
+                continue
             data = load_json(result_path)
             rows.append(
                 {
@@ -96,13 +101,14 @@ def export_bar_data() -> list[dict]:
 
 def export_ablation_stage_data() -> list[dict]:
     rows = []
-    reflection_dir = ROOT / "result" / "ablation_reflection_only_seed7"
     for group_key, group_label, color in ABLA_GROUPS:
         result_path = (
-            reflection_dir / "full_result.json"
+            REFLECTION_DIR / "full_result.json"
             if group_key == "ablation_reflection_only"
             else ABLA_DIR / group_key / "full_result.json"
         )
+        if not result_path.exists():
+            continue
         data = load_json(result_path)
         stage_scores = data["best_simulation"]["stage_scores"]
         for stage_key, stage_label in STAGES:
@@ -193,16 +199,25 @@ def make_ablation_stage_figure(rows: list[dict]) -> None:
 def make_bar_figure(rows: list[dict]) -> None:
     fig, axes = plt.subplots(3, 2, figsize=(10.6, 9.6))
     axes = axes.flatten()
-    colors = [color for _, _, color in GROUPS]
+    color_map = {group_key: color for group_key, _, color in GROUPS}
+    short_label_map = {
+        "ablation_pure_llm": "Pure",
+        "ablation_memento": "Memento",
+        "ablation_hope": "Hope",
+        "ablation_reflection_only": "Reflect.",
+        "ablation_full": "Full",
+    }
 
     for axis, (scene_key, scene_label) in zip(axes, SCENES):
         scene_rows = [row for row in rows if row["scene_key"] == scene_key]
         values = [row["mission_success"] for row in scene_rows]
+        labels = [short_label_map[row["group_key"]] for row in scene_rows]
+        colors = [color_map[row["group_key"]] for row in scene_rows]
         y_min = max(0.0, min(values) - 0.015)
         y_max = min(1.0, max(values) + 0.015)
         ticks = np.linspace(y_min, y_max, 5)
         bars = axis.bar(
-            GROUP_SHORT_LABELS,
+            labels,
             values,
             color=colors,
             edgecolor="black",
@@ -335,11 +350,23 @@ def parse_args() -> argparse.Namespace:
         choices=["ablation", "generalization", "trend"],
         help="Generate only the selected figure groups.",
     )
+    parser.add_argument("--abla-dir", type=Path, default=ABLA_DIR,
+                        help="Single-scenario ablation suite directory.")
+    parser.add_argument("--reflection-dir", type=Path, default=REFLECTION_DIR,
+                        help="Reflection-only ablation directory.")
+    parser.add_argument("--iter20-dir", type=Path, default=ITER20_DIR,
+                        help="20-iteration generalization suite directory.")
+    parser.add_argument("--iter50-dir", type=Path, default=ITER50_DIR,
+                        help="50-iteration trend suite directory.")
     return parser.parse_args()
 
 
 def main() -> None:
+    global ABLA_DIR, REFLECTION_DIR, ITER20_DIR, ITER50_DIR
     args = parse_args()
+    ABLA_DIR, REFLECTION_DIR, ITER20_DIR, ITER50_DIR = (
+        args.abla_dir, args.reflection_dir, args.iter20_dir, args.iter50_dir,
+    )
     selected = set(args.only or ["ablation", "generalization", "trend"])
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     if "ablation" in selected:
