@@ -1,0 +1,44 @@
+% ===== Table 6 (tab:generalization-summary) — 4090 scene-out suite =====
+% 场景数 5 | Full 胜 Pure 4/5 | Full 不低于全部变体 2/5
+\begin{table}[ht]
+\centering
+\caption{Cross-scenario transfer summary (4090, 20-iteration scene-out suite). All settings use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
+\label{tab:generalization-summary}
+\small
+\begin{tabular}{lcc}
+\toprule
+Setting & Avg. MS & Avg. OE \\
+\midrule
+Pure LLM & 65.01 & 72.49 \\
+LLM + Memento & 65.46 & 72.93 \\
+LLM + Hope & 66.40 & 78.01 \\
+Full & 66.48 & 77.92 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===== Table 7 (tab:generalization-scenes) — 4090 per-scene =====
+\begin{table}[ht]
+\centering
+\caption{Per-scene mission success (4090, 20-iteration scene-out suite).}
+\label{tab:generalization-scenes}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+Scenario & Family & Pure & Memento & Hope & Full & $\Delta$MS \\
+\midrule
+Coastal joint assault & assault & 58.98 & 58.55 & 60.84 & 60.44 & +0.01 \\
+Island resupply corridor & sustain & 64.87 & 64.00 & 65.28 & 65.93 & +0.01 \\
+Mountain corridor recon & recon & 68.82 & 69.85 & 71.60 & 71.71 & +0.03 \\
+River crossing breakthrough & assault & 64.84 & 67.48 & 69.19 & 67.84 & +0.03 \\
+Urban hub defense & defense & 67.52 & 67.40 & 65.11 & 66.50 & -0.01 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===== 叙述要点（results.tex 段落替换参考） =====
+% - Full 胜 Pure：4/5 场景；平均 MS Pure=65.01 Full=66.48（Δ+1.48 点）
+% - Full 不低于全部变体：2/5 场景
+% - 若有场景非 Full 最优，列出（如 river 场景 Hope 领先），如实报告
+

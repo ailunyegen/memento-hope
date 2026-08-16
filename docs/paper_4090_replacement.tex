@@ -1,0 +1,186 @@
+% ============================================================================
+% 论文 RTX 4090 D 全量替换包（自动生成，2026-08）
+% 应用方式：按节替换 manuscript/sections/*.tex 对应段落/表格。
+% 口径：全稿统一默认 HOPE 参数（theta=0.5, eps=0.02）；已删除优化参数表
+%       （tab:multiseed-optimized），避免混合口径。
+% 数据源：result/ablation_suite_4090_rerun | ablation_4090_multiseed |
+%         scene_out_4090 | ablation_reflection_only_4090（runtime_manifest 实测）
+% ============================================================================
+
+% ----------------------------------------------------------------------------
+% 1) experimental_setup.tex:79 硬件与运行元数据（替换整段 "The refreshed
+%    canonical manuscript evidence was rerun ..."）
+% ----------------------------------------------------------------------------
+\paragraph{替换文本：}
+The refreshed canonical manuscript evidence was rerun with the local backend
+model \texttt{deepseek-r1-0528-qwen3-8b} inside a dedicated Python environment.
+The recorded runtime manifests report Python 3.12.7, PyTorch 2.5.1, an
+OpenAI-compatible local API endpoint, a 13th Gen Intel(R) Core(TM) i7-13700KF
+CPU, and an NVIDIA GeForce RTX 4090 D GPU (24\,GB). The Python-side torch build
+is CPU-only; GPU inference is served by the local OpenAI-compatible endpoint.
+Newly generated \texttt{full\_result.json} files emit this information through a
+top-level \texttt{runtime\_manifest} ...
+
+% ----------------------------------------------------------------------------
+% 2) discussion.tex:22 硬件句（替换 "...i7-13700F CPU with an NVIDIA GeForce
+%    RTX 3060 GPU..." 为下句）
+% ----------------------------------------------------------------------------
+\paragraph{替换文本：}
+... on a 13th Gen Intel(R) Core(TM) i7-13700KF CPU with an NVIDIA GeForce RTX
+4090 D GPU (24\,GB), using an OpenAI-compatible local endpoint.
+
+% ----------------------------------------------------------------------------
+% 3) Table 4（tab:ablation-main）替换（4090 默认参数，含 Reflection 行）
+%    caption 改为：All groups use default HOPE parameters ($\theta=0.5$,
+%    $\epsilon=0.02$). The reflection-only row uses the matched follow-up rerun.
+% ----------------------------------------------------------------------------
+\begin{table}[ht]
+\centering
+\caption{Main ablation results on the sample coastal joint-assault scenario
+(RTX 4090 D). All groups use 10 planning iterations, 50 Monte Carlo runs,
+seed 7, writeback disabled, and default HOPE parameters
+($\theta=0.5$, $\epsilon=0.02$).}
+\label{tab:ablation-main}
+\small
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{lccccc}
+\toprule
+Setting & MS & OE & LER & Time (h) & Cmd.\ resilience \\
+\midrule
+
+Pure LLM & 62.75 & 73.84 & 1.71 & 11.41 & 60.96 \\
+LLM + Memento & 61.25 & 70.90 & 1.52 & 13.48 & 60.96 \\
+LLM + Hope & 64.45 & 77.29 & 1.97 & 10.92 & 63.59 \\
+LLM + Reflection & 59.29 & 67.49 & 1.17 & 11.56 & 60.96 \\
+Full & 65.76 & 78.75 & 2.19 & 14.18 & 76.08 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ----------------------------------------------------------------------------
+% 4) Table 5（tab:ablation-stage）替换（列序：Stage & Pure & Memento & Hope &
+%    Full & Reflection）
+% ----------------------------------------------------------------------------
+\begin{table}[ht]
+\centering
+\caption{Five-stage kill-chain scores for the ablation study (RTX 4090 D).}
+\label{tab:ablation-stage}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+Stage & Pure LLM & \shortstack{LLM +\\Memento} & \shortstack{LLM +\\Hope} & Full & \shortstack{LLM +\\Reflection} \\
+\midrule
+
+detect & 62.24 & 61.00 & 64.94 & 66.65 & 61.59 \\
+disrupt & 57.31 & 61.26 & 57.78 & 65.69 & 60.25 \\
+breach & 55.91 & 55.83 & 58.57 & 60.88 & 52.41 \\
+control & 64.43 & 60.88 & 66.50 & 67.97 & 54.21 \\
+sustain & 68.40 & 64.03 & 70.09 & 66.57 & 55.22 \\
+\bottomrule
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\end{table}
+
+% ----------------------------------------------------------------------------
+% 5) Table 12（tab:multiseed）替换（4090 5-seed 配对检验）
+%    叙述：mean MS gain +3.81 (SD=2.27), t(4)=3.75, p=0.02, d=1.68;
+%          OE gain +4.85 (t=5.87, p<0.01); LER gain +0.486 (t=6.60, p<0.01)
+% ----------------------------------------------------------------------------
+\begin{table}[ht]
+\centering
+\caption{Multi-seed replication (RTX 4090 D): Pure LLM vs.\ Full pipeline
+across five seeds. All runs use 10 iterations, 50 Monte Carlo runs, default
+HOPE parameters, and writeback disabled.}
+\label{tab:multiseed}
+\small
+\begin{tabular}{lccc}
+\toprule
+Seed & Pure LLM & Full & $\Delta$MS \\
+\midrule
+
+7 & 63.33 & 66.92 & +3.59 \\
+42 & 63.92 & 65.96 & +2.04 \\
+123 & 63.97 & 71.68 & +7.71 \\
+999 & 62.73 & 65.99 & +3.26 \\
+2024 & 65.64 & 68.08 & +2.44 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ----------------------------------------------------------------------------
+% 6) Table 6/7（tab:generalization-summary / tab:generalization-scenes）
+% ----------------------------------------------------------------------------
+
+% ===== Table 6 (tab:generalization-summary) — 4090 scene-out suite =====
+% 场景数 5 | Full 胜 Pure 4/5 | Full 不低于全部变体 2/5
+\begin{table}[ht]
+\centering
+\caption{Cross-scenario transfer summary (4090, 20-iteration scene-out suite). All settings use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
+\label{tab:generalization-summary}
+\small
+\begin{tabular}{lcc}
+\toprule
+Setting & Avg. MS & Avg. OE \\
+\midrule
+Pure LLM & 65.01 & 72.49 \\
+LLM + Memento & 65.46 & 72.93 \\
+LLM + Hope & 66.40 & 78.01 \\
+Full & 66.48 & 77.92 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===== Table 7 (tab:generalization-scenes) — 4090 per-scene =====
+\begin{table}[ht]
+\centering
+\caption{Per-scene mission success (4090, 20-iteration scene-out suite).}
+\label{tab:generalization-scenes}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+Scenario & Family & Pure & Memento & Hope & Full & $\Delta$MS \\
+\midrule
+Coastal joint assault & assault & 58.98 & 58.55 & 60.84 & 60.44 & +0.01 \\
+Island resupply corridor & sustain & 64.87 & 64.00 & 65.28 & 65.93 & +0.01 \\
+Mountain corridor recon & recon & 68.82 & 69.85 & 71.60 & 71.71 & +0.03 \\
+River crossing breakthrough & assault & 64.84 & 67.48 & 69.19 & 67.84 & +0.03 \\
+Urban hub defense & defense & 67.52 & 67.40 & 65.11 & 66.50 & -0.01 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===== 叙述要点（results.tex 段落替换参考） =====
+% - Full 胜 Pure：4/5 场景；平均 MS Pure=65.01 Full=66.48（Δ+1.48 点）
+% - Full 不低于全部变体：2/5 场景
+% - 若有场景非 Full 最优，列出（如 river 场景 Hope 领先），如实报告
+
+
+
+% ----------------------------------------------------------------------------
+% 7) 摘要（abstract.tex）重写要点
+% ----------------------------------------------------------------------------
+% - 单场景：Full 相对 Pure：MS 62.75 -> 65.76（Δ+3.01 点），OE 73.84 -> 78.75
+%   （Δ+4.91 点），LER 1.71 -> 2.19（4090 默认参数）。
+% - 多种子：5 seeds 配对 ΔMS = +3.81（SD=2.27），t(4)=3.75，p=0.02，
+%   Cohen's d=1.68；ΔOE t(4)=5.87 p<0.01；ΔLER t(4)=6.60 p<0.01。
+% - 泛化：5 场景中 Full 胜 Pure 4/5，平均 MS 65.01 -> 66.48（Δ+1.48 点），
+%   平均 OE 72.49 -> 77.92（Δ+5.43 点）；coastal/river 场景 Hope 领先，
+%   urban 场景 Pure 领先（seed 7 单次运行，如实报告）。
+% - 删除所有 "optimized HOPE parameters (theta=0.9, eps=0.005)" 表述。
+
+% ----------------------------------------------------------------------------
+% 8) results.tex 叙述改写要点
+% ----------------------------------------------------------------------------
+% - Table 4 段：Full 相对 Pure 提升改为 +3.01 点 MS、+4.91 点 OE；删除
+%   "The Full setting uses optimized HOPE SDE parameters" 表述。
+% - Table 5 段：如实改写为 "Full 在 detect/disrupt/breach/control 四个阶段
+%   领先，sustain 阶段 Hope 保持单项优势（70.09 vs 66.57）——该现象与
+%   breach/sustain 竞争 protection 维度的结构性张力一致（见 4.5 节）"。
+% - 泛化段：Full 胜 Pure 由 "all five scenarios" 改为 "4/5 scenarios
+%   （urban-defense 除外）"；平均增益 +1.48 点；说明单 seed 单次运行方差。
+% - 删除 tab:multiseed-optimized 表及 "optimized parameters" 相关段落。
+% - Figure 数据（ablation_stage_profile.png 等）需按新表重新生成
+%   （scripts/generate_paper_figures.py 数据源切换为 4090 套件）。
+

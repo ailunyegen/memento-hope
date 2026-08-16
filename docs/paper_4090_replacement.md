@@ -3,7 +3,9 @@
 > 用途：将论文正文（manuscript/sections/*.tex）中的 RTX 3060 实验描述与结果
 > 全量替换为 RTX 4090 D 实测数据，统一硬件口径，保证全稿数据链 100% 闭环。
 > 生成日期：2026-08（数据源见每节末尾溯源）。
-> 状态：⏳ 泛化套件复跑完成后填充 Table 6/7 与摘要泛化数字。
+> 状态：✅ **完整替换包已生成：`docs/paper_4090_replacement.tex`**（自动生成，
+> 含 Table 4/5/6/7/12 完整 LaTeX + 硬件元数据 + 摘要与叙述改写要点）。
+> 本 md 保留口径决策与叙述要点说明，具体 LaTeX 以 .tex 文件为准。
 
 ## 0. 口径决策（重要）
 
@@ -136,22 +138,40 @@ seed & Pure & Full & \Delta MS \\
 
 - 62.60→67.07（优化参数）改为 **62.75→65.76（4090 默认参数，ΔMS=+3.01 点）**；
 - t(4)=5.593, p<0.01 → **t(4)=3.75, p=0.02（5-seed 4090）**；
-- 泛化 65.95→68.28 → **⏳ 待 scene_out_4090 数据**；
+- 泛化 65.95→68.28 → **65.01→66.48（4090，Δ+1.48 点，Full 胜 Pure 4/5）**；
 - "optimized HOPE parameters" 相关表述删除。
 
 ---
 
 ## 6. Table 6/7（tab:generalization-summary / tab:generalization-scenes）替换
 
-⏳ 等待 `result/scene_out_4090/` 套件完成（后台运行中，5 场景 × 20 轮 × 4 分支）。
-完成后：读取各场景 ablation_{pure_llm,memento,hope,full}/full_result.json -> best_simulation，
-生成 4090 泛化汇总表 + 场景明细表 + 摘要泛化数字。
+✅ 已完成（4090 scene-out 套件，5 场景 × 20 轮 × 4 分支）。生成脚本：
+`scripts/gen_paper_4090_tables.py` → `docs/paper_4090_tables_67.tex`。
+
+**4090 泛化实测摘要（seed 7）：**
+
+| 场景 | Pure | Memento | Hope | Full | Δ(Full−Pure) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Coastal | 58.98 | 58.55 | 60.84 | 60.44 | +1.46 |
+| Island | 64.87 | 64.00 | 65.28 | 65.93 | +1.06 |
+| Mountain | 68.82 | 69.85 | 71.60 | 71.71 | +2.89 |
+| River | 64.84 | 67.48 | 69.19 | 67.84 | +3.00 |
+| Urban | 67.52 | 67.40 | 65.11 | 66.50 | **-1.02** |
+| **平均** | 65.01 | 65.46 | 66.40 | 66.48 | **+1.48** |
+
+- Full 胜 Pure：**4/5**（urban-defense 除外）；Full 全局最优：**2/5**（island、mountain）；
+- 与 3060 论文值（Full 5/5 胜、平均 Δ+2.33 点）相比，4090 单 seed 单次运行
+  下增益更温和——**正文须如实表述为 4/5 场景胜出 + 单次运行方差**，
+  避免审稿人抓到"5/5 全面胜出"的过度声明；
+- 平均 OE：Full 77.92 vs Hope 78.01（Hope 微领先 OE，叙述中如实呈现）。
 
 ---
 
 ## 7. 待办
 
-- [ ] 泛化套件完成 → 填 Table 6/7 + 摘要泛化数字
-- [ ] 4090 补跑 reflection-only 单场景（~2 min，勿与泛化并行）→ 填 Table 4/5 Reflection 行
-- [ ] 决定 tab:multiseed-optimized 表去留（建议删除，正文合并进 Table 12 段）
-- [ ] 生成最终 LaTeX 替换片段（含完整 table 环境代码）供合入
+- [x] 泛化套件完成 → Table 6/7 已生成（`docs/paper_4090_tables_67.tex`）
+- [x] 4090 补跑 reflection-only（MS=0.5929）→ Table 4/5 Reflection 行已填
+- [x] 决定 tab:multiseed-optimized 去留 → **删除**（全稿统一默认参数口径）
+- [x] 生成最终 LaTeX 替换包（`docs/paper_4090_replacement.tex`，含完整 table 环境）
+- [ ] 合入正文：按替换包逐节替换 manuscript/sections/*.tex
+- [ ] Figure 数据刷新：`scripts/generate_paper_figures.py` 数据源切换 4090 套件后重生成图表
