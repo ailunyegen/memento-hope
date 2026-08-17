@@ -1927,6 +1927,25 @@ class MilitaryResearchPipeline:
             return gpu_name.splitlines()[0].strip()
         return None
 
+    def _detect_git_commit(self) -> str | None:
+        """读取当前仓库 HEAD 的 git commit（用于实验溯源）。"""
+        try:
+            completed = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="ignore",
+                timeout=3,
+                check=False,
+            )
+            if completed.returncode == 0:
+                commit = (completed.stdout or "").strip()
+                return commit or None
+        except (FileNotFoundError, PermissionError, OSError, subprocess.SubprocessError):
+            pass
+        return None
+
     def _collect_runtime_manifest(self) -> Dict[str, Any]:
         model_id = os.getenv("LOCAL_LLM_MODEL", "").strip() or "unknown"
         base_url = os.getenv("LOCAL_LLM_BASE_URL", "").strip() or "http://localhost:1234/v1"
@@ -1934,6 +1953,7 @@ class MilitaryResearchPipeline:
         gpu_name = self._detect_gpu_name()
         return {
             "collected_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "git_commit": self._detect_git_commit(),
             "llm_backend": {
                 "model_id": model_id,
                 "base_url": base_url,
@@ -2438,6 +2458,7 @@ class MilitaryResearchPipeline:
         reflection: Dict[str, Any] | None = None
         memory_hits: List[Dict[str, Any]] = []
         run_started = time.perf_counter()
+        result_id = uuid.uuid4().hex[:12]
         iteration_wall_times: List[float] = []
         iteration_candidate_counts: List[int] = []
         total_simulation_rollouts = 0
@@ -2704,6 +2725,7 @@ class MilitaryResearchPipeline:
             "delta_rounds": len(delta_history) if delta_history else None,
         }
         return {
+            "result_id": result_id,
             "runtime_manifest": self._collect_runtime_manifest(),
             "runtime_stats": runtime_stats,
             "experiment_config": {
@@ -2721,6 +2743,8 @@ class MilitaryResearchPipeline:
                 "delta_refine": delta_refine,
                 "delta_max_iters": delta_max_iters,
                 "early_stop_ms": early_stop_ms,
+                "sde_theta": sde_theta,
+                "sde_epsilon": sde_epsilon,
             },
             "scenario": scenario.to_dict(),
             "memory_hits": [

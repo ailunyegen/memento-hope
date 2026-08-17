@@ -251,7 +251,7 @@ The seed-to-seed variability in the baseline is notable: Pure LLM mission succes
 
 \begin{table}[ht]
 \centering
-\caption{Multi-seed replication (RTX 4090 D): Pure LLM vs.\ Full pipeline across five seeds. All runs use 10 iterations and 50 Monte Carlo simulation runs on the coastal joint-assault scenario, with default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$). The seed-7 row is an independent rerun within this multi-seed suite and therefore differs slightly from the single-scenario ablation (Table~\ref{tab:ablation-main}, seed 7) because of LLM sampling variance ($temperature=0.1$); both runs share the identical configuration and are reported as separate executions.}
+\caption{Multi-seed replication (RTX 4090 D): Pure LLM vs.\ Full pipeline across five seeds. All runs use 10 iterations and 50 Monte Carlo simulation runs on the coastal joint-assault scenario, with default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$). The seed-7 row comes from an independent rerun within this multi-seed suite: although the client-side random seed, parameters, and scenario configuration are identical to the single-scenario ablation (Table~\ref{tab:ablation-main}), the local OpenAI-compatible serving backend does not guarantee end-to-end determinism at $temperature=0.1$, so these values are not merged with Table~\ref{tab:ablation-main} and should not be treated as a reproduction of the same run.}
 \label{tab:multiseed}
 \footnotesize
 \setlength{\tabcolsep}{2.8pt}
