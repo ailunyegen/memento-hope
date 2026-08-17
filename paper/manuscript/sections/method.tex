@@ -16,6 +16,7 @@ Figure~\ref{fig:method-overview} presents the overall framework of the implement
 The domain layer defines normalized capability dimensions (\texttt{fires}, \texttt{mobility}, \texttt{protection}, \texttt{awareness}, \texttt{ew}, \texttt{sustainment}, and \texttt{c2}), typed actions, force units, scenarios, plan phases, and complete combat plans. These objects enforce non-empty text fields, bounded numeric ratios, and structured phase/action serialization. The downstream simulator and exporters therefore operate on typed fields rather than on unconstrained narrative text.
 
 \subsection{Memory module: case retrieval, selection, and memory-conditioned weight initialization}
+\label{sec:memory-coupling}
 
 The case-memory module stores records with mission type, terrain, objective, roles, key actions, lessons, outcomes, and metric summaries. When optional embedding dependencies are available, the module uses a Sentence-Transformer encoder with a FAISS index; otherwise it falls back to keyword retrieval \citep{lewis2020rag,reimers2019sbert,johnson2019faiss}. At the design level, that retrieval path remains closer to case-based reasoning than to standalone prompting \citep{aamodt1994cbr,kolodner1993cbr}. Retrieved items are scored by confidence, blended with a case-quality heuristic, and labeled as either \textit{imitate} or \textit{avoid} according to the source outcome.
 

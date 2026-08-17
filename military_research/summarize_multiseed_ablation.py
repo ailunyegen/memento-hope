@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from pathlib import Path
 from statistics import mean, stdev
 from typing import Any, Dict, Iterable, List
@@ -24,10 +25,32 @@ GROUPS = [
     ("ablation_reflection_only", "Reflection only"),
 ]
 
+GROUP_PATH_CANDIDATES = {
+    "ablation_pure_llm": ["ablation_pure_llm/full_result.json"],
+    "ablation_memento": ["ablation_memento/full_result.json"],
+    "ablation_hope": ["ablation_hope/full_result.json"],
+    "ablation_full": [
+        "ablation_full/full_result.json",
+        "ablation_full_optimized/full_result.json",
+        "full_result.json",
+    ],
+    "ablation_reflection_only": ["ablation_reflection_only/full_result.json"],
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Summarize multi-seed ablation suites.")
     parser.add_argument("--suite-dir", required=True, help="Directory produced by run_ablation_multiseed.ps1")
+    parser.add_argument(
+        "--baseline-suite-dir",
+        default="",
+        help="Optional suite that provides missing baseline groups such as ablation_pure_llm.",
+    )
+    parser.add_argument(
+        "--canonical-seed7-suite",
+        default="",
+        help="Optional single-seed suite used to fill missing seed_7 baseline groups.",
+    )
     parser.add_argument("--output", required=True, help="Markdown output path or '-' to print")
     return parser.parse_args()
 
@@ -53,14 +76,25 @@ def fmt_delta(value: float | None) -> str:
 
 
 def discover_seed_dirs(suite_dir: Path) -> List[Path]:
-    return sorted(path for path in suite_dir.iterdir() if path.is_dir() and path.name.startswith("seed_"))
+    seed_pattern = re.compile(r"^seed_\d+$")
+    return sorted(path for path in suite_dir.iterdir() if path.is_dir() and seed_pattern.match(path.name))
 
 
-def load_seed_results(seed_dir: Path) -> Dict[str, Dict[str, Any]]:
+def find_group_result(seed_dir: Path, group_dir: str) -> Path | None:
+    for candidate in GROUP_PATH_CANDIDATES.get(group_dir, [f"{group_dir}/full_result.json"]):
+        result_path = seed_dir / candidate
+        if result_path.exists():
+            return result_path
+    return None
+
+
+def load_seed_results(seed_dir: Path, baseline_seed_dir: Path | None = None) -> Dict[str, Dict[str, Any]]:
     results: Dict[str, Dict[str, Any]] = {}
     for group_dir, _label in GROUPS:
-        result_path = seed_dir / group_dir / "full_result.json"
-        if result_path.exists():
+        result_path = find_group_result(seed_dir, group_dir)
+        if result_path is None and baseline_seed_dir is not None:
+            result_path = find_group_result(baseline_seed_dir, group_dir)
+        if result_path is not None and result_path.exists():
             results[group_dir] = load_json(result_path)
     return results
 
@@ -76,6 +110,19 @@ def summarize_values(values: Iterable[float]) -> Dict[str, float] | None:
         "max": max(items),
         "n": len(items),
     }
+
+
+def summarize_paired_stats(values: Iterable[float]) -> Dict[str, float] | None:
+    stats = summarize_values(values)
+    if stats is None:
+        return None
+    if stats["n"] <= 1 or stats["std"] == 0:
+        stats["t"] = 0.0
+        stats["cohens_d"] = 0.0
+    else:
+        stats["t"] = stats["mean"] / (stats["std"] / math.sqrt(stats["n"]))
+        stats["cohens_d"] = stats["mean"] / stats["std"]
+    return stats
 
 
 def build_metric_rows(seed_payloads: List[Dict[str, Dict[str, Any]]]) -> List[str]:
@@ -112,13 +159,14 @@ def build_delta_rows(seed_payloads: List[Dict[str, Dict[str, Any]]]) -> List[str
                 for seed_payload in seed_payloads
                 if left_group in seed_payload and right_group in seed_payload
             ]
-            stats = summarize_values(deltas)
+            stats = summarize_paired_stats(deltas)
             if stats is None:
                 parts.append("N/A")
             else:
                 parts.append(
                     f"{fmt_delta(stats['mean'])} ± {fmt_num(stats['std'])} "
-                    f"(min={fmt_delta(stats['min'])}, max={fmt_delta(stats['max'])}, n={int(stats['n'])})"
+                    f"(min={fmt_delta(stats['min'])}, max={fmt_delta(stats['max'])}, "
+                    f"n={int(stats['n'])}, t={fmt_num(stats['t'])}, d={fmt_num(stats['cohens_d'])})"
                 )
         rows.append("| " + " | ".join(parts) + " |")
     return rows
@@ -162,7 +210,16 @@ def main() -> None:
     if not seed_dirs:
         raise SystemExit(f"No seed_* directories found under: {suite_dir}")
 
-    seed_payloads = [load_seed_results(seed_dir) for seed_dir in seed_dirs]
+    baseline_suite_dir = Path(args.baseline_suite_dir) if args.baseline_suite_dir else None
+    canonical_seed7_suite = Path(args.canonical_seed7_suite) if args.canonical_seed7_suite else None
+    seed_payloads = []
+    for seed_dir in seed_dirs:
+        baseline_seed_dir = baseline_suite_dir / seed_dir.name if baseline_suite_dir is not None else None
+        if baseline_seed_dir is not None and not baseline_seed_dir.exists():
+            baseline_seed_dir = None
+        if baseline_seed_dir is None and seed_dir.name == "seed_7" and canonical_seed7_suite is not None:
+            baseline_seed_dir = canonical_seed7_suite
+        seed_payloads.append(load_seed_results(seed_dir, baseline_seed_dir=baseline_seed_dir))
     report = build_report(suite_dir, seed_dirs, seed_payloads)
 
     if args.output == "-":

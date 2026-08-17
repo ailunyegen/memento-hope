@@ -48,7 +48,7 @@ Figure~\ref{fig:ablation-stage-profile} presents the same five-stage evidence in
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.88\textwidth]{figures/ablation_stage_profile.png}
-\caption{Five-stage kill-chain scores for the canonical single-scenario ablation. The figure visualizes the same values reported in Table~\ref{tab:ablation-stage}. The Full pipeline leads every stage, with the largest gaps in \texttt{detect} and \texttt{disrupt}, and \texttt{breach} remains the weakest Full-stage score and therefore the most explicit residual bottleneck.}
+\caption{Five-stage kill-chain scores for the canonical single-scenario ablation (RTX 4090 D). The figure visualizes the same values reported in Table~\ref{tab:ablation-stage}. The Full pipeline leads four of the five stages (detect, disrupt, breach, control); in the \texttt{sustain} stage the Hope-only variant retains the highest bar. \texttt{breach} remains the weakest Full-stage score and therefore the most explicit residual bottleneck.}
 \label{fig:ablation-stage-profile}
 \end{figure}
 
@@ -83,7 +83,7 @@ A scene-centered visual summary of the same cross-scenario evidence is given nex
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.88\textwidth]{figures/generalization_scene_group_bar.png}
-\caption{Mission success by ablation setting within each of the five scene-out scenarios in the canonical generalization suite. Five settings are compared: Pure LLM, LLM + Memento, LLM + Hope, LLM + Reflection, and Full. Each panel uses its own locally tightened y-axis range. The Reflection-only bars are consistently the lowest in every panel, confirming that standalone reflection degrades performance relative to the pure LLM baseline.}
+\caption{Mission success by ablation setting within each of the five scene-out scenarios in the canonical generalization suite (RTX 4090 D). Four settings are compared in each panel: Pure LLM, LLM + Memento, LLM + Hope, and Full (the 4090 scene-out suite does not include a reflection-only arm). Each panel uses its own locally tightened y-axis range; the in-panel range labels make the small between-group differences explicit.}
 \label{fig:generalization-bars}
 \end{figure}
 
@@ -178,7 +178,7 @@ These baselines contextualize the pipeline's gains: the Full setting's improveme
 
 \begin{table}[ht]
 \centering
-\caption{External baseline comparison on the coastal joint-assault scenario (RTX 4090 D). All runs use seed 7 and 30 Monte Carlo simulation runs. Baseline results are from a single pipeline execution each; Pure and Full are from the 10-iteration ablation for reference. All settings use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
+\caption{External baseline comparison on the coastal joint-assault scenario (RTX 4090 D). All runs use seed 7. The three baselines are single-pass or few-pass executions evaluated with 30 Monte Carlo simulation runs and are provided as supplementary reference only: their MC run count, iteration budget, and LLM call count are not aligned with the 50-MC, 10-iteration main ablation, so direct numerical comparison with the main settings should be read as indicative rather than strict. Pure and Full rows are from the 10-iteration ablation for reference. All settings use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
 \label{tab:baseline-comparison}
 \footnotesize
 \setlength{\tabcolsep}{4.5pt}
@@ -251,7 +251,7 @@ The seed-to-seed variability in the baseline is notable: Pure LLM mission succes
 
 \begin{table}[ht]
 \centering
-\caption{Multi-seed replication (RTX 4090 D): Pure LLM vs.\ Full pipeline across five seeds. All runs use 10 iterations and 50 Monte Carlo simulation runs on the coastal joint-assault scenario, with default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
+\caption{Multi-seed replication (RTX 4090 D): Pure LLM vs.\ Full pipeline across five seeds. All runs use 10 iterations and 50 Monte Carlo simulation runs on the coastal joint-assault scenario, with default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$). The seed-7 row is an independent rerun within this multi-seed suite and therefore differs slightly from the single-scenario ablation (Table~\ref{tab:ablation-main}, seed 7) because of LLM sampling variance ($temperature=0.1$); both runs share the identical configuration and are reported as separate executions.}
 \label{tab:multiseed}
 \footnotesize
 \setlength{\tabcolsep}{2.8pt}

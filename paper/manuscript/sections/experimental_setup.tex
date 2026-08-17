@@ -17,7 +17,7 @@ The ablation suite is executed via the automated simulation runner and aggregate
 \item \textbf{LLM + Memento}: memory is enabled, Hope and reflection are disabled;
 \item \textbf{LLM + Hope}: Hope is enabled, memory and reflection are disabled;
 \item \textbf{LLM + Reflection}: reflection is enabled, memory and Hope are disabled;
-\item \textbf{Full}: memory, Hope, and reflection are all enabled, with HOPE Stochastic Differential Equation (SDE) parameters set to $\theta=0.9$ (reversion coefficient) and $\epsilon=0.005$ (noise strength). These values were selected based on the hyperparameter sensitivity analysis (Section~\ref{sec:hyperparam-sensitivity}), which revealed that the original defaults ($\theta=0.5$, $\epsilon=0.02$) sit near the performance minimum of a U-shaped sensitivity curve.
+\item \textbf{Full}: memory, Hope, and reflection are all enabled, with default HOPE Stochastic Differential Equation (SDE) parameters $\theta=0.5$ (reversion coefficient) and $\epsilon=0.02$ (noise strength). The paper reports the default-parameter configuration as the canonical evidence; a hyperparameter sensitivity analysis (Section~\ref{sec:hyperparam-sensitivity}, recorded under the earlier RTX 3060 environment) documents how the SDE parameters affect the Hope-only variant and is retained as supplementary evidence.
 \end{itemize}
 
 \subsection{Cross-scenario generalization configuration}
