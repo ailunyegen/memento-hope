@@ -243,6 +243,58 @@ Random search ($N{=}10$) & -- & -- & $\sim$120 & -- \\
 \end{tabular}
 \end{table}
 
+\subsection{Real-time response and incremental refinement}
+
+The dual-system architecture described in Section~\ref{sec:dual-system} is evaluated on the same coastal joint-assault scenario (RTX 4090 D, seed 7). Table~\ref{tab:latency-matrix} summarizes the three response tiers. The System 1 emergency path produces a structurally complete plan and its DoDAF/C2SIM export in 5.6\,ms on this hardware (1.4\,ms in the warm steady state), with no LLM call; the emergency plan already reaches mission success 0.6172, i.e., 93.8\% of the 10-iteration Full result. The System 2 delta loop refines this anchor for 22.8\,s (12 patch rounds, early-stopped), reaching mission success 0.6338---96.4\% of the 10-iteration Full value (0.6576) at roughly 6\% of its wall-clock cost, and 99.2\% of the earlier-hardware Full result. The single-candidate fast mode (one full-plan generation per round with rule-based reflection) reaches 0.6347 in 45.8\,s. The complete pipeline therefore spans a three-tier latency profile: milliseconds for an emergency plan, tens of seconds for agile tactical refinement, and a few minutes for full global optimization.
+
+\begin{table}[ht]
+\centering
+\caption{Three-tier response latency and quality on the sample coastal joint-assault scenario (RTX 4090 D, seed 7, 50-MC). System 1 is the rule-based emergency fast path; System 2 refers to the delta-patching refinement loop; Fast mode denotes single-candidate full regeneration with rule-based reflection.}
+\label{tab:latency-matrix}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Tier & Mechanism & Wall clock & MS (best) \\
+\midrule
+System 1 (emergency) & case warping + weight projection, no LLM & 5.6\,ms & 0.6172 \\
+System 2 (delta loop, 12 rounds) & bottleneck patch + gate + early stop & 22.8\,s & 0.6338 \\
+Fast mode (10 rounds) & single-candidate full generation & 45.8\,s & 0.6347 \\
+Full (10 rounds, reference) & 4-candidate competition + LLM reflection & 365\,s & 0.6576 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The key behavioural result is the contrast between full regeneration and local patching. Figure~\ref{fig:rewrite-vs-delta} plots the mission-success trajectory of the single-candidate full-regeneration mode (Fast mode) against the best-so-far trajectory of the delta loop. Full regeneration spikes in round 1 (0.6347) and then regresses to 0.54--0.59 in the following rounds: because every round rewrites the entire plan, the loop's best value is dominated by sampling luck rather than by monotone improvement, and the strong first-round plan is never preserved as an anchor. The delta loop, by contrast, rises monotonically from the emergency anchor (0.6182) to 0.6328 across 12 rounds with zero rollback, because each accepted patch is guaranteed by the acceptance gate to be no worse than the incumbent. This contrast is the empirical justification for the delta-patching mechanism: local, diagnosis-driven patches preserve the high-quality anchor that full regeneration destroys.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/full_rewrite_vs_delta.png}
+\caption{Full-regeneration regression versus delta-patching monotone convergence on the sample scenario (RTX 4090 D). The dashed orange line is the single-candidate full-regeneration trajectory (Fast mode), which spikes in round 1 and regresses afterwards; the solid blue and green lines are the delta-loop best-so-far trajectories (8-round and 15-round runs), which rise monotonically. Horizontal references mark the System 1 emergency anchor (0.6176), the Fast-mode peak (0.6347), and the 10-iteration Full result.}
+\label{fig:rewrite-vs-delta}
+\end{figure}
+
+The delta loop also transfers across scenario families. Table~\ref{tab:delta-generalization} reports the System 1 anchor and the delta-refined result for the five scene-out scenarios (8 patch rounds each, 50-MC). Four of five scenarios gain between +0.86 and +1.28 points in mission success; the mountain-reconnaissance scenario is essentially flat ($-0.09$ points, within Monte Carlo noise) because its System 1 anchor (0.6756) is already close to the scenario ceiling and the loop early-stops after three rounds. The acceptance gate guarantees that no scenario regresses beyond noise in the best-so-far sense.
+
+\begin{table}[ht]
+\centering
+\caption{Cross-scenario delta-loop gains (RTX 4090 D, scene-out case banks, 8 patch rounds, 50-MC). System 1 is the emergency anchor; Delta is the refined best-so-far plan.}
+\label{tab:delta-generalization}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+Scenario & Family & System 1 MS & Delta MS & $\Delta$MS \\
+\midrule
+Coastal joint assault & assault & 0.6212 & 0.6331 & +1.19 \\
+Island resupply & sustain & 0.6295 & 0.6381 & +0.86 \\
+Mountain recon & recon & 0.6756 & 0.6747 & $-$0.09 \\
+River crossing & assault & 0.6524 & 0.6630 & +1.06 \\
+Urban defense & defense & 0.6480 & 0.6608 & +1.28 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Multi-seed replication}
 
 Table~\ref{tab:multiseed} reports Pure LLM and Full pipeline results across five seeds $\{7, 42, 123, 999, 2024\}$ on the same coastal joint-assault scenario (RTX 4090 D, 10 iterations, 50 Monte Carlo simulation runs per seed). The Full pipeline improves mission success in every seed, with per-seed gains ranging from +2.04 (seed 42) to +7.71 (seed 123). The mean mission-success gain is +3.81 ($\text{SD}=2.27$), and a paired $t$-test across the five seeds yields $t(4)=3.75$, which is significant at $p=0.02$ (two-tailed). Cohen's $d=1.68$ indicates a large effect size. The mean overall-effectiveness gain is +4.85 ($\text{SD}=1.84$) with $t(4)=5.87$ and $d=2.63$ ($p<0.01$).
