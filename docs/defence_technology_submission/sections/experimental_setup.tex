@@ -1,0 +1,112 @@
+This study adopts a single canonical evidence scope to avoid mixing results from incompatible output directories. The goal is to keep the paper internally consistent and fully traceable to project files.
+
+\subsection{Evidence scope and configuration constraints}
+
+The selected single-scenario ablation evidence comes from the canonical ablation benchmark configuration. The selected cross-scenario generalization evidence comes from the canonical scene-out evaluation suite. The manuscript excludes other result configurations from the main body and treats them as audit-only artifacts.
+
+The sample ablation scenario is a coastal-urban assault case with rain, threat level 0.74, electronic-warfare threat 0.68, time pressure 0.77, five friendly units, and three enemy units. Its objective is to seize a coastal landing window and suppress enemy air-defense and shore-defense nodes for follow-on amphibious expansion. The frozen seed case bank used by the ablation suite contains five records.
+
+The generalization study uses five project scenarios defined within the structured configuration profiles: coastal assault, urban defense, mountain reconnaissance, river crossing assault, and maritime sustainment. The selected evidence set relies on the scene-out case bank construction, which derives 200-case banks from a 250-case source pool with the target scenario held out.
+
+\subsection{Ablation configuration}
+
+The ablation suite is executed via the automated simulation runner and aggregated by the statistical analysis module. In the canonical evidence set, all five ablation groups use the same random seed (7), the same sample scenario, 10 planning iterations, and 50 Monte Carlo simulation runs, with writeback disabled in the recorded experiment configuration. The five compared settings are:
+
+\begin{itemize}
+\item \textbf{Pure LLM}: memory, Hope, and reflection are disabled;
+\item \textbf{LLM + Memento}: memory is enabled, Hope and reflection are disabled;
+\item \textbf{LLM + Hope}: Hope is enabled, memory and reflection are disabled;
+\item \textbf{LLM + Reflection}: reflection is enabled, memory and Hope are disabled;
+\item \textbf{Full}: memory, Hope, and reflection are all enabled, with default HOPE Stochastic Differential Equation (SDE) parameters $\theta=0.5$ (reversion coefficient) and $\epsilon=0.02$ (noise strength). The paper reports the default-parameter configuration as the canonical evidence; a hyperparameter sensitivity analysis (Section~\ref{sec:hyperparam-sensitivity}, recorded under the earlier RTX 3060 environment) documents how the SDE parameters affect the Hope-only variant and is retained as supplementary evidence.
+\end{itemize}
+
+\subsection{Cross-scenario generalization configuration}
+
+The generalization suite is executed via the automated evaluation workflow, which runs the ablation pipeline for each scenario and aggregates results through the statistical analysis module. In the selected evidence set, each scenario uses 20 planning iterations, 50 Monte Carlo simulation runs, random seed 7, writeback disabled, and a scene-specific leave-one-source-scenario-out case bank.
+
+Table~\ref{tab:scenario-overview} summarizes the five project scenarios used in the selected scene-out suite. The table keeps only the scenario attributes that matter most for experimental reading: mission family, terrain and weather, operational focus, force size, and the three normalized pressure coefficients that feed the planning pipeline.
+
+\begin{table}[!t]
+\centering
+\caption{Overview of the five scenario families used in the selected scene-out generalization suite. Threat, EW, and time are the normalized scenario coefficients stored in the project JSON files. Each scene-out case bank contains 200 cases derived from the same 250-case source pool with the target scenario held out.}
+\label{tab:scenario-overview}
+{\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{P{2.15cm}P{1.00cm}P{1.85cm}Y C{0.85cm}C{0.78cm}C{0.72cm}C{0.72cm}}
+\toprule
+Scenario & Family & Terrain / weather & Operational focus & Forces & Thr. & EW & Time \\
+\midrule
+Coastal joint assault & assault & coastal-urban / rain & Landing-window seizure; suppress shore and air defense for follow-on expansion. & 5 / 3 & 0.74 & 0.68 & 0.77 \\
+Urban hub defense & defense & urban / fog & Hold the transport and communications hub against an armored urban thrust. & 4 / 2 & 0.69 & 0.54 & 0.66 \\
+Mountain corridor reconnaissance & recon & mountain / cloudy & Gather fire-node and supply-line intelligence under constrained visibility. & 3 / 2 & 0.58 & 0.46 & 0.55 \\
+River crossing breakthrough & assault & river-plain / overcast & Open a defended crossing window and secure the bridgehead. & 4 / 2 & 0.71 & 0.57 & 0.73 \\
+Island resupply corridor & sustain & maritime-island / windy & Keep the island resupply corridor open under harassment and interdiction. & 4 / 2 & 0.63 & 0.59 & 0.61 \\
+\bottomrule
+\end{tabularx}
+\par}
+\end{table}
+
+\subsection{Metrics}
+
+The paper reports the same metrics stored in \texttt{full\_result.json}: mission success, overall effectiveness, loss-exchange ratio (LER), completion time in hours, command resilience, stage scores for the five kill-chain stages, and Monte Carlo confidence intervals where available. Table~\ref{tab:metric-definitions} summarizes the five headline metrics used throughout the main result tables and figures.
+
+\begin{table}[!t]
+\centering
+\caption{Definitions of the main quantitative metrics reported in the manuscript. The wording follows the system's simulator implementation rather than an external benchmark specification.}
+\label{tab:metric-definitions}
+{\scriptsize
+\setlength{\tabcolsep}{2.8pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{P{2.45cm}Y C{1.35cm} C{2.20cm}}
+\toprule
+Metric & Definition and implementation basis & Direction & Stored field \\
+\midrule
+Mission success & Mission-level success score. Computed from a weighted combination of stage-based success across the five kill-chain stages and average phase success, with extra penalties when C2 is weak or time pressure is extreme. & Higher & \shortstack{\texttt{mission\_}\\\texttt{success}} \\
+Overall effectiveness & Composite utility score for overall plan quality. Combines mission success, normalized LER, survivability, command resilience, and a bounded completion-time term into one summary score. & Higher & \shortstack{\texttt{overall\_}\\\texttt{effectiveness}} \\
+Loss-exchange ratio (LER) & Enemy-loss to friendly-loss ratio under the simulator's phase-by-phase loss accounting. Values above 1 indicate that the plan inflicts more loss on the opposing side than it absorbs. & Higher & \texttt{ler} \\
+Command resilience & Proxy for the plan's ability to maintain command continuity under pressure. Computed from the fused C2, EW, and awareness weights, with a subtraction term for scenario EW threat. & Higher & \shortstack{\texttt{command\_}\\\texttt{resilience}} \\
+Completion time & Total simulated execution time of the plan in hours. This value also enters the overall-effectiveness score through a bounded time term, so slower plans are penalized both as a standalone metric and inside the composite score. & Lower & \shortstack{\texttt{completion\_}\\\texttt{time\_hours}} \\
+\bottomrule
+\end{tabularx}
+\par}
+\end{table}
+
+In implementation terms, the current code computes mission success from a weighted combination of stage-level and phase-level success, while overall effectiveness combines mission success, LER, survivability, command resilience, and a time penalty. For the Monte Carlo summaries, the reported headline values in the manuscript are arithmetic means over the repeated simulation runs, and confidence intervals are reported where the stored result object provides them.
+
+\subsection{Runtime metadata}
+
+The refreshed canonical manuscript evidence was rerun with the local backend model \texttt{deepseek-r1-0528-qwen3-8b} inside a dedicated Python environment. The recorded runtime manifests report Python 3.12.7, PyTorch 2.5.1, an OpenAI-compatible local API endpoint, a 13th Gen Intel(R) Core(TM) i7-13700KF CPU, and an NVIDIA GeForce RTX 4090 D GPU (24\,GB). The Python-side torch build is CPU-only; GPU inference is served by the local OpenAI-compatible endpoint. On this hardware, the complete four-way ablation suite (10 iterations $\times$ 50 Monte Carlo runs per setting) completes in approximately 6 minutes, a $\sim$10$\times$ speed-up over the earlier RTX 3060 environment. Newly generated \texttt{full\_result.json} files now emit this information through a top-level \texttt{runtime\_manifest} so that the main paper evidence can be traced to machine-readable backend, software, and hardware metadata without storing machine-specific secrets.
+
+\subsection{LLM inference parameters}
+
+For reproducibility of the structured plan generation, the pipeline uses the following LLM inference parameters for all primary generation calls: \texttt{temperature}=0.1, \texttt{top\_p}=1.0 (default, not explicitly set), and \texttt{max\_tokens} is left at the server-side default (effectively unlimited for the local endpoint). JSON repair calls (invoked when the initial response fails schema validation) use \texttt{temperature}=0.0 for deterministic re-generation. The structured output mode (\texttt{response\_format}=\texttt{json\_schema}) is enabled for all generation and repair calls, with the schema definitions embedded in the pipeline's prompt-construction module. Prompt templates are defined inline and are not externalized as separate template files; the full prompt construction logic is therefore traceable through the system's source code.
+
+\subsection{Reproducibility and reporting boundaries}
+
+The manuscript interpretation depends on the proposed simulation framework and should not be read as external validation. All result bundles include machine-readable runtime manifests and wall-clock timing summaries for full traceability.
+
+\subsection{Multi-seed replication}
+
+To address the single-seed limitation of the earlier version, we supplement the canonical seed-7 evidence with additional runs under seeds $\{42, 123, 999, 2024\}$. Each seed runs the same four-way ablation (Pure, +Memento, +Hope, Full) on the coastal joint-assault scenario with 10 planning iterations and 50 Monte Carlo simulation runs. The aggregated multi-seed results report per-setting mean $\pm$ standard deviation across the five seeds and the paired $t$-test statistic (or Cohen's $d$ effect size) for the Full-versus-Pure comparison. Because these additional runs are computationally expensive (each seed requires four independent pipeline executions $\times$ 10 iterations $\times$ 50 MC runs), they are reported as a separate multi-seed evidence table rather than being folded into the main single-seed tables.
+
+\subsection{External baselines}
+
+Three lightweight external baselines are introduced to contextualize the pipeline's performance without requiring external framework dependencies:
+
+\begin{itemize}
+\item \textbf{Few-shot chain-of-thought (CoT)}: Two hand-authored example plans (one coastal assault, one urban defense) are injected directly into the LLM prompt as few-shot demonstrations. The LLM generates a single plan without any memory retrieval, adaptive weighting, or iterative feedback. This measures how much structure can be obtained from prompting alone.
+\item \textbf{Random search}: $N=10$ plans are generated with independently perturbed capability weights (uniform noise in $[-0.15, 0.15]$ per dimension) and evaluated by the same simulator. The best-scoring plan is selected. This measures the value of the pipeline's guided optimization relative to uninformed random exploration.
+\item \textbf{Single-pass Memento}: Memory retrieval is performed once (top-3 hits with simple quality filtering) and used to condition a single plan generation. No iteration, no Hope, no reflection. This isolates the contribution of memory retrieval alone from the benefit of iterative feedback.
+\end{itemize}
+
+All three baselines run on the same coastal joint-assault scenario with 50 Monte Carlo simulation runs and the same LLM backend, making their results directly comparable to the main ablation table.
+
+\subsection{Cost--quality reporting}
+
+The runtime manifests recorded in each \texttt{full\_result.json} now include per-iteration wall-clock times and total pipeline duration. We report an additional column in the main results table showing total wall-clock time and compute a simple cost--quality ratio (overall effectiveness gain per hour of inference) for each ablation setting. This addresses the practical concern that a pipeline achieving modest metric gains at substantially higher computational cost may not be attractive for time-sensitive planning workflows.
+
+\subsection{Hyperparameter sensitivity analysis}
+\label{sec:hyperparam-sensitivity}
+
+We evaluate sensitivity to the two HOPE SDE parameters: the reversion coefficient $\theta \in \{0.1, 0.3, 0.5, 0.7, 0.9\}$ and the noise strength $\epsilon \in \{0.005, 0.01, 0.02, 0.05, 0.1\}$. For each variant, a single parameter is varied while the other is held at its default value ($\theta=0.5$, $\epsilon=0.02$). All sensitivity runs use the Hope-only variant (memory and reflection disabled) to isolate the HOPE mechanism, with 10 iterations, 50 Monte Carlo simulation runs, and seed 7. One combined run at $(\theta=0.1, \epsilon=0.005)$ tests for parameter interaction effects.
