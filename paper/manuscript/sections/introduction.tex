@@ -13,7 +13,7 @@ From a research-positioning perspective, the present study should be read as an 
 This work intentionally stays close to what can be verified from files in the current implementation. It does not claim formal guarantees, external benchmark coverage, or a complete literature survey. Instead, the paper makes five application-oriented contributions grounded in code and experiment outputs:
 
 \begin{enumerate}
-\item It documents the proposed planning pipeline as an integrated workflow that combines case retrieval, adaptive weighting, bottleneck detection, reflection, structured simulation evaluation, and standards-oriented exporters.
+\item It documents the proposed planning pipeline as an integrated workflow that combines case retrieval, adaptive weighting, bottleneck detection, reflection, a decoupled dual-system fast/slow response hierarchy for real-time mission planning, structured simulation evaluation, and standards-oriented exporters.
 \item It reports a single-scenario five-way ablation (Pure LLM, +Memento, +Hope, +Reflection, Full) under default HOPE parameters, plus a multi-seed replication across five seeds confirming statistical significance for the default Full setting ($t(4)=3.75$, $p=0.02$, $d=1.68$).
 \item It reports a five-scenario cross-scenario transfer study characterizing where gains are stable, where they remain scenario-dependent, and where the pipeline shows residual limitations.
 \item It provides a Reflection-only single-scenario ablation (and a three-seed Reflection-only replication on the earlier hardware suite), revealing that standalone reflection degrades or does not improve plan quality and should be deployed only within the coupled architecture.
