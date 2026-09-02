@@ -104,8 +104,8 @@ def main() -> None:
     out_dir = ROOT / "result/figures"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "full_rewrite_vs_delta.png"
-    fig.savefig(out_path, dpi=200)
-    print(f"chart saved: {out_path}")
+    fig.savefig(out_path, dpi=600)
+    print(f"chart saved: {out_path} (600 dpi vector-grade)")
 
     # 随图输出数据摘要
     summary = {
