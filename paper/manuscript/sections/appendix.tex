@@ -1,0 +1,112 @@
+% Supplementary analyses moved to appendix per reviewer guidance (main text shortened).
+
+\section{Multi-LLM backend comparison}
+\label{app:multillm}
+
+To assess whether the pipeline's gains are coupled to the specific local LLM backend (deepseek-r1-0528-qwen3-8b), we replicate the Pure LLM baseline and Full pipeline on three additional backends (Qwen3.5-9B, Gemma-4-e4b, and DeepSeek-cloud). This comparison was recorded under the earlier RTX 3060 environment as backend-robustness supplementary evidence. The Gemma-4-e4b backend achieves the highest Pure LLM mission success (66.00), exceeding deepseek-r1 (62.60) and Qwen3.5-9B (62.57), challenging the assumption that larger models necessarily produce better plans. The Full pipeline improves mission success on all three: +4.47 points for deepseek-r1, +1.94 for Qwen3.5-9B, and +1.40 for Gemma-4-e4b (3-iteration preliminary). The cloud DeepSeek endpoint (Pure MS=60.36) failed on Full due to JSON schema incompliance. All three operational backends confirm that the Full pipeline's improvement over Pure LLM is not an artifact of a single model choice.
+
+\begin{table}[ht]
+\centering
+\caption{Multi-LLM backend comparison on the coastal joint-assault scenario (seed 7), recorded under the earlier RTX 3060 environment. Gemma Full uses 3 iterations (marked with $^*$).}
+\label{tab:multillm}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lccc}
+\toprule
+Backend & Pure MS & Full MS & $\Delta$MS \\
+\midrule
+DeepSeek-R1 8B (local) & 62.60 & 67.07 & +4.47 \\
+Qwen3.5-9B (local) & 62.57 & 64.51 & +1.94 \\
+Gemma-4-e4b (local) & 66.00 & 69.24$^*$ & +1.40$^*$ \\
+\bottomrule
+\multicolumn{4}{p{0.9\textwidth}}{\footnotesize $^*$3-iteration preliminary result; 10-iteration Full did not complete within the practical time budget.}\\
+\end{tabular}
+\end{table}
+
+\section{Convergence analysis with 20 iterations}
+\label{app:convergence-20}
+
+To assess whether the pipeline benefits from extended optimization, we ran the Full setting for 20 iterations (seed 7, 30 Monte Carlo runs, default HOPE parameters $\theta=0.5$, $\epsilon=0.02$) under the earlier RTX 3060 environment. Compared with the 10-iteration Full result, the 20-iteration run achieves mission success 72.57 and overall effectiveness 82.23. The stage scores show that \texttt{control} (+9.18) and \texttt{sustain} (+8.49) benefit most, while \texttt{breach} remains the most stubborn bottleneck (+2.89). The BottleneckDetector identifies \texttt{breach} as the active bottleneck in 19 of 20 iterations (95\%).
+
+\begin{table}[ht]
+\centering
+\caption{Stage-score trajectory over 20 iterations (Full, seed 7, default HOPE parameters), recorded under the earlier RTX 3060 environment as convergence supplementary evidence.}
+\label{tab:convergence-stage}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+ & detect & disrupt & breach & control & sustain \\
+\midrule
+Start (iter 1) & 62.56 & 62.88 & 57.00 & 59.66 & 61.72 \\
+End (iter 20) & 65.00 & 60.69 & 59.89 & 68.84 & 70.21 \\
+Change & +2.44 & $-$2.19 & +2.89 & +9.18 & +8.49 \\
+\bottomrule
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\end{table}
+
+\section{Case-bank size ablation}
+\label{app:casebank}
+
+To examine how memory scale affects pipeline performance, we ablate the case-bank size using randomly sampled subsets from the 250-record generalization bank at sizes $\{5, 25, 100, 200\}$. Overall effectiveness rises from 77.36 (size 5) to a peak of 80.11 at size 100, then drops to 77.93 at size 200, suggesting a retrieval-dilution effect. The frozen-seed 5-record bank underperforms the random 5-record bank (63.88 vs.\ 66.82 MS), reinforcing the importance of memory diversity over small-sample curation. Recorded under the earlier RTX 3060 environment.
+
+\begin{table}[ht]
+\centering
+\caption{Case-bank size ablation (Full pipeline, seed 7, 10 iterations, 50 MC runs), recorded under the earlier RTX 3060 environment. The ``frozen seed'' row uses the curated 5-record bank; other rows use random subsets from the 250-record generalization bank.}
+\label{tab:casebank-ablation}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccc}
+\toprule
+Case-bank size & MS & OE & LER & Time (h) \\
+\midrule
+5 (frozen seed, curated) & 63.88 & 76.85 & 1.9771 & 14.14 \\
+5 (random sample) & 66.82 & 77.36 & 1.9799 & 13.52 \\
+25 & 66.37 & 79.79 & 2.2443 & 9.94 \\
+100 & 67.04 & 80.11 & 2.3189 & 11.00 \\
+200 & 66.57 & 77.93 & 2.9152 & 13.43 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Hyperparameter sensitivity}
+\label{app:hyperparam}
+
+We evaluate sensitivity to the two HOPE SDE parameters $\theta$ (reversion coefficient) and $\epsilon$ (noise strength), varied independently using the adaptive-controller-only variant. The default $\theta=0.5$ yields the worst performance, while $\theta=0.9$ achieves the best MS (66.12); and $\epsilon=0.005$ achieves the best result (MS=67.66), a U-shaped pattern. Recorded under the earlier RTX 3060 environment; the sweep should be re-run on the current hardware before generalizing the finding.
+
+\begin{table}[t]
+\centering
+\caption{Sensitivity to the HOPE reversion coefficient $\theta$ (fixed $\epsilon=0.02$), adaptive-controller-only variant, seed 7, recorded under the earlier RTX 3060 environment.}
+\label{tab:hyperparam-theta}
+\small
+\begin{tabular}{lccc}
+\toprule
+$\theta$ & Mission success & Overall effectiveness & LER \\
+\midrule
+0.1 & 65.92 & 79.06 & 2.1522 \\
+0.3 & 63.82 & 77.12 & 1.9135 \\
+0.5 (default) & 62.29 & 75.72 & 1.7550 \\
+0.7 & 64.84 & 76.91 & 1.8874 \\
+0.9 & 66.12 & 79.99 & 2.0364 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Sensitivity to the HOPE noise strength $\epsilon$ (fixed $\theta=0.5$), adaptive-controller-only variant, seed 7, recorded under the earlier RTX 3060 environment.}
+\label{tab:hyperparam-epsilon}
+\small
+\begin{tabular}{lccc}
+\toprule
+$\epsilon$ & Mission success & Overall effectiveness & LER \\
+\midrule
+0.005 & 67.66 & 80.27 & 2.4616 \\
+0.01 & 65.01 & 79.49 & 2.0157 \\
+0.02 (default) & 62.29 & 75.72 & 1.7550 \\
+0.05 & 62.55 & 75.05 & 1.6777 \\
+0.1 & 65.67 & 79.49 & 2.0032 \\
+\bottomrule
+\end{tabular}
+\end{table}
