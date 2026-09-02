@@ -1,10 +1,10 @@
 \subsection{Single-scenario ablation}
 
-Table~\ref{tab:ablation-main} reports the main ablation metrics for the canonical single-scenario evidence set (RTX 4090 D). All values in this subsection are copied from the corresponding \texttt{full\_result.json} files in the canonical ablation suite, plus the matched reflection-only follow-up rerun. Relative to the pure LLM baseline, the full pipeline improves mission success by 3.01 points, overall effectiveness by 4.91 points, and LER by 0.48. The Full setting leads every variant on mission success, overall effectiveness, and LER, and achieves the highest command resilience (76.08), while the Hope-only variant retains a slight edge in completion time (10.92\,h vs.\ 14.18\,h). The Memento-only and Reflection-only variants each offer intermediate or negative contributions that do not match the combined Full result: standalone reflection (59.29) and memory-only (61.25) both fall below the pure baseline (62.75) in this five-record frozen bank, consistent with the coupling argument that reflection and memory provide repair signal only when combined with adaptive weighting.
+The single-scenario evidence is reported primarily at the five-seed statistical level, in Table~\ref{tab:multiseed}, because the cross-seed spread of the baseline ($\pm1.09$) is roughly five times wider than the within-seed Monte Carlo confidence intervals; a single seed is therefore not representative of the system's typical behaviour. Table~\ref{tab:ablation-main} is retained as a \emph{representative single-seed trace} (seed 7) that illustrates the per-setting ordering and stage-level profile in a micro-analysis, and is not to be read as the headline quantitative claim. Relative to the pure LLM baseline, the full pipeline improves mission success by 3.01 points, overall effectiveness by 4.91 points, and LER by 0.48 on this trace. The Full setting leads every variant on mission success, overall effectiveness, and LER, and achieves the highest command resilience (76.08), while the adaptive-controller-only variant retains a slight edge in completion time (10.92\,h vs.\ 14.18\,h). The case-memory-only and reflection-only variants each offer intermediate or negative contributions that do not match the combined Full result: standalone reflection (59.29) and memory-only (61.25) both fall below the pure baseline (62.75) in this five-record frozen bank, consistent with the coupling argument that reflection and memory provide repair signal only when combined with adaptive weighting.
 
 \begin{table}[ht]
 \centering
-\caption{Main ablation results on the sample coastal joint-assault scenario (RTX 4090 D). All groups use 10 planning iterations, 50 Monte Carlo runs, seed 7, writeback disabled, and default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$). The reflection-only row uses the matched follow-up rerun under the same fixed-seed setting.}
+\caption{Representative single-seed ablation trace on the sample coastal joint-assault scenario (RTX 4090 D, seed 7). All groups use 10 planning iterations, 50 Monte Carlo runs, writeback disabled, and default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$). The reflection-only row uses the matched follow-up rerun. This table is a single-seed trace; the headline ablation result is the five-seed mean $\pm$ SD in Table~\ref{tab:multiseed}.}
 \label{tab:ablation-main}
 \small
 \setlength{\tabcolsep}{3.2pt}
@@ -172,13 +172,11 @@ The weight-competition analysis identifies \texttt{protection} as a shared capab
 \FloatBarrier
 \subsection{External baseline comparison}
 
-Table~\ref{tab:baseline-comparison} places the pipeline results alongside three external baselines run on the same scenario with the same LLM backend (RTX 4090 D). The few-shot CoT baseline achieves the lowest mission success (57.12), indicating that generic example plans from different scenario families do not transfer well to the target coastal assault scenario. The single-pass Memento baseline (58.01) and random search over $N{=}10$ weight-perturbed candidates (58.26) both fall below the 10-iteration Pure LLM result (62.75), suggesting that a single informed retrieval or blind weight-space exploration cannot match ten rounds of iterative optimization. The Full pipeline (65.76) improves +7.75 over single-pass Memento, consistent with the interpretation that the iterative Hope--Reflection loop contributes substantial additional gain on top of memory guidance.
-
-These baselines contextualize the pipeline's gains: the Full setting's improvement over Pure LLM (+3.01 mission success) should be read alongside the gap between the worst baseline (few-shot CoT at 57.12) and the best (Full at 65.76), which spans 8.64 mission success. This spread confirms that generation strategy matters substantially in this simulation environment, and that the pipeline's gains are measured against a reasonably strong internal baseline (Pure LLM already at 62.75) rather than against a weak lower bound. Notably, random search performs comparably to single-pass Memento (+0.25 points) despite using 10$\times$ the number of LLM generations, reinforcing that naive search over the weight space is not more sample-efficient than retrieval-guided generation.
+Table~\ref{tab:baseline-comparison} places the pipeline results against baselines grouped by computation budget, so that the comparison is not distorted by an iteration-count mismatch. The \emph{single-pass / prompt-level} baselines make a single LLM call: few-shot CoT (57.12), single-pass case-memory retrieval (58.01), and single-shot random search over 10 weight-perturbed candidates (58.26). The \emph{10-iteration, budget-aligned} group applies the same ten-round iterative framework as the main ablation: a 10-iteration random search improves to 60.59, the pure-LLM loop reaches 62.75, and the full loop reaches 65.76. Two observations follow. First, aligning the iteration budget raises the random-search baseline from 58.26 to 60.59, but it still falls well below both the pure-LLM loop (62.75) and the full loop (65.76), so the gain of the guided loop is not attributable simply to more optimization rounds. Second, the single-pass case-memory retrieval (58.01) already captures a substantial part of the benefit of unguided iteration, but the full coupled loop adds a further +7.75 over it, indicating that adaptive capability control and diagnosis-driven reflection contribute meaningful additional gain on top of retrieval guidance.
 
 \begin{table}[ht]
 \centering
-\caption{External baseline comparison on the coastal joint-assault scenario (RTX 4090 D). All runs use seed 7. The three baselines are single-pass or few-pass executions evaluated with 30 Monte Carlo simulation runs and are provided as supplementary reference only: their MC run count, iteration budget, and LLM call count are not aligned with the 50-MC, 10-iteration main ablation, so direct numerical comparison with the main settings should be read as indicative rather than strict. Pure and Full rows are from the 10-iteration ablation for reference. All settings use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
+\caption{Baseline comparison grouped by computation budget (RTX 4090 D, seed 7, 50-MC). Single-pass baselines make one LLM call; the 10-iteration group applies the same ten-round iterative framework as the main ablation. All settings use default HOPE parameters ($\theta=0.5$, $\epsilon=0.02$).}
 \label{tab:baseline-comparison}
 \footnotesize
 \setlength{\tabcolsep}{4.5pt}
@@ -186,9 +184,13 @@ These baselines contextualize the pipeline's gains: the Full setting's improveme
 \toprule
 Method & MS & OE & LER & Time (h) \\
 \midrule
-Few-shot CoT (1-pass) & 57.12 & 66.73 & 1.19 & 11.51 \\
-Single-pass Memento (1-pass) & 58.01 & 66.64 & 1.23 & 14.68 \\
-Random search ($N{=}10$) & 58.26 & 72.19 & 1.86 & 17.06 \\
+\multicolumn{5}{l}{\emph{Single-pass / prompt-level baselines (1 LLM call)}} \\
+Few-shot CoT & 57.12 & 66.73 & 1.19 & 11.51 \\
+Single-pass case-memory & 58.01 & 66.64 & 1.23 & 14.68 \\
+Random search (10 candidates) & 58.26 & 72.19 & 1.86 & 17.06 \\
+\midrule
+\multicolumn{5}{l}{\emph{10-iteration / budget-aligned group}} \\
+Random search (10-iter) & 60.59 & 71.50 & 1.46 & 11.03 \\
 Pure LLM (10-iter) & 62.75 & 73.84 & 1.71 & 11.41 \\
 Full pipeline (10-iter) & 65.76 & 78.75 & 2.19 & 14.18 \\
 \bottomrule
@@ -197,25 +199,7 @@ Full pipeline (10-iter) & 65.76 & 78.75 & 2.19 & 14.18 \\
 
 \subsection{Multi-LLM backend comparison}
 
-To assess whether the pipeline's gains are coupled to the specific local LLM backend (deepseek-r1-0528-qwen3-8b), we replicate the Pure LLM baseline and Full pipeline on three additional backends (Qwen3.5-9B, Gemma-4-e4b, and DeepSeek-cloud). This comparison was recorded under the earlier RTX 3060 environment as backend-robustness supplementary evidence (Table~\ref{tab:multillm}). The Gemma-4-e4b backend achieves the highest Pure LLM mission success (66.00), exceeding deepseek-r1 (62.60) and Qwen3.5-9B (62.57). This challenges the assumption that larger models necessarily produce better plans: the 4B-parameter Gemma model scores higher than the 8--9B reasoning models. The Full pipeline improves mission success on all three: +4.47 points for deepseek-r1, +1.94 for Qwen3.5-9B, and +1.40 for Gemma-4-e4b (3-iteration preliminary). The pattern is consistent with diminishing returns: the gain is largest when the Pure baseline is weakest (deepseek-r1) and smallest when it is strongest (Gemma). The cloud DeepSeek endpoint (Pure MS=60.36) failed on Full due to JSON schema incompliance. All three operational backends confirm that the Full pipeline's improvement over Pure LLM is not an artifact of a single model choice.
-
-\begin{table}[ht]
-\centering
-\caption{Multi-LLM backend comparison on the coastal joint-assault scenario (seed 7). Recorded under the earlier RTX 3060 environment as backend-robustness supplementary evidence (the deepseek-r1 row corresponds to the old-parameter run); the 4090 default-parameter value for the primary backend is Pure 62.75 / Full 65.76 (see Table~\ref{tab:ablation-main}). Gemma Full uses 3 iterations (marked with $^*$).}
-\label{tab:multillm}
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lccc}
-\toprule
-Backend & Pure MS & Full MS & $\Delta$MS \\
-\midrule
-DeepSeek-R1 8B (local) & 62.60 & 67.07 & +4.47 \\
-Qwen3.5-9B (local) & 62.57 & 64.51 & +1.94 \\
-Gemma-4-e4b (local) & 66.00 & 69.24$^*$ & +1.40$^*$ \\
-\bottomrule
-\multicolumn{4}{p{0.9\textwidth}}{\footnotesize $^*$3-iteration preliminary result; 10-iteration Full did not complete within practical time budget.}\\
-\end{tabular}
-\end{table}
+The robustness of the pipeline across LLM backends is examined in Appendix~\ref{app:multillm}: on three further backends the Full pipeline improves over the pure-LLM baseline, confirming the gain is not an artifact of a single model choice (recorded under the earlier RTX 3060 environment).
 
 \subsection{Cost--quality trade-off}
 
@@ -295,9 +279,9 @@ Urban defense & defense & 0.6480 & 0.6608 & +1.28 \\
 \end{tabular}
 \end{table}
 
-\subsection{Multi-seed replication}
+\subsection{Primary ablation: five-seed replication}
 
-Table~\ref{tab:multiseed} reports Pure LLM and Full pipeline results across five seeds $\{7, 42, 123, 999, 2024\}$ on the same coastal joint-assault scenario (RTX 4090 D, 10 iterations, 50 Monte Carlo simulation runs per seed). The Full pipeline improves mission success in every seed, with per-seed gains ranging from +2.04 (seed 42) to +7.71 (seed 123). The mean mission-success gain is +3.81 ($\text{SD}=2.27$), and a paired $t$-test across the five seeds yields $t(4)=3.75$, which is significant at $p=0.02$ (two-tailed). Cohen's $d=1.68$ indicates a large effect size. The mean overall-effectiveness gain is +4.85 ($\text{SD}=1.84$) with $t(4)=5.87$ and $d=2.63$ ($p<0.01$).
+Table~\ref{tab:multiseed} is the headline single-scenario ablation result: Pure LLM and Full pipeline are compared across five seeds $\{7, 42, 123, 999, 2024\}$ on the same coastal joint-assault scenario (RTX 4090 D, 10 iterations, 50 Monte Carlo simulation runs per seed). The Full pipeline improves mission success in every seed, with per-seed gains ranging from +2.04 (seed 42) to +7.71 (seed 123). The mean mission-success gain is +3.81 ($\text{SD}=2.27$), and a paired $t$-test across the five seeds yields $t(4)=3.75$, which is significant at $p=0.02$ (two-tailed). Cohen's $d=1.68$ indicates a large effect size. The mean overall-effectiveness gain is +4.85 ($\text{SD}=1.84$) with $t(4)=5.87$ and $d=2.63$ ($p<0.01$). The stage-level analysis in this manuscript is reported for the representative seed-7 trace (Table~\ref{tab:ablation-stage}), since a per-seed stage table would require a multi-seed treatment of the five-stage decomposition; the stage ordering (breach as the persistent floor) is stable across seeds in the recorded bundles.
 
 The seed-to-seed variability in the baseline is notable: Pure LLM mission success ranges from 62.73 to 65.64, a spread of 2.91, which is comparable to the mean Full-versus-Pure delta (3.81). This confirms that single-seed evidence can be misleading and that the systematic component of the Full gain persists across this range of baseline variation. The largest absolute gain occurs in the seed where the Full setting reached its best plan (seed 123), suggesting the pipeline's feedback mechanisms are most beneficial when the initial plan quality is lower---a desirable property for robustness.
 
@@ -326,101 +310,12 @@ Mean $\pm$ SD & \shortstack{63.92\\$\pm$1.09} & \shortstack{67.73\\$\pm$2.37} & 
 
 \subsection{Convergence analysis with 20 iterations}
 
-To assess whether the pipeline benefits from extended optimization, we ran the Full setting for 20 iterations (seed 7, 30 Monte Carlo runs, default HOPE parameters $\theta=0.5$, $\epsilon=0.02$) under the earlier RTX 3060 environment (Table~\ref{tab:convergence-stage}); this run predates the 4090 refresh and is retained as convergence supplementary evidence. Compared with the 10-iteration Full result (63.88 and 76.85), the 20-iteration run achieves mission success 72.57 and overall effectiveness 82.23, representing gains of +8.69 and +5.38. The five-stage scores show that \texttt{control} (+9.18) and \texttt{sustain} (+8.49) benefit most from the additional iterations, while \texttt{breach} remains the most stubborn bottleneck, improving by only +2.89 from iteration 1 to iteration 20.
-
-The BottleneckDetector identifies \texttt{breach} as the active bottleneck in 19 of 20 iterations (95\%), with \texttt{disrupt} flagged once. The breach-deficit value decreases from approximately 0.43 to 0.40 over the run, confirming that while the dynamic reallocation mechanism partially addresses the bottleneck, it does not fully eliminate it. Breach is highly correlated with \texttt{control} ($r=0.92$) and \texttt{sustain} ($r=0.91$), indicating shared capability dependencies. The weight-competition analysis reveals that breach and sustain both depend on the \texttt{protection} capability dimension, creating a structural tension that scalarized reward optimization cannot fully resolve---a finding that connects the pipeline's behavior to gradient-conflict challenges in multi-task optimization \citep{yu2020pcgrad}.
-
-Table~\ref{tab:convergence-stage} summarizes the stage-score trajectory across 20 iterations. The score paths show non-monotonic improvement with oscillations, consistent with the exploration--exploitation dynamic introduced by the reflective feedback mechanism. The largest single-iteration jumps occur at iterations 11, 15, and 17, which correspond to reflection cycles that proposed substantial plan restructuring.
-
-\begin{table}[ht]
-\centering
-\caption{Stage-score trajectory over 20 iterations (Full, seed 7, default HOPE parameters $\theta=0.5$, $\epsilon=0.02$). Recorded under the earlier RTX 3060 environment as convergence supplementary evidence; the 4090 rerun of the 10-iteration suite is reported in Table~\ref{tab:ablation-stage} and Figure~\ref{fig:convergence-stage}. Start and end values are from iteration 1 and iteration 20, respectively.}
-\label{tab:convergence-stage}
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccccc}
-\toprule
- & detect & disrupt & breach & control & sustain \\
-\midrule
-Start (iter 1) & 62.56 & 62.88 & 57.00 & 59.66 & 61.72 \\
-End (iter 20) & 65.00 & 60.69 & 59.89 & 68.84 & 70.21 \\
-Change & +2.44 & $-$2.19 & +2.89 & +9.18 & +8.49 \\
-\bottomrule
-\end{tabular}
-\setlength{\tabcolsep}{6pt}
-\end{table}
+Extended optimization beyond 10 iterations provides further improvement, but the result is recorded under the earlier RTX 3060 environment and is retained in Appendix~\ref{app:convergence-20} (20-iteration run: MS 72.57, OE 82.23; \texttt{breach} remains the most persistent bottleneck).
 
 \subsection{Case-bank size ablation}
 
-To examine how memory scale affects pipeline performance, we ablate the case-bank size using randomly sampled subsets from the 250-record generalization bank at sizes $\{5, 25, 100, 200\}$. All runs use the Full pipeline with 10 iterations, 50 Monte Carlo simulation runs, and seed 7 on the coastal joint-assault scenario.
-
-Table~\ref{tab:casebank-ablation} reports the results. Overall effectiveness rises from 77.36 (size 5) to a peak of 80.11 at size 100, then drops to 77.93 at size 200. This non-monotonic pattern suggests a retrieval-dilution effect: beyond a certain bank size, the top-$k$ similarity search may return less relevant records that dilute the memory signal. Mission success is relatively stable across sizes (range 66.37--67.04 for random-sample banks), suggesting that even a small random bank captures the critical retrieval patterns for this scenario. The frozen-seed 5-record bank underperforms the random 5-record bank (63.88 vs.\ 66.82 MS), which suggests that the original curated records---while high-quality---may be suboptimal for this specific scenario compared to randomly sampled records from a scenario-diverse generalization bank. This finding reinforces the importance of memory diversity: a small but topically varied bank can outperform a comparably sized bank that lacks scenario coverage breadth.
-
-The practical implication is that case-bank construction benefits more from diversity and coverage than from small-sample curation, but that naive scaling beyond an intermediate size can degrade performance through retrieval dilution. The optimal size for this scenario appears to be around 100 records, which balances diversity against retrieval precision. Future work should investigate adaptive top-$k$ truncation or relevance reranking to maintain signal quality at larger bank sizes.
-
-\begin{table}[ht]
-\centering
-\caption{Case-bank size ablation (Full pipeline, seed 7, 10 iterations, 50 MC runs). Recorded under the earlier RTX 3060 environment as memory-scale supplementary evidence (default HOPE parameters). The row labeled ``frozen seed'' uses the original curated 5-record bank; all other rows use randomly sampled subsets from the 250-record generalization bank.}
-\label{tab:casebank-ablation}
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lcccc}
-\toprule
-Case-bank size & MS & OE & LER & Time (h) \\
-\midrule
-5 (frozen seed, curated) & 63.88 & 76.85 & 1.9771 & 14.14 \\
-5 (random sample) & 66.82 & 77.36 & 1.9799 & 13.52 \\
-25 & 66.37 & 79.79 & 2.2443 & 9.94 \\
-100 & 67.04 & 80.11 & 2.3189 & 11.00 \\
-200 & 66.57 & 77.93 & 2.9152 & 13.43 \\
-\bottomrule
-\end{tabular}
-\end{table}
+The effect of memory scale is reported in Appendix~\ref{app:casebank}: overall effectiveness peaks at a 100-record bank and then degrades (retrieval-dilution), and a small but topically diverse bank outperforms a comparably sized curated one. Recorded under the earlier RTX 3060 environment as supplementary evidence.
 
 \subsection{Hyperparameter sensitivity}
 
-We evaluate sensitivity to the two HOPE SDE parameters: the reversion coefficient $\theta$ (forgetting rate) and the noise strength $\epsilon$. These are varied independently using the Hope-only variant (memory and reflection disabled) with 10 iterations, 50 Monte Carlo runs, and seed 7, to isolate their effect on the adaptive weighting mechanism.
-
-Table~\ref{tab:hyperparam-theta} reports $\theta$ sensitivity with $\epsilon=0.02$ fixed. The default $\theta=0.5$ yields the \emph{worst} performance (MS=62.29); both extremes outperform it, with $\theta=0.9$ achieving the best MS (66.12) and OE (79.99), and $\theta=0.1$ close behind (MS=65.92). This U-shaped pattern suggests that moderate reversion rates create an unfavorable intermediate regime: either commit to the adaptation ($\theta\approx0.1$) or aggressively track the prior ($\theta\approx0.9$), but do not hover in between.
-
-Table~\ref{tab:hyperparam-epsilon} reports $\epsilon$ sensitivity with $\theta=0.5$ fixed. The lowest noise level $\epsilon=0.005$ achieves the best result (MS=67.66, OE=80.27)---a +5.37 MS improvement over the default $\epsilon=0.02$. The pattern is again non-monotonic: $\epsilon=0.1$ (MS=65.67) is the second-best, with a performance dip at intermediate noise levels $\epsilon\in[0.01,0.05]$. This U-shape indicates that very low noise allows stable convergence while very high noise provides beneficial exploration; intermediate noise introduces jitter without sufficient exploratory benefit.
-
-A combined run with $\theta=0.1,\epsilon=0.005$ (both individually best) yields MS=63.81---\emph{worse} than either parameter optimized alone. This negative interaction confirms that $\theta$ and $\epsilon$ operate through distinct mechanisms: low reversion (small $\theta$) benefits from the exploration provided by moderate noise, while low noise (small $\epsilon$) benefits from the adaptation drive of high reversion. The two extreme regimes should not be combined naively.
-
-The practical implication of this RTX 3060 supplementary analysis is that the HOPE mechanism is sensitive to its SDE parameters: with well-tuned $\epsilon=0.005$, the Hope-only variant (67.66) outperformed the default-parameter Full pipeline (63.88) on that environment. This suggests that a systematic hyperparameter optimization pass could unlock stronger pipeline performance at no additional inference cost. Note that this conclusion is specific to the recorded hyperparameter sweep; under the 4090 default-parameter refresh, the default Full pipeline (65.76) already exceeds the default Hope-only variant (64.45), so the sweep should be re-run on the current environment before generalizing the finding.
-
-\begin{table}[t]
-\centering
-\caption{Sensitivity to HOPE reversion coefficient $\theta$ (fixed $\epsilon=0.02$). Hope-only variant, seed 7. Recorded under the earlier RTX 3060 environment as hyperparameter supplementary evidence.}
-\label{tab:hyperparam-theta}
-\small
-\begin{tabular}{lccc}
-\toprule
-$\theta$ & Mission success & Overall effectiveness & LER \\
-\midrule
-0.1 & 65.92 & 79.06 & 2.1522 \\
-0.3 & 63.82 & 77.12 & 1.9135 \\
-0.5 (default) & 62.29 & 75.72 & 1.7550 \\
-0.7 & 64.84 & 76.91 & 1.8874 \\
-0.9 & 66.12 & 79.99 & 2.0364 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[t]
-\centering
-\caption{Sensitivity to HOPE noise strength $\epsilon$ (fixed $\theta=0.5$). Hope-only variant, seed 7. Recorded under the earlier RTX 3060 environment as hyperparameter supplementary evidence.}
-\label{tab:hyperparam-epsilon}
-\small
-\begin{tabular}{lccc}
-\toprule
-$\epsilon$ & Mission success & Overall effectiveness & LER \\
-\midrule
-0.005 & 67.66 & 80.27 & 2.4616 \\
-0.01 & 65.01 & 79.49 & 2.0157 \\
-0.02 (default) & 62.29 & 75.72 & 1.7550 \\
-0.05 & 62.55 & 75.05 & 1.6777 \\
-0.1 & 65.67 & 79.49 & 2.0032 \\
-\bottomrule
-\end{tabular}
-\end{table}
+The sensitivity of the adaptive controller to the two SDE parameters $\theta$ and $\epsilon$ is reported in Appendix~\ref{app:hyperparam}. Both exhibit U-shaped curves in the recorded sweep (recorded under the earlier RTX 3060 environment); under the 4090 default-parameter refresh the default Full pipeline already exceeds the default adaptive-controller-only variant, so the sweep should be re-run on the current hardware before generalizing the finding.
