@@ -1,0 +1,103 @@
+\documentclass[preprint,12pt]{elsarticle}
+
+% NOTE:
+% This manuscript is prepared against the Elsevier elsarticle bundle
+% extracted under paper/template_elsarticle/. A workspace-local TinyTeX
+% toolchain is used for compilation, and elsarticle.cls is generated from
+% paper/template_elsarticle/elsarticle/elsarticle.ins.
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage[section]{placeins}
+\usepackage{tabularx}
+\usepackage[hyphens]{url}
+\input{glyphtounicode}
+\pdfgentounicode=1
+% -- Explicit glyph-to-unicode mappings placed AFTER glyphtounicode to override --
+\pdfglyphtounicode{fi}{0066 0069}
+\pdfglyphtounicode{fl}{0066 006C}
+\pdfglyphtounicode{ff}{0066 0066}
+\pdfglyphtounicode{ffi}{0066 0066 0069}
+\pdfglyphtounicode{ffl}{0066 0066 006C}
+
+\setlength{\emergencystretch}{2em}
+\hyphenpenalty=500
+\exhyphenpenalty=200
+\tolerance=1500
+\hyphenation{evi-dence eval-u-at-ing cross-scenario Bottle-neck-Detector re-flec-tion re-flec-tion-only Memen-to Memento-only gen-er-al-iza-tion mil-i-tary de-ci-sion-mak-ing com-pre-hen-sive bench-mark}
+\raggedbottom
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\/\do\-\do\_}
+\makeatother
+\newcommand{\repo}[1]{\path{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
+\journal{Defence Technology}
+\biboptions{sort&compress}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{A Dual-System Enhanced Large Language Model Architecture for Real-Time Joint-Operation Mission Planning in Command and Control Systems}
+
+% --- Blinded: author, affiliation, and corresponding-email information removed ---
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\begin{highlights}
+\input{submission/highlights.txt}
+\end{highlights}
+
+\begin{keyword}
+military command and control \sep large language models \sep mission planning \sep case-based reasoning \sep adaptive weighting \sep kill-chain optimization \sep C2SIM interoperability \sep real-time replanning
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+\input{sections/introduction}
+
+\section{Method}
+\input{sections/method}
+
+\section{Experimental Setup}
+\input{sections/experimental_setup}
+
+\section{Results}
+\label{sec:results}
+\input{sections/results}
+
+\section{Discussion}
+\label{sec:discussion}
+\input{sections/discussion}
+
+\section{Conclusion}
+\input{sections/conclusion}
+
+\section*{CRediT authorship contribution statement}
+Author 1: Conceptualization, Methodology, Software, Formal analysis, Investigation, Data curation, Visualization, Writing - original draft. Author 2: Supervision, Validation, Resources, Writing - review \& editing, Project administration, Funding acquisition.
+
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Acknowledgments}
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+
+\section*{Data availability}
+The structured scenario configurations, evaluation logs, and software artifacts supporting the findings of this study are available from the corresponding author upon reasonable request.
+
+\bibliographystyle{../paper/template_elsarticle/elsarticle/elsarticle-num}
+{\sloppy\bibliography{references}}
+
+\end{document}
